@@ -21,6 +21,7 @@ plugins {
   `kotlin-dsl`
   idea
   id("com.diffplug.spotless") version "6.22.0"
+  id("org.jetbrains.dokka") version "1.9.0"
 }
 
 repositories {
@@ -46,6 +47,7 @@ kotlin {
   }
 }
 
+val check = tasks.named("check")
 testing {
   suites {
     register("functionalTest", JvmTestSuite::class) {
@@ -53,7 +55,7 @@ testing {
         testTask.configure {
           shouldRunAfter(tasks.named("test"))
         }
-        tasks.named("check").configure {
+        check.configure {
           dependsOn(testTask)
         }
       }
@@ -86,17 +88,28 @@ spotless {
   }
 }
 
-tasks.named("check").configure { dependsOn(tasks.named("spotlessCheck")) }
-tasks.named("spotlessApply").configure { mustRunAfter(tasks.named("clean")) }
+val spotlessApply = tasks.named("spotlessApply")
+val spotlessCheck = tasks.named("spotlessCheck")
+check.configure { dependsOn(spotlessCheck) }
+spotlessApply.configure { mustRunAfter(tasks.named("clean")) }
 
 if (!providers.environmentVariable("CI").isPresent) {
-  tasks.named("spotlessCheck").configure { dependsOn(tasks.named("spotlessApply")) }
+  spotlessCheck.configure { dependsOn(spotlessApply) }
 }
 
-tasks.named("compileKotlin").configure { mustRunAfter(tasks.named("spotlessKotlinApply")) }
-tasks.named("compileTestKotlin").configure { mustRunAfter(tasks.named("spotlessKotlinApply")) }
+val spotlessKotlinApply = tasks.named("spotlessKotlinApply")
+val spotlessKotlinCheck = tasks.named("spotlessKotlinCheck")
+tasks.named("compileKotlin").configure {
+  mustRunAfter(spotlessKotlinApply)
+  shouldRunAfter(spotlessKotlinCheck)
+}
+tasks.named("compileTestKotlin").configure {
+  mustRunAfter(spotlessKotlinApply)
+  shouldRunAfter(spotlessKotlinCheck)
+}
 tasks.named("compileFunctionalTestKotlin").configure {
-  mustRunAfter(tasks.named("spotlessKotlinApply"))
+  mustRunAfter(spotlessKotlinApply)
+  shouldRunAfter(spotlessKotlinCheck)
 }
 
 group = "eu.aylett"
