@@ -21,7 +21,7 @@ plugins {
   `kotlin-dsl`
   idea
   id("com.diffplug.spotless") version "6.22.0"
-  id("org.jetbrains.dokka") version "1.9.0"
+  id("org.jetbrains.dokka") version "1.9.10"
 }
 
 repositories {
