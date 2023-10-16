@@ -16,6 +16,12 @@
 
 @file:Suppress("UnstableApiUsage")
 
+import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.kotlin.gradle.dsl.KotlinCommonCompilerOptions
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
+import java.net.URI
+
+
 plugins {
   `java-gradle-plugin`
   `kotlin-dsl`
@@ -99,17 +105,28 @@ if (!providers.environmentVariable("CI").isPresent) {
 
 val spotlessKotlinApply = tasks.named("spotlessKotlinApply")
 val spotlessKotlinCheck = tasks.named("spotlessKotlinCheck")
-tasks.named("compileKotlin").configure {
+
+tasks.withType<KotlinCompilationTask<KotlinCommonCompilerOptions>>().configureEach {
   mustRunAfter(spotlessKotlinApply)
   shouldRunAfter(spotlessKotlinCheck)
 }
-tasks.named("compileTestKotlin").configure {
-  mustRunAfter(spotlessKotlinApply)
-  shouldRunAfter(spotlessKotlinCheck)
-}
-tasks.named("compileFunctionalTestKotlin").configure {
-  mustRunAfter(spotlessKotlinApply)
-  shouldRunAfter(spotlessKotlinCheck)
+
+tasks.withType<DokkaTask>().configureEach {
+  dokkaSourceSets {
+    configureEach {
+      includes.from(projectDir.resolve("module.md"))
+      jdkVersion.set(17)
+
+      sourceLink {
+        localDirectory.set(projectDir.resolve("src"))
+        remoteUrl.set(URI("https://github.com/andrewaylett/gradle-plugins/tree/main/src").toURL())
+        remoteLineSuffix.set("#L")
+        externalDocumentationLink {
+          url.set(URI("https://docs.gradle.org/8.4/javadoc/").toURL())
+        }
+      }
+    }
+  }
 }
 
 group = "eu.aylett"
