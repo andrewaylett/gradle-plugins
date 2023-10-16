@@ -142,7 +142,7 @@ gradlePlugin {
       id = "eu.aylett.plugins.base"
       displayName = "aylett.eu base plugin"
       description = "Base plugin for registering common Gradle features"
-      tags = listOf()
+      tags = listOf("base", "jvm")
       //language=jvm-class-name
       implementationClass = "eu.aylett.gradle.plugins.BasePlugin"
     }
@@ -150,7 +150,7 @@ gradlePlugin {
       id = "eu.aylett.conventions.bom-alignment"
       displayName = "aylett.eu BOM alignment plugin"
       description = "Adds virtual BOM for common sets of packages that don't have a real BOM"
-      tags = listOf("bom")
+      tags = listOf("bom", "jvm")
       //language=jvm-class-name
       implementationClass = "eu.aylett.gradle.plugins.conventions.BomAlignmentConvention"
     }
@@ -158,7 +158,7 @@ gradlePlugin {
       id = "eu.aylett.conventions.ide-support"
       displayName = "aylett.eu IDE support conventions"
       description = "Conventional support for JetBrains IDEs"
-      tags = listOf("ide", "idea", "conventions")
+      tags = listOf("ide", "idea", "conventions", "jvm")
       //language=jvm-class-name
       implementationClass = "eu.aylett.gradle.plugins.conventions.IDESupportConvention"
     }
@@ -174,7 +174,7 @@ gradlePlugin {
       id = "eu.aylett.conventions"
       displayName = "aylett.eu conventions"
       description = "Applies all Andrew's favourite build conventions"
-      tags = listOf("conventions")
+      tags = listOf("conventions", "jvm")
       //language=jvm-class-name
       implementationClass = "eu.aylett.gradle.plugins.conventions.Conventions"
     }
