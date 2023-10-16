@@ -28,6 +28,7 @@ plugins {
   idea
   id("com.diffplug.spotless") version "6.22.0"
   id("org.jetbrains.dokka") version "1.9.10"
+  id("com.gradle.plugin-publish") version "1.2.1"
 }
 
 repositories {
@@ -133,7 +134,7 @@ group = "eu.aylett"
 version = "0.1.0"
 
 gradlePlugin {
-  website = "https://aylett.eu/gradle-plugins"
+  website = "https://gradle-plugins.aylett.eu/"
   vcsUrl = "https://github.com/andrewaylett/gradle-plugins"
 
   plugins {
