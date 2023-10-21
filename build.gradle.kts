@@ -41,6 +41,11 @@ repositories {
 
 dependencies {
   implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$embeddedKotlinVersion")
+  implementation("com.google.guava:guava:32.1.3-jre")
+
+  testImplementation("com.fasterxml.jackson.core:jackson-core:2.14.1")
+  testImplementation("com.fasterxml.jackson.core:jackson-databind")
+
   pitest("com.groupcdg.arcmutate:base:1.2.2")
   pitest("com.groupcdg.pitest:pitest-accelerator-junit5:1.0.6")
   pitest("com.groupcdg:pitest-git-plugin:1.1.2")
@@ -176,6 +181,14 @@ gradlePlugin {
       tags = listOf("base", "jvm")
       //language=jvm-class-name
       implementationClass = "eu.aylett.gradle.plugins.BasePlugin"
+    }
+    create("versionPlugin") {
+      id = "eu.aylett.plugins.version"
+      displayName = "aylett.eu automatic version plugin"
+      description = "Sets the project version from the state of the git repository it's in."
+      tags = listOf("git", "version")
+      //language=jvm-class-name
+      implementationClass = "com.palantir.gradle.gitversion.GitVersionPlugin"
     }
     create("bomAlignmentConvention") {
       id = "eu.aylett.conventions.bom-alignment"

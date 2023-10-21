@@ -41,6 +41,7 @@ repos:
   - id: insert-license
     types:
     - kotlin
+    exclude: .*/palantir/.*
     args:
     - --use-current-year
     - --license-filepath
