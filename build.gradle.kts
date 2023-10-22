@@ -21,14 +21,15 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinCommonCompilerOptions
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 import java.net.URI
 
-
 plugins {
+  id("eu.aylett.conventions") version "0.1.0"
   `java-gradle-plugin`
+  id("org.jetbrains.kotlin.jvm") version "1.9.10"
   `kotlin-dsl`
-  idea
   id("com.diffplug.spotless") version "6.22.0"
   id("org.jetbrains.dokka") version "1.9.10"
   id("com.gradle.plugin-publish") version "1.2.1"
+  id("info.solidsoft.pitest") version "1.15.0"
 }
 
 repositories {
@@ -40,17 +41,9 @@ dependencies {
   implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$embeddedKotlinVersion")
 }
 
-javaToolchains {
-  compilerFor {
-    languageVersion = JavaLanguageVersion.of(17)
-  }
-}
-
-kotlin {
-  target {
-    jvmToolchain {
-      languageVersion = JavaLanguageVersion.of(17)
-    }
+aylett {
+  jvm {
+    jvmVersion.set(17)
   }
 }
 
@@ -71,18 +64,11 @@ testing {
     withType(JvmTestSuite::class).configureEach {
       useJUnitJupiter()
       dependencies {
-        implementation("org.assertj:assertj-core:3.24.2")
+        implementation("org.hamcrest:hamcrest:2.2")
         implementation(gradleApi())
         implementation(gradleTestKit())
       }
     }
-  }
-}
-
-idea {
-  module {
-    isDownloadSources = true
-    isDownloadJavadoc = true
   }
 }
 
@@ -112,6 +98,15 @@ tasks.withType<KotlinCompilationTask<KotlinCommonCompilerOptions>>().configureEa
   shouldRunAfter(spotlessKotlinCheck)
 }
 
+pitest {
+  junit5PluginVersion.set("1.2.0")
+  verbosity.set("VERBOSE")
+  avoidCallsTo.set(listOf("kotlin.jvm.internal"))
+  pitestVersion.set("1.15.1")
+  verbose.set(true)
+  threads.set(1)
+}
+
 tasks.withType<DokkaTask>().configureEach {
   dokkaSourceSets {
     configureEach {
@@ -131,7 +126,6 @@ tasks.withType<DokkaTask>().configureEach {
 }
 
 group = "eu.aylett"
-version = "0.1.0"
 
 gradlePlugin {
   website = "https://gradle-plugins.aylett.eu/"

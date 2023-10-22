@@ -16,14 +16,24 @@
 
 package eu.aylett.gradle.plugins.conventions
 
-import org.gradle.kotlin.dsl.apply
+import eu.aylett.gradle.matchers.hasPlugin
 import org.gradle.testfixtures.ProjectBuilder
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
+import java.io.File
 
 class BomAlignmentConventionTest {
+  @TempDir
+  lateinit var projectDir: File
+
   @Test
   fun `plugin applies`() {
-    val project = ProjectBuilder.builder().build()
-    project.pluginManager.apply(BomAlignmentConvention::class)
+    val project = ProjectBuilder.builder().withProjectDir(projectDir).build()
+    project.pluginManager.apply(BomAlignmentConvention::class.java)
+    assertThat(
+      project.pluginManager,
+      hasPlugin("eu.aylett.conventions.bom-alignment"),
+    )
   }
 }
