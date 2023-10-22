@@ -30,9 +30,4 @@ class JvmConventionTest {
   fun `this fails`() {
     ProjectBuilder.builder().build()
   }
-
-  @Test
-  fun `this also fails`() {
-    Assertions.assertEquals(true, false)
-  }
 }
