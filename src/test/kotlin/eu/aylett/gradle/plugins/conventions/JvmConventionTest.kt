@@ -17,6 +17,7 @@
 package eu.aylett.gradle.plugins.conventions
 
 import org.gradle.testfixtures.ProjectBuilder
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 class JvmConventionTest {
@@ -28,5 +29,10 @@ class JvmConventionTest {
   @Test
   fun `this fails`() {
     ProjectBuilder.builder().build()
+  }
+
+  @Test
+  fun `this also fails`() {
+    Assertions.assertEquals(true, false)
   }
 }
