@@ -1,23 +1,18 @@
-# Andrew's Gradle Conventions
+# Inferred type issues
 
-This is a set of reasonably-opinionated conventions for developing JVM projects
-using Gradle. They're my opinion of current best practice, both for writing
-plugins and for the set up of projects.
+This branch contains an example of an issue I've found in IntelliJ IDEA.
 
-In an ideal world, absent any requirement to publish the build output, you need
-only apply my conventions plugin and you'll have a magically wonderful build
-experience.
+While the code compiles and runs via Gradle:
 
-## Applying the plugins
+```shell
+./gradlew check
+```
 
-If you're sure you agree with all my decisions, you may import the main
-conventions file into your `build.gradle.kts` or `build.gradle`.
+If you import it into IDEA then you'll get an error reported in
+[CanReadLanguageVersion](./src/test/kotlin/eu/aylett/gradle/plugins/conventions/CanReadLanguageVersion.kt):
 
-If you have a multi-project build, I recommend adding a `buildSrc` project with
-a plugin that configures the correct version of this plugin (along with and
-customisation, or extra configuration) then applying _that_ plugin to each of
-your projects.
+![A screenshot of code from CanReadLanguageVersion.kt, rendered by IDEA. The variable languageVersion on line 39 is coloured red.](img.png "Screenshot of IDE error")
 
-If you have multiple builds, and you want different conventions from me, you
-should probably do what I've done and publish your own conventions. My hope is
-that this project might be a useful base for people to start with.
+Putting the same source in a `main` source set appears to work.
+
+This is obviously a very-much reduced example!
