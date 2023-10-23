@@ -1,7 +1,7 @@
 #
 # Run pitest and update github in a single step. Until and unless I get outside contributions, this suffices
 #
-name: pull request ci
+name: Pitest PR Check
 on:
   pull_request:
 

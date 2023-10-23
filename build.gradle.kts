@@ -109,6 +109,7 @@ pitest {
   failWhenNoMutations.set(false)
   outputFormats.add("gitci")
   jvmArgs.add("--add-opens=java.base/java.lang=ALL-UNNAMED")
+  jvmArgs.add("--add-opens=java.base/java.text=ALL-UNNAMED")
 }
 
 tasks.withType<DokkaTask>().configureEach {
