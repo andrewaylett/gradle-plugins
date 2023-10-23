@@ -5,6 +5,12 @@ name: Pitest PR Check
 on:
   pull_request:
 
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+  issues: write
+
 jobs:
   pull-request-ci:
     # Only run on PRs from the repo. PRs from forks will fail due to lack of permissions and
