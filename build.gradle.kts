@@ -113,7 +113,7 @@ pitest {
   features.add("+auto_threads")
   if (providers.environmentVariable("REPO_TOKEN").isPresent) {
     // Running in GitHub Actions
-    features.addAll("+git(from[main])", "+gitci(error)")
+    features.addAll("+git(from[main])", "+gitci(level[error])")
   }
   jvmArgs.add("--add-opens=java.base/java.lang=ALL-UNNAMED")
   mutators.set(listOf("STRONGER", "EXTENDED"))
