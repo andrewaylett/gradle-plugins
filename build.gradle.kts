@@ -40,6 +40,7 @@ repositories {
 
 dependencies {
   implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$embeddedKotlinVersion")
+  pitest("com.groupcdg.arcmutate:base:1.2.2")
   pitest("com.groupcdg.pitest:pitest-accelerator-junit5:1.0.6")
   pitest("com.groupcdg:pitest-git-plugin:1.1.2")
   pitest("com.groupcdg.pitest:pitest-kotlin-plugin:1.1.3")
@@ -107,9 +108,15 @@ pitest {
   verbosity.set("VERBOSE")
   pitestVersion.set("1.15.1")
   failWhenNoMutations.set(false)
-  outputFormats.add("gitci")
+  timeoutFactor.set(BigDecimal.TEN)
+  outputFormats.set(listOf("html", "gitci"))
+  features.add("+auto_threads")
+  if (providers.environmentVariable("REPO_TOKEN").isPresent) {
+    // Running in GitHub Actions
+    features.add("+git(from[main]),+gitci(error)")
+  }
   jvmArgs.add("--add-opens=java.base/java.lang=ALL-UNNAMED")
-  jvmArgs.add("--add-opens=java.base/java.text=ALL-UNNAMED")
+  mutators.set(listOf("STRONGER", "EXTENDED"))
 }
 
 tasks.withType<DokkaTask>().configureEach {
