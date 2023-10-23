@@ -30,15 +30,19 @@ plugins {
   id("org.jetbrains.dokka") version "1.9.10"
   id("com.gradle.plugin-publish") version "1.2.1"
   id("info.solidsoft.pitest") version "1.15.0"
+  id("com.groupcdg.pitest.github") version "1.0.4"
 }
 
 repositories {
-  gradlePluginPortal()
   mavenCentral()
+  gradlePluginPortal()
 }
 
 dependencies {
   implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$embeddedKotlinVersion")
+  pitest("com.groupcdg.pitest:pitest-accelerator-junit5:1.0.6")
+  pitest("com.groupcdg:pitest-git-plugin:1.1.2")
+  pitest("com.groupcdg.pitest:pitest-kotlin-plugin:1.1.3")
 }
 
 aylett {
@@ -101,10 +105,10 @@ tasks.withType<KotlinCompilationTask<KotlinCommonCompilerOptions>>().configureEa
 pitest {
   junit5PluginVersion.set("1.2.0")
   verbosity.set("VERBOSE")
-  avoidCallsTo.set(listOf("kotlin.jvm.internal"))
   pitestVersion.set("1.15.1")
-  verbose.set(true)
-  threads.set(1)
+  failWhenNoMutations.set(false)
+  outputFormats.add("gitci")
+  jvmArgs.add("--add-opens=java.base/java.lang=ALL-UNNAMED")
 }
 
 tasks.withType<DokkaTask>().configureEach {
