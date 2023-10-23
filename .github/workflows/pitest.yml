@@ -27,6 +27,6 @@ jobs:
       uses: gradle/gradle-build-action@v2
 
     - name: Execute Gradle build
-      run: ./gradlew pitest-github
+      run: ./gradlew --no-configuration-cache pitest-github
       env:
         REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
