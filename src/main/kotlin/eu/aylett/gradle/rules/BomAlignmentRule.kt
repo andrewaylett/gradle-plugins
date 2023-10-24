@@ -35,10 +35,10 @@ class BomAlignmentRule : ComponentMetadataRule {
       details.belongsTo("io.dropwizard.metrics:metrics-virtual-bom:$version")
     } else if (group == "io.dropwizard") {
       details.belongsTo("io.dropwizard:dropwizard-virtual-bom:$version")
-    } else if (group == "org.glassfish.jersey") {
+    } else if (group.startsWith("org.glassfish.jersey")) {
       details.belongsTo("org.glassfish.jersey:jersey-virtual-bom:$version")
     } else if (group == "org.jetbrains.kotlin" && name.startsWith("kotlin-")) {
-      details.belongsTo("org.jetbrains.kotlin:kotlin-virtual-bom:$version")
+      details.belongsTo("org.jetbrains.kotlin:kotlin-bom:$version", false)
     } else if (group == "org.assertj") {
       details.belongsTo("org.assertj:assertj-virtual-bom:$version")
     } else if (group == "com.google.protobuf") {

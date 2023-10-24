@@ -20,6 +20,7 @@ import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.dsl.KotlinCommonCompilerOptions
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 import java.net.URI
+import java.nio.file.Files
 
 plugins {
   id("eu.aylett.conventions") version "0.1.0"
@@ -68,6 +69,11 @@ testing {
 
     withType(JvmTestSuite::class).configureEach {
       useJUnitJupiter()
+      sources {
+        kotlin {
+          srcDir(layout.buildDirectory.dir("generated/test/kotlin"))
+        }
+      }
       dependencies {
         implementation("org.hamcrest:hamcrest:2.2")
         implementation(gradleApi())
@@ -135,6 +141,30 @@ tasks.withType<DokkaTask>().configureEach {
       }
     }
   }
+}
+
+val gen =
+  tasks.register("generateTestProjectConstants") {
+    val baseDir = layout.buildDirectory.dir("generated/test/kotlin")
+    outputs.dir(baseDir)
+
+    val outFile = baseDir.get().file("eu/aylett/gradle/generated/ProjectLocations.kt")
+    Files.createDirectories(outFile.asFile.parentFile.toPath())
+    Files.writeString(
+      outFile.asFile.toPath(),
+      """
+      package eu.aylett.gradle.generated
+
+      val PROJECT_DIR: String = "${projectDir.canonicalPath}"
+      """.trimIndent(),
+    )
+  }
+
+tasks.named("compileTestKotlin") {
+  dependsOn(gen)
+}
+tasks.named("spotlessKotlin") {
+  mustRunAfter(gen)
 }
 
 group = "eu.aylett"
