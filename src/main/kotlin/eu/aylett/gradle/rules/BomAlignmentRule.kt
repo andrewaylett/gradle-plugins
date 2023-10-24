@@ -29,19 +29,19 @@ class BomAlignmentRule : ComponentMetadataRule {
     val group = details.id.group
     val name = details.id.name
     val version = details.id.version
-    if (group.startsWith("org.mockito")) {
+    if (group == "org.mockito") {
       details.belongsTo("org.mockito:mockito-virtual-bom:$version")
-    } else if (group.startsWith("io.dropwizard.metrics")) {
+    } else if (group == "io.dropwizard.metrics") {
       details.belongsTo("io.dropwizard.metrics:metrics-virtual-bom:$version")
     } else if (group == "io.dropwizard") {
       details.belongsTo("io.dropwizard:dropwizard-virtual-bom:$version")
-    } else if (group.startsWith("org.glassfish.jersey")) {
+    } else if (group == "org.glassfish.jersey") {
       details.belongsTo("org.glassfish.jersey:jersey-virtual-bom:$version")
-    } else if (group.equals("org.jetbrains.kotlin") && name.startsWith("kotlin-")) {
+    } else if (group == "org.jetbrains.kotlin" && name.startsWith("kotlin-")) {
       details.belongsTo("org.jetbrains.kotlin:kotlin-virtual-bom:$version")
-    } else if (group.equals("org.assertj")) {
+    } else if (group == "org.assertj") {
       details.belongsTo("org.assertj:assertj-virtual-bom:$version")
-    } else if (group.equals("com.google.protobuf")) {
+    } else if (group == "com.google.protobuf") {
       details.belongsTo("com.google.protobuf:proto-virtual-bom:$version")
     }
   }
