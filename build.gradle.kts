@@ -31,7 +31,7 @@ plugins {
   id("org.jetbrains.dokka") version "1.9.10"
   id("com.gradle.plugin-publish") version "1.2.1"
   id("info.solidsoft.pitest") version "1.15.0"
-  id("com.groupcdg.pitest.github") version "1.0.4"
+  id("com.groupcdg.pitest.github") version "1.0.5"
 }
 
 repositories {
