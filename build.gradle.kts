@@ -53,6 +53,23 @@ aylett {
   }
 }
 
+val gen =
+  tasks.register("generateTestProjectConstants") {
+    val baseDir = generatedSourcesDirectory.map { it.dir("test/kotlin") }
+    outputs.dir(baseDir)
+
+    val outFile = baseDir.get().file("eu/aylett/gradle/generated/ProjectLocations.kt")
+    Files.createDirectories(outFile.asFile.parentFile.toPath())
+    Files.writeString(
+      outFile.asFile.toPath(),
+      """
+      package eu.aylett.gradle.generated
+
+      val PROJECT_DIR: String = "${projectDir.canonicalPath}"
+      """.trimIndent(),
+    )
+  }
+
 val check = tasks.named("check")
 testing {
   suites {
@@ -71,7 +88,7 @@ testing {
       useJUnitJupiter()
       sources {
         kotlin {
-          srcDir(layout.buildDirectory.dir("generated/test/kotlin"))
+          srcDir(gen)
         }
       }
       dependencies {
@@ -83,9 +100,11 @@ testing {
   }
 }
 
+val generatedSourcesDirectory = layout.buildDirectory.dir("generated")
 spotless {
   kotlin {
     ktlint()
+    targetExclude(generatedSourcesDirectory.map { it.asFileTree })
   }
   kotlinGradle {
     ktlint()
@@ -141,30 +160,6 @@ tasks.withType<DokkaTask>().configureEach {
       }
     }
   }
-}
-
-val gen =
-  tasks.register("generateTestProjectConstants") {
-    val baseDir = layout.buildDirectory.dir("generated/test/kotlin")
-    outputs.dir(baseDir)
-
-    val outFile = baseDir.get().file("eu/aylett/gradle/generated/ProjectLocations.kt")
-    Files.createDirectories(outFile.asFile.parentFile.toPath())
-    Files.writeString(
-      outFile.asFile.toPath(),
-      """
-      package eu.aylett.gradle.generated
-
-      val PROJECT_DIR: String = "${projectDir.canonicalPath}"
-      """.trimIndent(),
-    )
-  }
-
-tasks.named("compileTestKotlin") {
-  dependsOn(gen)
-}
-tasks.named("spotlessKotlin") {
-  mustRunAfter(gen)
 }
 
 group = "eu.aylett"

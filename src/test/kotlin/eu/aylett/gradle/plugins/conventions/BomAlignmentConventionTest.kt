@@ -21,6 +21,7 @@ package eu.aylett.gradle.plugins.conventions
 import eu.aylett.gradle.generated.PROJECT_DIR
 import eu.aylett.gradle.matchers.hasPlugin
 import org.gradle.api.artifacts.ExternalModuleDependency
+import org.gradle.api.artifacts.ModuleVersionSelector
 import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.testfixtures.ProjectBuilder
@@ -70,6 +71,8 @@ class BomAlignmentConventionTest {
         deps.drop(1)
       }
 
+    // Notice there's a blank line between dependencies that match the group and are part of the BOM
+    // and dependencies that match the group but need to retain their original version.
     val mapDependenciesUpTo = realDeps.indexOf("")
 
     val configuration = project.configurations.create("resolveTest")
@@ -88,19 +91,19 @@ class BomAlignmentConventionTest {
     configuration.resolve()
 
     val resolvedVersion = dependencies[0].version
-    val resolvedGroup =
+    val resolvedGroup: String =
       if (deps.first().contains(':')) {
-        dependencies[0].group!!
+        (dependencies[0] as ModuleVersionSelector).group
       } else {
         deps.first()
       }
 
     val resolved =
-      dependencies.mapIndexed { i, it ->
+      dependencies.mapIndexed { i, it: ModuleVersionSelector ->
         project.dependencyFactory.create(
           it.group,
           it.name,
-          if (it.group!!.startsWith(resolvedGroup) &&
+          if (it.group.startsWith(resolvedGroup) &&
             (mapDependenciesUpTo == -1 || i < mapDependenciesUpTo)
           ) {
             resolvedVersion
