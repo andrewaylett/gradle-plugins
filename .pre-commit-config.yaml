@@ -29,7 +29,7 @@ repos:
     - xml
     - markdown
     - kotlin
-    exclude: LICENSE
+    exclude: LICENSE|gradlew.bat
 - repo: https://github.com/python-jsonschema/check-jsonschema
   rev: 0.27.0
   hooks:
@@ -53,3 +53,7 @@ repos:
   - id: gradle-check
     args:
     - -w
+
+ci:
+  skip:
+  - gradle-check

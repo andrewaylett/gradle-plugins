@@ -14,26 +14,228 @@
  * limitations under the License.
  */
 
+@file:Suppress("UnstableApiUsage")
+
 package eu.aylett.gradle.plugins.conventions
 
+import eu.aylett.gradle.generated.PROJECT_DIR
 import eu.aylett.gradle.matchers.hasPlugin
+import org.gradle.api.artifacts.ExternalModuleDependency
+import org.gradle.api.artifacts.ModuleVersionSelector
+import org.gradle.api.artifacts.ResolvedArtifact
+import org.gradle.api.plugins.JavaPlugin
 import org.gradle.testfixtures.ProjectBuilder
+import org.hamcrest.Description
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.SelfDescribing
+import org.hamcrest.TypeSafeMatcher
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.io.TempDir
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import java.io.File
+import java.nio.file.Path
+import java.util.stream.Stream
 
 class BomAlignmentConventionTest {
-  @TempDir
-  lateinit var projectDir: File
+  private val extraDeps =
+    listOf(
+      "com.hubspot.jinjava:jinjava:2.7.0",
+      "com.googlecode.concurrent-trees:concurrent-trees:2.6.1",
+    )
+
+  private val userHomeDir: File = Path.of(PROJECT_DIR, "./build/cache").toFile()
 
   @Test
   fun `plugin applies`() {
-    val project = ProjectBuilder.builder().withProjectDir(projectDir).build()
+    val project = ProjectBuilder.builder().withGradleUserHomeDir(userHomeDir).build()
     project.pluginManager.apply(BomAlignmentConvention::class.java)
     assertThat(
       project.pluginManager,
       hasPlugin("eu.aylett.conventions.bom-alignment"),
     )
+  }
+
+  @ParameterizedTest
+  @MethodSource("eu.aylett.gradle.plugins.conventions.BomAlignmentConventionTest#specifications")
+  fun `plugin sets the version of a dependency`(deps: List<String>) {
+    val project = ProjectBuilder.builder().withGradleUserHomeDir(userHomeDir).build()
+    project.pluginManager.apply(JavaPlugin::class.java)
+    project.pluginManager.apply(BomAlignmentConvention::class.java)
+
+    project.repositories.mavenCentral()
+
+    val realDeps =
+      if (deps.first().contains(':')) {
+        deps
+      } else {
+        deps.drop(1)
+      }
+
+    // Notice there's a blank line between dependencies that match the group and are part of the BOM
+    // and dependencies that match the group but need to retain their original version.
+    val mapDependenciesUpTo = realDeps.indexOf("")
+
+    val configuration = project.configurations.create("resolveTest")
+    val dependencies =
+      (realDeps + extraDeps).filter(String::isNotBlank).map {
+          it: String ->
+        project.dependencyFactory.create(it)
+      }
+
+    configuration.dependencies.apply {
+      dependencies.forEach {
+        this.add(it)
+      }
+    }
+
+    configuration.resolve()
+
+    val resolvedVersion = dependencies[0].version
+    val resolvedGroup: String =
+      if (deps.first().contains(':')) {
+        (dependencies[0] as ModuleVersionSelector).group
+      } else {
+        deps.first()
+      }
+
+    val resolved =
+      dependencies.mapIndexed { i, it: ModuleVersionSelector ->
+        project.dependencyFactory.create(
+          it.group,
+          it.name,
+          if (it.group.startsWith(resolvedGroup) &&
+            (mapDependenciesUpTo == -1 || i < mapDependenciesUpTo)
+          ) {
+            resolvedVersion
+          } else {
+            it.version
+          },
+        )
+      }
+
+    assertThat(
+      configuration.resolvedConfiguration.resolvedArtifacts,
+      ResolvesToContain(resolved),
+    )
+  }
+
+  @ParameterizedTest
+  @MethodSource("eu.aylett.gradle.plugins.conventions.BomAlignmentConventionTest#specifications")
+  fun `project with no plugin retains the version of a dependency`(deps: List<String>) {
+    val project = ProjectBuilder.builder().withGradleUserHomeDir(userHomeDir).build()
+    project.pluginManager.apply(JavaPlugin::class.java)
+
+    project.repositories.mavenCentral()
+
+    val realDeps =
+      if (deps.first().contains(':')) {
+        deps
+      } else {
+        deps.drop(1)
+      }
+
+    val configuration = project.configurations.create("resolveTest")
+    val dependencies =
+      (realDeps + extraDeps).filter(String::isNotBlank).map {
+          it: String ->
+        project.dependencyFactory.create(it)
+      }
+
+    configuration.dependencies.apply {
+      dependencies.forEach {
+        this.add(it)
+      }
+    }
+
+    configuration.resolve()
+
+    assertThat(
+      configuration.resolvedConfiguration.resolvedArtifacts,
+      ResolvesToContain(dependencies),
+    )
+  }
+
+  companion object {
+    @JvmStatic
+    @Suppress("ktlint:standard:max-line-length")
+    fun specifications(): Stream<List<String>> =
+      Stream.of(
+        listOf(
+          "org.mockito:mockito-core:5.6.0",
+          "org.mockito:mockito-junit-jupiter:5.5.0",
+        ),
+        listOf(
+          "io.dropwizard.metrics:metrics-core:4.2.20",
+          "io.dropwizard.metrics:metrics-jvm:4.2.2",
+        ),
+        listOf(
+          "io.dropwizard:dropwizard-util:4.0.2",
+          "io.dropwizard:dropwizard-core:4.0.0",
+          "com.google.code.findbugs:jsr305:3.0.2",
+        ),
+        listOf(
+          // Explicit prefix without a ':'
+          "org.glassfish.jersey",
+          "org.glassfish.jersey.core:jersey-common:2.39.1",
+          "org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-inmemory:2.2",
+          "org.glassfish:jakarta.el:3.0.4",
+        ),
+        listOf(
+          "org.jetbrains.kotlin:kotlin-stdlib:1.9.10",
+          "org.jetbrains.kotlin:kotlin-reflect:1.8.0",
+          // We won't map dependency versions after an empty string
+          "",
+          "org.jetbrains.kotlin:kdoc:0.12.613",
+        ),
+        listOf(
+          "org.assertj:assertj-core:3.24.2",
+          "org.assertj:assertj-guava:3.2.0",
+        ),
+        listOf(
+          "com.google.protobuf:protobuf-java:3.24.4",
+          "com.google.protobuf:protobuf-java-util:3.23.1",
+        ),
+      )
+  }
+}
+
+class ResolvesToContain(private val dependencies: List<ExternalModuleDependency>) :
+  TypeSafeMatcher<Set<ResolvedArtifact>>() {
+  override fun describeTo(description: Description) {
+    val selfDescribing =
+      dependencies.map {
+        SelfDescribing { d -> d.appendText("(${it.group}:${it.name}:${it.version})") }
+      }
+    description.appendText("A configuration that includes dependencies on ")
+    description.appendList("<[", ", ", "]>", selfDescribing)
+  }
+
+  override fun describeMismatchSafely(
+    item: Set<ResolvedArtifact>,
+    mismatchDescription: Description,
+  ) {
+    mismatchDescription.appendText("was missing ")
+    val mismatches = mutableListOf<SelfDescribing>()
+    for (required in dependencies) {
+      if (!item.any { required.matchesStrictly(it.moduleVersion.id) }) {
+        mismatches.add(
+          SelfDescribing {
+              d ->
+            d.appendText("(${required.group}:${required.name}:${required.version})")
+          },
+        )
+      }
+    }
+    mismatchDescription.appendList("<[", ", ", "]> from ", mismatches)
+    mismatchDescription.appendValue(item)
+  }
+
+  override fun matchesSafely(item: Set<ResolvedArtifact>): Boolean {
+    for (required in dependencies) {
+      if (!item.any { required.matchesStrictly(it.moduleVersion.id) }) {
+        return false
+      }
+    }
+    return true
   }
 }

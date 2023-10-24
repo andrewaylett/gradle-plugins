@@ -20,6 +20,7 @@ import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.dsl.KotlinCommonCompilerOptions
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 import java.net.URI
+import java.nio.file.Files
 
 plugins {
   id("eu.aylett.conventions") version "0.1.0"
@@ -30,15 +31,20 @@ plugins {
   id("org.jetbrains.dokka") version "1.9.10"
   id("com.gradle.plugin-publish") version "1.2.1"
   id("info.solidsoft.pitest") version "1.15.0"
+  id("com.groupcdg.pitest.github") version "1.0.4"
 }
 
 repositories {
-  gradlePluginPortal()
   mavenCentral()
+  gradlePluginPortal()
 }
 
 dependencies {
   implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$embeddedKotlinVersion")
+  pitest("com.groupcdg.arcmutate:base:1.2.2")
+  pitest("com.groupcdg.pitest:pitest-accelerator-junit5:1.0.6")
+  pitest("com.groupcdg:pitest-git-plugin:1.1.2")
+  pitest("com.groupcdg.pitest:pitest-kotlin-plugin:1.1.3")
 }
 
 aylett {
@@ -46,6 +52,23 @@ aylett {
     jvmVersion.set(17)
   }
 }
+
+val gen =
+  tasks.register("generateTestProjectConstants") {
+    val baseDir = generatedSourcesDirectory.map { it.dir("test/kotlin") }
+    outputs.dir(baseDir)
+
+    val outFile = baseDir.get().file("eu/aylett/gradle/generated/ProjectLocations.kt")
+    Files.createDirectories(outFile.asFile.parentFile.toPath())
+    Files.writeString(
+      outFile.asFile.toPath(),
+      """
+      package eu.aylett.gradle.generated
+
+      val PROJECT_DIR: String = "${projectDir.canonicalPath}"
+      """.trimIndent(),
+    )
+  }
 
 val check = tasks.named("check")
 testing {
@@ -63,6 +86,11 @@ testing {
 
     withType(JvmTestSuite::class).configureEach {
       useJUnitJupiter()
+      sources {
+        kotlin {
+          srcDir(gen)
+        }
+      }
       dependencies {
         implementation("org.hamcrest:hamcrest:2.2")
         implementation(gradleApi())
@@ -72,9 +100,11 @@ testing {
   }
 }
 
+val generatedSourcesDirectory = layout.buildDirectory.dir("generated")
 spotless {
   kotlin {
     ktlint()
+    targetExclude(generatedSourcesDirectory.map { it.asFileTree })
   }
   kotlinGradle {
     ktlint()
@@ -101,10 +131,17 @@ tasks.withType<KotlinCompilationTask<KotlinCommonCompilerOptions>>().configureEa
 pitest {
   junit5PluginVersion.set("1.2.0")
   verbosity.set("VERBOSE")
-  avoidCallsTo.set(listOf("kotlin.jvm.internal"))
   pitestVersion.set("1.15.1")
-  verbose.set(true)
-  threads.set(1)
+  failWhenNoMutations.set(false)
+  timeoutFactor.set(BigDecimal.TEN)
+  outputFormats.set(listOf("html", "gitci"))
+  features.add("+auto_threads")
+  if (providers.environmentVariable("REPO_TOKEN").isPresent) {
+    // Running in GitHub Actions
+    features.addAll("+git(from[HEAD~1])", "+gitci(level[warning])")
+  }
+  jvmArgs.add("--add-opens=java.base/java.lang=ALL-UNNAMED")
+  mutators.set(listOf("STRONGER", "EXTENDED"))
 }
 
 tasks.withType<DokkaTask>().configureEach {
