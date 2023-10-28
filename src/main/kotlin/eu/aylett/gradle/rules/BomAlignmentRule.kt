@@ -23,7 +23,7 @@ import org.gradle.api.artifacts.ComponentMetadataRule
  * Make sure we use the same version of all dependencies that are known to not specify Gradle Module
  * Metadata. Applied to projects using the [eu.aylett.gradle.plugins.conventions.BomAlignmentConvention] plugin.
  */
-class BomAlignmentRule : ComponentMetadataRule {
+internal class BomAlignmentRule : ComponentMetadataRule {
   override fun execute(ctx: ComponentMetadataContext) {
     val details = ctx.details
     val group = details.id.group

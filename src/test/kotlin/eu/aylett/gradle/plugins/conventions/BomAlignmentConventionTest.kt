@@ -29,6 +29,7 @@ import org.hamcrest.Description
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.SelfDescribing
 import org.hamcrest.TypeSafeMatcher
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
@@ -42,8 +43,6 @@ class BomAlignmentConventionTest {
       "com.hubspot.jinjava:jinjava:2.7.0",
       "com.googlecode.concurrent-trees:concurrent-trees:2.6.1",
     )
-
-  private val userHomeDir: File = Path.of(PROJECT_DIR, "./build/cache").toFile()
 
   @Test
   fun `plugin applies`() {
@@ -196,10 +195,23 @@ class BomAlignmentConventionTest {
           "com.google.protobuf:protobuf-java-util:3.23.1",
         ),
       )
+
+    private val userHomeDir: File = Path.of(PROJECT_DIR, "./build/cache").toFile()
+
+    @JvmStatic
+    @BeforeAll
+    fun `set up a project`() {
+      // Run this once in isolation, to avoid races between tests setting up static metadata :(
+      val project =
+        ProjectBuilder.builder().withGradleUserHomeDir(userHomeDir)
+          .build()
+      project.pluginManager.apply(JavaPlugin::class.java)
+      project.pluginManager.apply(BomAlignmentConvention::class.java)
+    }
   }
 }
 
-class ResolvesToContain(private val dependencies: List<ExternalModuleDependency>) :
+private class ResolvesToContain(private val dependencies: List<ExternalModuleDependency>) :
   TypeSafeMatcher<Set<ResolvedArtifact>>() {
   override fun describeTo(description: Description) {
     val selfDescribing =
