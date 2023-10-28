@@ -122,7 +122,8 @@ testing {
 spotless {
   kotlin {
     ktlint()
-    targetExclude(layout.buildDirectory)
+    target(sourceSets.map { it.kotlin.sourceDirectories })
+    targetExclude(layout.buildDirectory.dir("generated/test/kotlin"))
   }
   kotlinGradle {
     ktlint()
