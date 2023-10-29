@@ -23,7 +23,7 @@ import org.gradle.api.artifacts.ComponentMetadataRule
  * Make sure we use the same version of all dependencies that are known to not specify Gradle Module
  * Metadata. Applied to projects using the [eu.aylett.gradle.plugins.conventions.BomAlignmentConvention] plugin.
  */
-class BomAlignmentRule : ComponentMetadataRule {
+internal class BomAlignmentRule : ComponentMetadataRule {
   override fun execute(ctx: ComponentMetadataContext) {
     val details = ctx.details
     val group = details.id.group
@@ -37,7 +37,9 @@ class BomAlignmentRule : ComponentMetadataRule {
       details.belongsTo("io.dropwizard:dropwizard-virtual-bom:$version")
     } else if (group.startsWith("org.glassfish.jersey")) {
       details.belongsTo("org.glassfish.jersey:jersey-virtual-bom:$version")
-    } else if (group == "org.jetbrains.kotlin" && name.startsWith("kotlin-")) {
+    } else if (group == "org.jetbrains.kotlin" && name.startsWith("kotlin-stdlib")) {
+      // The Kotlin BOM supports many but not all of the objects in the group.
+      // But we can pull the BOM in based on stdlib being present
       details.belongsTo("org.jetbrains.kotlin:kotlin-bom:$version", false)
     } else if (group == "org.assertj") {
       details.belongsTo("org.assertj:assertj-virtual-bom:$version")

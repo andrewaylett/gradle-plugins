@@ -26,8 +26,6 @@ import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.withType
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
-import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformJvmPlugin
 
 /**
  * Configure Java
@@ -78,12 +76,6 @@ class JvmConvention : Plugin<Project> {
 
       plugins.withType<JavaBasePlugin>().configureEach {
         target.extensions.getByType<JavaPluginExtension>().toolchain {
-          languageVersion.set(conventionExtension.jvmVersion.map(JavaLanguageVersion::of))
-        }
-      }
-
-      plugins.withType<KotlinPlatformJvmPlugin>().configureEach {
-        target.extensions.getByType<KotlinJvmProjectExtension>().jvmToolchain {
           languageVersion.set(conventionExtension.jvmVersion.map(JavaLanguageVersion::of))
         }
       }

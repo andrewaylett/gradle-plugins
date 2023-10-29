@@ -23,7 +23,8 @@ import java.net.URI
 import java.nio.file.Files
 
 plugins {
-  id("eu.aylett.conventions") version "0.1.0"
+  id("eu.aylett.conventions.jvm") version "0.1.0"
+  id("eu.aylett.conventions.ide-support") version "0.1.0"
   `java-gradle-plugin`
   id("org.jetbrains.kotlin.jvm") version "1.9.10"
   `kotlin-dsl`
@@ -40,7 +41,13 @@ repositories {
 }
 
 dependencies {
-  implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$embeddedKotlinVersion")
+  implementation(platform("org.jetbrains.kotlin:kotlin-bom:$embeddedKotlinVersion"))
+  implementation("com.google.guava:guava:32.1.3-jre")
+
+  testImplementation("com.fasterxml.jackson.core:jackson-core:2.14.1")
+  testImplementation("com.fasterxml.jackson.core:jackson-databind")
+  testImplementation("org.jetbrains.kotlin:kotlin-gradle-plugin")
+
   pitest("com.groupcdg.arcmutate:base:1.2.2")
   pitest("com.groupcdg.pitest:pitest-accelerator-junit5:1.0.6")
   pitest("com.groupcdg:pitest-git-plugin:1.1.2")
@@ -53,39 +60,48 @@ aylett {
   }
 }
 
-val gen =
-  tasks.register("generateTestProjectConstants") {
-    val baseDir = generatedSourcesDirectory.map { it.dir("test/kotlin") }
-    outputs.dir(baseDir)
+abstract class GenerateTestProjectConstants : DefaultTask() {
+  @get:OutputDirectory
+  abstract val baseDir: DirectoryProperty
 
-    val outFile = baseDir.get().file("eu/aylett/gradle/generated/ProjectLocations.kt")
+  @get:Input
+  abstract val projectDir: Property<String>
+
+  @TaskAction
+  fun execute() {
+    val outFile = this.baseDir.get().file("eu/aylett/gradle/generated/ProjectLocations.kt")
     Files.createDirectories(outFile.asFile.parentFile.toPath())
     Files.writeString(
       outFile.asFile.toPath(),
       """
       package eu.aylett.gradle.generated
 
-      val PROJECT_DIR: String = "${projectDir.canonicalPath}"
+      val PROJECT_DIR: String = "$projectDir"
       """.trimIndent(),
     )
+  }
+}
+
+val gen =
+  tasks.register<GenerateTestProjectConstants>("generateTestProjectConstants") {
+    this.baseDir.set(layout.buildDirectory.dir("generated/test/kotlin"))
+    this.projectDir.set(layout.projectDirectory.asFile.canonicalPath)
   }
 
 val check = tasks.named("check")
 testing {
   suites {
-    register("functionalTest", JvmTestSuite::class) {
+    register<JvmTestSuite>("functionalTest") {
       targets.configureEach {
-        testTask.configure {
-          shouldRunAfter(tasks.named("test"))
-        }
-        check.configure {
-          dependsOn(testTask)
+        dependencies {
+          implementation(project())
+          implementation(gradleTestKit())
         }
       }
     }
 
-    withType(JvmTestSuite::class).configureEach {
-      useJUnitJupiter()
+    withType<JvmTestSuite>().configureEach {
+      useJUnitJupiter("5.10.0")
       sources {
         kotlin {
           srcDir(gen)
@@ -94,17 +110,20 @@ testing {
       dependencies {
         implementation("org.hamcrest:hamcrest:2.2")
         implementation(gradleApi())
-        implementation(gradleTestKit())
       }
     }
   }
 }
 
-val generatedSourcesDirectory = layout.buildDirectory.dir("generated")
+check.configure {
+  dependsOn(testing.suites.withType<JvmTestSuite>().flatMap { it.targets.map { it.testTask } })
+}
+
 spotless {
   kotlin {
     ktlint()
-    targetExclude(generatedSourcesDirectory.map { it.asFileTree })
+    target(sourceSets.map { it.kotlin.sourceDirectories })
+    targetExclude(layout.buildDirectory.dir("generated/test/kotlin"))
   }
   kotlinGradle {
     ktlint()
@@ -116,7 +135,8 @@ val spotlessCheck = tasks.named("spotlessCheck")
 check.configure { dependsOn(spotlessCheck) }
 spotlessApply.configure { mustRunAfter(tasks.named("clean")) }
 
-if (!providers.environmentVariable("CI").isPresent) {
+val isCI = providers.environmentVariable("CI").isPresent
+if (!isCI) {
   spotlessCheck.configure { dependsOn(spotlessApply) }
 }
 
@@ -129,19 +149,26 @@ tasks.withType<KotlinCompilationTask<KotlinCommonCompilerOptions>>().configureEa
 }
 
 pitest {
+  testSourceSets.set(testing.suites.withType<JvmTestSuite>().map { it.sources })
+  // Don't mutate the class that calls git
+  excludedClasses.add("eu.aylett.gradle.gitversion.Git")
+
   junit5PluginVersion.set("1.2.0")
-  verbosity.set("VERBOSE")
+  verbosity.set("VERBOSE_NO_SPINNER")
   pitestVersion.set("1.15.1")
   failWhenNoMutations.set(false)
+  mutators.set(listOf("STRONGER", "EXTENDED"))
   timeoutFactor.set(BigDecimal.TEN)
+
   outputFormats.set(listOf("html", "gitci"))
   features.add("+auto_threads")
-  if (providers.environmentVariable("REPO_TOKEN").isPresent) {
+  if (isCI) {
     // Running in GitHub Actions
     features.addAll("+git(from[HEAD~1])", "+gitci(level[warning])")
   }
+
   jvmArgs.add("--add-opens=java.base/java.lang=ALL-UNNAMED")
-  mutators.set(listOf("STRONGER", "EXTENDED"))
+  jvmArgs.add("-Dorg.gradle.testkit.debug=true")
 }
 
 tasks.withType<DokkaTask>().configureEach {
@@ -168,6 +195,8 @@ gradlePlugin {
   website = "https://gradle-plugins.aylett.eu/"
   vcsUrl = "https://github.com/andrewaylett/gradle-plugins"
 
+  testSourceSets(sourceSets.getByName("functionalTest"))
+
   plugins {
     create("basePlugin") {
       id = "eu.aylett.plugins.base"
@@ -176,6 +205,14 @@ gradlePlugin {
       tags = listOf("base", "jvm")
       //language=jvm-class-name
       implementationClass = "eu.aylett.gradle.plugins.BasePlugin"
+    }
+    create("versionPlugin") {
+      id = "eu.aylett.plugins.version"
+      displayName = "aylett.eu automatic version plugin"
+      description = "Sets the project version from the state of the git repository it's in."
+      tags = listOf("git", "version")
+      //language=jvm-class-name
+      implementationClass = "eu.aylett.gradle.gitversion.GitVersionPlugin"
     }
     create("bomAlignmentConvention") {
       id = "eu.aylett.conventions.bom-alignment"
