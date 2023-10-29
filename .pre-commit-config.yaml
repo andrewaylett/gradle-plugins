@@ -54,7 +54,7 @@ repos:
 #  - id: gradle-check
 #    args:
 #    - -w
-
-ci:
-  skip:
-  - gradle-check
+#
+#ci:
+#  skip:
+#  - gradle-check
