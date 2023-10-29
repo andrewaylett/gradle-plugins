@@ -20,19 +20,18 @@ package eu.aylett.gradle.gitversion
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.notNullValue
 import org.junit.jupiter.api.Test
-import java.util.Optional
 import kotlin.io.path.appendText
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 
 class GitVersionPluginBuildScanTests : GitVersionPluginTests() {
   @Test
-  fun `can set build scan custom values when Gradle 6 enterprise plugin 3-2 is applied`() {
+  fun `can set build scan custom values when Gradle enterprise plugin 3-15-1 is applied`() {
     // when:
     settingsFile.writeText(
       """
       plugins {
-        id "com.gradle.enterprise" version "3.2"
+        id "com.gradle.enterprise" version "3.15.1"
       }
       """.trimIndent() + '\n' + settingsFile.readText(),
     )
@@ -57,37 +56,7 @@ class GitVersionPluginBuildScanTests : GitVersionPluginTests() {
   }
 
   @Test
-  fun `can set build scan custom values when Gradle 7 build scan plugin is applied`() {
-    // when:
-    settingsFile.writeText(
-      """
-      plugins {
-        id "com.gradle.enterprise" version "3.2"
-      }
-      """.trimIndent() + '\n' + settingsFile.readText(),
-    )
-
-    buildFile.writeText(
-      """
-      plugins {
-        id "eu.aylett.plugins.version"
-      }
-      version gitVersion ()
-      """.trimIndent(),
-    )
-    gitIgnoreFile.appendText("build")
-    val git = Git(projectDir, true)
-    git.runGitCommand("init", projectDir.toString())
-    git.runGitCommand("add", ".")
-    git.runGitCommand("commit", "-m", "initial commit")
-    git.runGitCommand("tag", "-a", "1.0.0", "-m", "1.0.0")
-
-    // then:
-    assertThat(with(Optional.of("7.4.2"), "printVersion").build(), notNullValue())
-  }
-
-  @Test
-  fun `can set build scan custom values when Gradle 6 enterprise plugin 3-1 is applied`() {
+  fun `can set build scan custom values when Gradle enterprise plugin 3-1 is applied`() {
     // when:
     settingsFile.writeText(
       """
