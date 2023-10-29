@@ -37,7 +37,9 @@ internal class BomAlignmentRule : ComponentMetadataRule {
       details.belongsTo("io.dropwizard:dropwizard-virtual-bom:$version")
     } else if (group.startsWith("org.glassfish.jersey")) {
       details.belongsTo("org.glassfish.jersey:jersey-virtual-bom:$version")
-    } else if (group == "org.jetbrains.kotlin" && name.startsWith("kotlin-")) {
+    } else if (group == "org.jetbrains.kotlin" && name.startsWith("kotlin-stdlib")) {
+      // The Kotlin BOM supports many but not all of the objects in the group.
+      // But we can pull the BOM in based on stdlib being present
       details.belongsTo("org.jetbrains.kotlin:kotlin-bom:$version", false)
     } else if (group == "org.assertj") {
       details.belongsTo("org.assertj:assertj-virtual-bom:$version")

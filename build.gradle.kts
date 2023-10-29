@@ -23,7 +23,8 @@ import java.net.URI
 import java.nio.file.Files
 
 plugins {
-  id("eu.aylett.conventions") version "0.1.0"
+  id("eu.aylett.conventions.jvm") version "0.1.0"
+  id("eu.aylett.conventions.ide-support") version "0.1.0"
   `java-gradle-plugin`
   id("org.jetbrains.kotlin.jvm") version "1.9.10"
   `kotlin-dsl`
@@ -40,11 +41,12 @@ repositories {
 }
 
 dependencies {
-  implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$embeddedKotlinVersion")
+  implementation(platform("org.jetbrains.kotlin:kotlin-bom:$embeddedKotlinVersion"))
   implementation("com.google.guava:guava:32.1.3-jre")
 
   testImplementation("com.fasterxml.jackson.core:jackson-core:2.14.1")
   testImplementation("com.fasterxml.jackson.core:jackson-databind")
+  testImplementation("org.jetbrains.kotlin:kotlin-gradle-plugin")
 
   pitest("com.groupcdg.arcmutate:base:1.2.2")
   pitest("com.groupcdg.pitest:pitest-accelerator-junit5:1.0.6")
@@ -91,12 +93,6 @@ testing {
   suites {
     register<JvmTestSuite>("functionalTest") {
       targets.configureEach {
-        testTask.configure {
-          shouldRunAfter(tasks.named("test"))
-        }
-        check.configure {
-          dependsOn(testTask)
-        }
         dependencies {
           implementation(project())
           implementation(gradleTestKit())
@@ -117,6 +113,10 @@ testing {
       }
     }
   }
+}
+
+check.configure {
+  dependsOn(testing.suites.withType<JvmTestSuite>().flatMap { it.targets.map { it.testTask } })
 }
 
 spotless {

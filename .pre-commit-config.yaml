@@ -48,12 +48,12 @@ repos:
     - .license-header
     - --comment-style
     - '/*| *| */'
-- repo: https://github.com/jguttman94/pre-commit-gradle
-  rev: v0.3.0  # Use the ref you want to point at
-  hooks:
-  - id: gradle-check
-    args:
-    - -w
+#- repo: https://github.com/jguttman94/pre-commit-gradle
+#  rev: v0.3.0  # Use the ref you want to point at
+#  hooks:
+#  - id: gradle-check
+#    args:
+#    - -w
 
 ci:
   skip:
