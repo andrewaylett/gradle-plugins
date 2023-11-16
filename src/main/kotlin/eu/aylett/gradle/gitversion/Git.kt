@@ -46,7 +46,7 @@ class Git
       return runGitCmd(HashMap(), *commands)
     }
 
-    @Throws(IOException::class, InterruptedException::class)
+    @Throws(IOException::class)
     private fun runGitCmd(
       envvars: Map<String, String>,
       vararg commands: String,
@@ -68,7 +68,19 @@ class Git
         builder.append(line)
         builder.append(System.getProperty("line.separator"))
       }
-      val exitCode = process.waitFor()
+      var exitCode: Int
+      var interrupted = false
+      while (true) {
+        try {
+          exitCode = process.waitFor()
+          break
+        } catch (e: InterruptedException) {
+          interrupted = true
+        }
+      }
+      if (interrupted) {
+        throw GitException("Interrupted when trying to run ${cmdInput.joinToString(" ")}")
+      }
       if (exitCode != 0) {
         throw GitException(
           "Failed to run ${cmdInput.joinToString(" ")}, output ${builder.toString().trim()}",

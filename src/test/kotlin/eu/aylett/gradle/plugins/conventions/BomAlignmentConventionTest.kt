@@ -18,19 +18,12 @@
 
 package eu.aylett.gradle.plugins.conventions
 
-import eu.aylett.gradle.generated.PROJECT_DIR
-import eu.aylett.gradle.matchers.hasPlugin
-import org.gradle.api.artifacts.ExternalModuleDependency
+import eu.aylett.gradle.matchers.ResolvesToContain
 import org.gradle.api.artifacts.ModuleVersionSelector
-import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.testfixtures.ProjectBuilder
-import org.hamcrest.Description
-import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.SelfDescribing
-import org.hamcrest.TypeSafeMatcher
+import org.hamcrest.MatcherAssert
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import java.io.File
@@ -44,22 +37,14 @@ class BomAlignmentConventionTest {
       "com.googlecode.concurrent-trees:concurrent-trees:2.6.1",
     )
 
-  @Test
-  fun `plugin applies`() {
-    val project = ProjectBuilder.builder().withGradleUserHomeDir(userHomeDir).build()
-    project.pluginManager.apply(BomAlignmentConvention::class.java)
-    assertThat(
-      project.pluginManager,
-      hasPlugin("eu.aylett.conventions.bom-alignment"),
-    )
-  }
-
   @ParameterizedTest
   @MethodSource("eu.aylett.gradle.plugins.conventions.BomAlignmentConventionTest#specifications")
   fun `plugin sets the version of a dependency`(deps: List<String>) {
     val project = ProjectBuilder.builder().withGradleUserHomeDir(userHomeDir).build()
     project.pluginManager.apply(JavaPlugin::class.java)
-    project.pluginManager.apply(BomAlignmentConvention::class.java)
+    project.pluginManager.apply(
+      BomAlignmentConvention::class.java,
+    )
 
     project.repositories.mavenCentral()
 
@@ -112,7 +97,7 @@ class BomAlignmentConventionTest {
         )
       }
 
-    assertThat(
+    MatcherAssert.assertThat(
       configuration.resolvedConfiguration.resolvedArtifacts,
       ResolvesToContain(resolved),
     )
@@ -148,7 +133,7 @@ class BomAlignmentConventionTest {
 
     configuration.resolve()
 
-    assertThat(
+    MatcherAssert.assertThat(
       configuration.resolvedConfiguration.resolvedArtifacts,
       ResolvesToContain(dependencies),
     )
@@ -196,7 +181,11 @@ class BomAlignmentConventionTest {
         ),
       )
 
-    private val userHomeDir: File = Path.of(PROJECT_DIR, "./build/cache").toFile()
+    private val userHomeDir: File =
+      Path.of(
+        eu.aylett.gradle.generated.PROJECT_DIR,
+        "./build/cache",
+      ).toFile()
 
     @JvmStatic
     @BeforeAll
@@ -206,48 +195,9 @@ class BomAlignmentConventionTest {
         ProjectBuilder.builder().withGradleUserHomeDir(userHomeDir)
           .build()
       project.pluginManager.apply(JavaPlugin::class.java)
-      project.pluginManager.apply(BomAlignmentConvention::class.java)
+      project.pluginManager.apply(
+        BomAlignmentConvention::class.java,
+      )
     }
-  }
-}
-
-private class ResolvesToContain(private val dependencies: List<ExternalModuleDependency>) :
-  TypeSafeMatcher<Set<ResolvedArtifact>>() {
-  override fun describeTo(description: Description) {
-    val selfDescribing =
-      dependencies.map {
-        SelfDescribing { d -> d.appendText("(${it.group}:${it.name}:${it.version})") }
-      }
-    description.appendText("A configuration that includes dependencies on ")
-    description.appendList("<[", ", ", "]>", selfDescribing)
-  }
-
-  override fun describeMismatchSafely(
-    item: Set<ResolvedArtifact>,
-    mismatchDescription: Description,
-  ) {
-    mismatchDescription.appendText("was missing ")
-    val mismatches = mutableListOf<SelfDescribing>()
-    for (required in dependencies) {
-      if (!item.any { required.matchesStrictly(it.moduleVersion.id) }) {
-        mismatches.add(
-          SelfDescribing {
-              d ->
-            d.appendText("(${required.group}:${required.name}:${required.version})")
-          },
-        )
-      }
-    }
-    mismatchDescription.appendList("<[", ", ", "]> from ", mismatches)
-    mismatchDescription.appendValue(item)
-  }
-
-  override fun matchesSafely(item: Set<ResolvedArtifact>): Boolean {
-    for (required in dependencies) {
-      if (!item.any { required.matchesStrictly(it.moduleVersion.id) }) {
-        return false
-      }
-    }
-    return true
   }
 }

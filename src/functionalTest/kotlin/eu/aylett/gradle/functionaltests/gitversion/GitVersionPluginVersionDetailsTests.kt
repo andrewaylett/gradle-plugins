@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-package eu.aylett.gradle.gitversion
+package eu.aylett.gradle.functionaltests.gitversion
 
+import eu.aylett.gradle.gitversion.Git
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.matchesRegex

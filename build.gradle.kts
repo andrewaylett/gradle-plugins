@@ -16,28 +16,10 @@
 
 @file:Suppress("UnstableApiUsage")
 
-import org.jetbrains.dokka.gradle.DokkaTask
-import org.jetbrains.kotlin.gradle.dsl.KotlinCommonCompilerOptions
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
-import java.net.URI
-import java.nio.file.Files
-
 plugins {
-  id("eu.aylett.conventions.jvm") version "0.1.0"
-  id("eu.aylett.conventions.ide-support") version "0.1.0"
+  id("component")
   `java-gradle-plugin`
-  id("org.jetbrains.kotlin.jvm") version "1.9.10"
-  `kotlin-dsl`
-  id("com.diffplug.spotless") version "6.22.0"
-  id("org.jetbrains.dokka") version "1.9.10"
   id("com.gradle.plugin-publish") version "1.2.1"
-  id("info.solidsoft.pitest") version "1.15.0"
-  id("com.groupcdg.pitest.github") version "1.0.5"
-}
-
-repositories {
-  mavenCentral()
-  gradlePluginPortal()
 }
 
 dependencies {
@@ -47,146 +29,6 @@ dependencies {
   testImplementation("com.fasterxml.jackson.core:jackson-core:2.16.0")
   testImplementation("com.fasterxml.jackson.core:jackson-databind")
   testImplementation("org.jetbrains.kotlin:kotlin-gradle-plugin")
-
-  pitest("com.groupcdg.arcmutate:base:1.2.2")
-  pitest("com.groupcdg.pitest:pitest-accelerator-junit5:1.0.6")
-  pitest("com.groupcdg:pitest-git-plugin:1.1.2")
-  pitest("com.groupcdg.pitest:pitest-kotlin-plugin:1.1.5")
-}
-
-aylett {
-  jvm {
-    jvmVersion.set(17)
-  }
-}
-
-abstract class GenerateTestProjectConstants : DefaultTask() {
-  @get:OutputDirectory
-  abstract val baseDir: DirectoryProperty
-
-  @get:Input
-  abstract val projectDir: Property<String>
-
-  @TaskAction
-  fun execute() {
-    val outFile = this.baseDir.get().file("eu/aylett/gradle/generated/ProjectLocations.kt")
-    Files.createDirectories(outFile.asFile.parentFile.toPath())
-    Files.writeString(
-      outFile.asFile.toPath(),
-      """
-      package eu.aylett.gradle.generated
-
-      val PROJECT_DIR: String = "$projectDir"
-      """.trimIndent(),
-    )
-  }
-}
-
-val gen =
-  tasks.register<GenerateTestProjectConstants>("generateTestProjectConstants") {
-    this.baseDir.set(layout.buildDirectory.dir("generated/test/kotlin"))
-    this.projectDir.set(layout.projectDirectory.asFile.canonicalPath)
-  }
-
-val check = tasks.named("check")
-testing {
-  suites {
-    register<JvmTestSuite>("functionalTest") {
-      targets.configureEach {
-        dependencies {
-          implementation(project())
-          implementation(gradleTestKit())
-        }
-      }
-    }
-
-    withType<JvmTestSuite>().configureEach {
-      useJUnitJupiter("5.10.0")
-      sources {
-        kotlin {
-          srcDir(gen)
-        }
-      }
-      dependencies {
-        implementation("org.hamcrest:hamcrest:2.2")
-        implementation(gradleApi())
-      }
-    }
-  }
-}
-
-check.configure {
-  dependsOn(testing.suites.withType<JvmTestSuite>().flatMap { it.targets.map { it.testTask } })
-}
-
-spotless {
-  kotlin {
-    ktlint()
-    target(sourceSets.map { it.kotlin.sourceDirectories })
-    targetExclude(layout.buildDirectory.dir("generated/test/kotlin"))
-  }
-  kotlinGradle {
-    ktlint()
-  }
-}
-
-val spotlessApply = tasks.named("spotlessApply")
-val spotlessCheck = tasks.named("spotlessCheck")
-check.configure { dependsOn(spotlessCheck) }
-spotlessApply.configure { mustRunAfter(tasks.named("clean")) }
-
-val isCI = providers.environmentVariable("CI").isPresent
-if (!isCI) {
-  spotlessCheck.configure { dependsOn(spotlessApply) }
-}
-
-val spotlessKotlinApply = tasks.named("spotlessKotlinApply")
-val spotlessKotlinCheck = tasks.named("spotlessKotlinCheck")
-
-tasks.withType<KotlinCompilationTask<KotlinCommonCompilerOptions>>().configureEach {
-  mustRunAfter(spotlessKotlinApply)
-  shouldRunAfter(spotlessKotlinCheck)
-}
-
-pitest {
-  testSourceSets.set(testing.suites.withType<JvmTestSuite>().map { it.sources })
-  // Don't mutate the class that calls git
-  excludedClasses.add("eu.aylett.gradle.gitversion.Git")
-
-  junit5PluginVersion.set("1.2.0")
-  verbosity.set("VERBOSE_NO_SPINNER")
-  pitestVersion.set("1.15.1")
-  failWhenNoMutations.set(false)
-  mutators.set(listOf("STRONGER", "EXTENDED"))
-  timeoutFactor.set(BigDecimal.TEN)
-
-  outputFormats.set(listOf("html", "gitci"))
-  features.add("+auto_threads")
-  if (isCI) {
-    // Running in GitHub Actions
-    features.addAll("+git(from[HEAD~1])", "+gitci(level[warning])")
-  }
-
-  jvmArgs.add("--add-opens=java.base/java.lang=ALL-UNNAMED")
-  jvmArgs.add("-Dorg.gradle.testkit.debug=true")
-}
-
-tasks.withType<DokkaTask>().configureEach {
-  dokkaSourceSets {
-    configureEach {
-      includes.from(projectDir.resolve("module.md"))
-      jdkVersion.set(17)
-
-      sourceLink {
-        localDirectory.set(projectDir.resolve("src"))
-        remoteUrl.set(URI("https://github.com/andrewaylett/gradle-plugins/tree/main/src").toURL())
-        remoteLineSuffix.set("#L")
-        externalDocumentationLink {
-          url.set(URI("https://docs.gradle.org/8.4/javadoc/").toURL())
-        }
-      }
-    }
-  }
 }
 
 group = "eu.aylett"
@@ -205,14 +47,6 @@ gradlePlugin {
       tags = listOf("base", "jvm")
       //language=jvm-class-name
       implementationClass = "eu.aylett.gradle.plugins.BasePlugin"
-    }
-    create("versionPlugin") {
-      id = "eu.aylett.plugins.version"
-      displayName = "aylett.eu automatic version plugin"
-      description = "Sets the project version from the state of the git repository it's in."
-      tags = listOf("git", "version")
-      //language=jvm-class-name
-      implementationClass = "eu.aylett.gradle.gitversion.GitVersionPlugin"
     }
     create("bomAlignmentConvention") {
       id = "eu.aylett.conventions.bom-alignment"
@@ -245,6 +79,14 @@ gradlePlugin {
       tags = listOf("conventions", "jvm")
       //language=jvm-class-name
       implementationClass = "eu.aylett.gradle.plugins.conventions.Conventions"
+    }
+    create("versionPlugin") {
+      id = "eu.aylett.plugins.version"
+      displayName = "aylett.eu automatic version plugin"
+      description = "Sets the project version from the state of the git repository it's in."
+      tags = listOf("git", "version")
+      //language=jvm-class-name
+      implementationClass = "eu.aylett.gradle.gitversion.GitVersionPlugin"
     }
   }
 }

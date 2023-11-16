@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package eu.aylett.gradle.plugins
-
-import org.gradle.api.Plugin
-import org.gradle.api.Project
-
-class BasePlugin : Plugin<Project> {
-  override fun apply(target: Project) {
-    target.extensions.create("aylett", eu.aylett.gradle.extensions.BaseExtension::class.java)
+pluginManagement {
+  repositories {
+    gradlePluginPortal()
+    mavenCentral()
   }
 }
+
+enableFeaturePreview("STABLE_CONFIGURATION_CACHE")

@@ -16,11 +16,17 @@
 
 package eu.aylett.gradle.plugins
 
-import org.gradle.api.Plugin
-import org.gradle.api.Project
+import eu.aylett.gradle.matchers.hasPlugin
+import org.gradle.testfixtures.ProjectBuilder
+import org.hamcrest.MatcherAssert.assertThat
+import org.junit.jupiter.api.Test
 
-class BasePlugin : Plugin<Project> {
-  override fun apply(target: Project) {
-    target.extensions.create("aylett", eu.aylett.gradle.extensions.BaseExtension::class.java)
+class BasePluginTest {
+  @Test
+  fun `can apply plugin`() {
+    val project = ProjectBuilder.builder().build()
+    project.pluginManager.apply(BasePlugin::class.java)
+
+    assertThat(project.pluginManager, hasPlugin("eu.aylett.plugins.base"))
   }
 }
