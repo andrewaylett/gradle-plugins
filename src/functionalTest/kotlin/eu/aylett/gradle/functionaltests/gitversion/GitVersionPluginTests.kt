@@ -18,12 +18,16 @@ package eu.aylett.gradle.functionaltests.gitversion
 
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.parallel.ResourceLock
+import org.junit.jupiter.api.parallel.Resources
 import java.nio.file.Path
 import java.util.Optional
 import kotlin.io.path.createFile
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.writeText
 
+@ResourceLock(Resources.SYSTEM_OUT)
+@ResourceLock(Resources.SYSTEM_ERR)
 abstract class GitVersionPluginTests {
   protected lateinit var temporaryFolder: Path
   protected lateinit var projectDir: Path
@@ -61,6 +65,7 @@ abstract class GitVersionPluginTests {
 
     val gradleRunner =
       GradleRunner.create()
+        .forwardOutput()
         .withPluginClasspath()
         .withProjectDir(projectDir.toFile())
         .withArguments(arguments)

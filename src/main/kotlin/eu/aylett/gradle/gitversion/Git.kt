@@ -41,12 +41,10 @@ class Git
       }
     }
 
-    @Throws(IOException::class, InterruptedException::class)
     private fun runGitCmd(vararg commands: String): String {
       return runGitCmd(HashMap(), *commands)
     }
 
-    @Throws(IOException::class)
     private fun runGitCmd(
       envvars: Map<String, String>,
       vararg commands: String,

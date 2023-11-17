@@ -48,6 +48,14 @@ gradlePlugin {
       //language=jvm-class-name
       implementationClass = "eu.aylett.gradle.plugins.BasePlugin"
     }
+    create("versionPlugin") {
+      id = "eu.aylett.plugins.version"
+      displayName = "aylett.eu automatic version plugin"
+      description = "Sets the project version from the state of the git repository it's in."
+      tags = listOf("git", "version")
+      //language=jvm-class-name
+      implementationClass = "eu.aylett.gradle.gitversion.GitVersionPlugin"
+    }
     create("bomAlignmentConvention") {
       id = "eu.aylett.conventions.bom-alignment"
       displayName = "aylett.eu BOM alignment plugin"
@@ -79,14 +87,6 @@ gradlePlugin {
       tags = listOf("conventions", "jvm")
       //language=jvm-class-name
       implementationClass = "eu.aylett.gradle.plugins.conventions.Conventions"
-    }
-    create("versionPlugin") {
-      id = "eu.aylett.plugins.version"
-      displayName = "aylett.eu automatic version plugin"
-      description = "Sets the project version from the state of the git repository it's in."
-      tags = listOf("git", "version")
-      //language=jvm-class-name
-      implementationClass = "eu.aylett.gradle.gitversion.GitVersionPlugin"
     }
   }
 }
