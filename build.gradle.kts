@@ -18,6 +18,7 @@
 
 plugins {
   id("component")
+  id("eu.aylett.plugins.version")
   `java-gradle-plugin`
   id("com.gradle.plugin-publish") version "1.2.1"
 }
@@ -31,8 +32,10 @@ dependencies {
   testImplementation("org.jetbrains.kotlin:kotlin-gradle-plugin")
 }
 
+val gitVersion = ext["gitVersion"] as KotlinClosure1<*, *>
+
 group = "eu.aylett"
-version = "0.2.0"
+version = gitVersion()!!
 
 gradlePlugin {
   website = "https://gradle-plugins.aylett.eu/"

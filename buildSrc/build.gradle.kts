@@ -21,8 +21,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
 plugins {
   `java-library`
-  id("eu.aylett.conventions.jvm") version "0.1.0"
-  id("eu.aylett.conventions.ide-support") version "0.1.0"
+  id("eu.aylett.conventions") version "0.2.0"
   `java-gradle-plugin`
   id("org.jetbrains.kotlin.jvm") version "1.9.10"
   `kotlin-dsl`
@@ -39,7 +38,7 @@ dependencies {
   implementation("org.jetbrains.kotlin:kotlin-gradle-plugin-api")
   implementation("org.jetbrains.dokka:dokka-gradle-plugin:1.9.10")
   implementation("com.google.guava:guava:32.1.3-jre")
-  implementation("eu.aylett:gradle-plugins:0.1.0")
+  implementation("eu.aylett:gradle-plugins:0.2.0")
   implementation("com.diffplug.spotless:spotless-plugin-gradle:6.22.0")
   implementation("org.gradle.kotlin:gradle-kotlin-dsl-plugins:4.1.2")
   implementation("org.pitest:pitest:1.15.3")
