@@ -32,6 +32,7 @@ dependencies {
 }
 
 group = "eu.aylett"
+version = "0.2.0"
 
 gradlePlugin {
   website = "https://gradle-plugins.aylett.eu/"
