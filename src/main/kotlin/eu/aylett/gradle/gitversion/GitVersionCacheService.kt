@@ -26,25 +26,25 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
 abstract class GitVersionCacheService : BuildService<BuildServiceParameters.None?> {
-  private val versionDetailsMap: ConcurrentMap<String, VersionDetails?> = ConcurrentHashMap()
+  private val versionDetailsMap: ConcurrentMap<String, VersionDetails> = ConcurrentHashMap()
 
   fun getGitVersion(
     project: Path,
     args: Any?,
-  ): String? {
+  ): String {
     val gitDir = getRootGitDir(project)
     val gitVersionArgs: GitVersionArgs = GitVersionArgs.fromGroovyClosure(args)
     val key = gitDir.toString() + "|" + gitVersionArgs.prefix
     val value =
       versionDetailsMap
         .computeIfAbsent(key) { _ -> createVersionDetails(gitDir, gitVersionArgs) }
-    return value?.version
+    return value.version
   }
 
   fun getVersionDetails(
     project: Path,
     args: Any?,
-  ): VersionDetails? {
+  ): VersionDetails {
     val gitDir = getRootGitDir(project)
     val gitVersionArgs: GitVersionArgs = GitVersionArgs.fromGroovyClosure(args)
     val key = gitDir.toString() + "|" + gitVersionArgs.prefix

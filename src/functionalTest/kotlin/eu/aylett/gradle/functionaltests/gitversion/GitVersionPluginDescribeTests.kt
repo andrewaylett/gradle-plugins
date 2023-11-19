@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-package eu.aylett.gradle.gitversion
+package eu.aylett.gradle.functionaltests.gitversion
 
+import eu.aylett.gradle.gitversion.Git
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.matchesRegex
@@ -27,7 +28,7 @@ import kotlin.io.path.writeText
 
 private val MERGE_COMMIT_REGEX: Pattern =
   Pattern.compile(
-    ".*:printVersion\n1\\.0\\.0-1-g[a-z0-9]{7}\n.*",
+    ".*\\[QUIET] \\[system.out] 1\\.0\\.0-1-g[a-z0-9]{7}\n.*",
     Pattern.DOTALL,
   )
 
@@ -51,7 +52,7 @@ class GitVersionPluginDescribeTests : GitVersionPluginTests() {
     val buildResult = with("printVersion").build()
 
     // then:
-    assertThat(buildResult.output, containsString(":printVersion\nunspecified\n"))
+    assertThat(buildResult.output, containsString("[QUIET] [system.out] unspecified\n"))
   }
 
   @Test
@@ -76,7 +77,7 @@ class GitVersionPluginDescribeTests : GitVersionPluginTests() {
     val buildResult = with("printVersion").build()
 
     // then:
-    assertThat(buildResult.output, containsString(":printVersion\n1.0.0\n"))
+    assertThat(buildResult.output, containsString("[QUIET] [system.out] 1.0.0\n"))
   }
 
   @Test
@@ -101,7 +102,7 @@ class GitVersionPluginDescribeTests : GitVersionPluginTests() {
     val buildResult = with("printVersion").build()
 
     // then:
-    assertThat(buildResult.output, containsString(":printVersion\n1.0.0\n"))
+    assertThat(buildResult.output, containsString("[QUIET] [system.out] 1.0.0"))
   }
 
   @Test
@@ -183,7 +184,7 @@ class GitVersionPluginDescribeTests : GitVersionPluginTests() {
     val buildResult = with("printVersion").build()
 
     // then:
-    assertThat(buildResult.output, containsString(":printVersion\n2.0.0\n"))
+    assertThat(buildResult.output, containsString("[QUIET] [system.out] 2.0.0\n"))
   }
 
   @Test
@@ -210,6 +211,6 @@ class GitVersionPluginDescribeTests : GitVersionPluginTests() {
 
     // then:
     // assertThat(buildResult.output, containsString(projectDir.getAbsolutePath())
-    assertThat(buildResult.output, containsString(":printVersion\n1.0.0.dirty\n"))
+    assertThat(buildResult.output, containsString("[QUIET] [system.out] 1.0.0.dirty\n"))
   }
 }

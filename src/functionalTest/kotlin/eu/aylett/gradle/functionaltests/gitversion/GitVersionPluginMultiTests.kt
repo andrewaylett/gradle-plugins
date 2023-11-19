@@ -15,10 +15,13 @@
  * limitations under the License.
  */
 
-package eu.aylett.gradle.gitversion
+package eu.aylett.gradle.functionaltests.gitversion
 
+import eu.aylett.gradle.gitversion.Git
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.containsInRelativeOrder
 import org.hamcrest.Matchers.containsString
+import org.hamcrest.Matchers.endsWith
 import org.junit.jupiter.api.Test
 import java.nio.file.Files
 import java.time.Duration
@@ -67,8 +70,13 @@ class GitVersionPluginMultiTests : GitVersionPluginTests() {
     val buildResult = with("printVersion", ":sub:printVersion").build()
 
     // then:
-    assertThat(buildResult.output, containsString(":printVersion\n1.0.0\n"))
-    assertThat(buildResult.output, containsString(":sub:printVersion\n8.8.8\n"))
+    assertThat(
+      buildResult.output.split('\n'),
+      containsInRelativeOrder(
+        endsWith("[QUIET] [system.out] 1.0.0"),
+        endsWith("[QUIET] [system.out] 8.8.8"),
+      ),
+    )
   }
 
   @Test
@@ -99,7 +107,7 @@ class GitVersionPluginMultiTests : GitVersionPluginTests() {
     val buildResult = with("printVersion").build()
 
     // then:
-    assertThat(buildResult.output, containsString(":printVersion\n2.0.0\n"))
+    assertThat(buildResult.output, containsString("[QUIET] [system.out] 2.0.0\n"))
   }
 
   @Test
@@ -172,7 +180,7 @@ class GitVersionPluginMultiTests : GitVersionPluginTests() {
     val buildResult = with("printVersion").build()
 
     // then:
-    assertThat(buildResult.output, containsString(":printVersion\n2.0.0\n"))
+    assertThat(buildResult.output, containsString("[QUIET] [system.out] 2.0.0\n"))
   }
 
   @Test
@@ -203,7 +211,7 @@ class GitVersionPluginMultiTests : GitVersionPluginTests() {
     val buildResult = with("printVersion").build()
 
     // then:
-    assertThat(buildResult.output, containsString(":printVersion\n1.0.0\n"))
+    assertThat(buildResult.output, containsString("[QUIET] [system.out] 1.0.0\n"))
   }
 
   @Test
@@ -238,7 +246,7 @@ class GitVersionPluginMultiTests : GitVersionPluginTests() {
     // then:
     assertThat(
       buildResult.output,
-      containsString(":printVersion\n1.0.0-$depth-g${latestCommit.substring(0, 7)}\n"),
+      containsString("[QUIET] [system.out] 1.0.0-$depth-g${latestCommit.substring(0, 7)}\n"),
     )
   }
 }

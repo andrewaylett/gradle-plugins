@@ -26,3 +26,5 @@ plugins {
 }
 
 rootProject.name = "gradle-plugins"
+
+enableFeaturePreview("STABLE_CONFIGURATION_CACHE")

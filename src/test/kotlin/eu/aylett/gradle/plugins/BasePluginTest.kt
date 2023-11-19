@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.aylett.gradle.plugins.conventions
+package eu.aylett.gradle.plugins
 
 import eu.aylett.gradle.matchers.hasPlugin
 import org.gradle.api.GradleException
@@ -24,21 +24,11 @@ import org.hamcrest.Matchers
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 
-class ConventionsTest {
+class BasePluginTest {
   @Test
-  fun `plugin applies`() {
+  fun `can apply plugin`() {
     val project = ProjectBuilder.builder().build()
-    project.pluginManager.apply(BomAlignmentConvention::class.java)
-    assertThat(
-      project.pluginManager,
-      hasPlugin("eu.aylett.conventions.bom-alignment"),
-    )
-  }
-
-  @Test
-  fun `base plugin gets applied`() {
-    val project = ProjectBuilder.builder().build()
-    project.pluginManager.apply(Conventions::class.java)
+    project.pluginManager.apply(BasePlugin::class.java)
 
     assertThat(project.pluginManager, hasPlugin("eu.aylett.plugins.base"))
   }

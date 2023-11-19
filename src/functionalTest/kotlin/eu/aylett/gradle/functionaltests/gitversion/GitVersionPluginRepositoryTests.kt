@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-package eu.aylett.gradle.gitversion
+package eu.aylett.gradle.functionaltests.gitversion
 
+import eu.aylett.gradle.gitversion.Git
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.Test
@@ -77,7 +78,7 @@ class GitVersionPluginRepositoryTests : GitVersionPluginTests() {
     val buildResult = with("printVersion").build()
 
     // then:
-    assertThat(buildResult.output, containsString(":printVersion\n1.0.0\n"))
+    assertThat(buildResult.output, containsString("[QUIET] [system.out] 1.0.0\n"))
   }
 
   @Test
@@ -113,7 +114,7 @@ class GitVersionPluginRepositoryTests : GitVersionPluginTests() {
     val buildResult = with("printVersion").build()
 
     // then:
-    assertThat(buildResult.output, containsString(":printVersion\n1.0.0\n"))
+    assertThat(buildResult.output, containsString("[QUIET] [system.out] 1.0.0\n"))
   }
 
   @Test
@@ -151,6 +152,6 @@ class GitVersionPluginRepositoryTests : GitVersionPluginTests() {
     val buildResult = with("printVersion").build()
 
     // then:
-    assertThat(buildResult.output, containsString(":printVersion\n1.0.0\n"))
+    assertThat(buildResult.output, containsString("[QUIET] [system.out] 1.0.0\n"))
   }
 }

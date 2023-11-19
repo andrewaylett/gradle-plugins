@@ -50,7 +50,11 @@ internal class VersionDetailsImpl(
         "$description.dirty"
       }
     } catch (e: GitException) {
-      "unspecified"
+      if (e.statusCode != null) {
+        "unspecified"
+      } else {
+        throw GitException(null, e, null)
+      }
     }
   }
 
@@ -58,7 +62,11 @@ internal class VersionDetailsImpl(
     try {
       nativeGitInvoker.isClean
     } catch (e: GitException) {
-      false
+      if (e.statusCode != null) {
+        false
+      } else {
+        throw GitException(null, e, null)
+      }
     }
   }
 
@@ -75,7 +83,11 @@ internal class VersionDetailsImpl(
     try {
       !plainTagRegex.matches(description)
     } catch (e: GitException) {
-      false
+      if (e.statusCode != null) {
+        false
+      } else {
+        throw GitException(null, e, null)
+      }
     }
   }
 
@@ -113,14 +125,7 @@ internal class VersionDetailsImpl(
   override val branchName: String by lazy { nativeGitInvoker.currentBranch }
 
   override fun toString(): String =
-    String.format(
-      "VersionDetails(%s, %s, %s, %s, %s)",
-      version,
-      gitHash,
-      gitHashFull,
-      branchName,
-      isCleanTag,
-    )
+    "VersionDetails($version, $gitHash, $gitHashFull, $branchName, $isCleanTag)"
 }
 
 private const val VERSION_ABBR_LENGTH = 10

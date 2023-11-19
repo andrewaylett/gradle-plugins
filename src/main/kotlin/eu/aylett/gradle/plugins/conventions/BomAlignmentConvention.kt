@@ -19,6 +19,7 @@ package eu.aylett.gradle.plugins.conventions
 import eu.aylett.gradle.rules.BomAlignmentRule
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.plugins.JavaBasePlugin
 
 /**
  * Add [BomAlignmentRule] to your project dependency lookup.
@@ -46,6 +47,7 @@ import org.gradle.api.Project
  */
 class BomAlignmentConvention : Plugin<Project> {
   override fun apply(target: Project) {
+    target.pluginManager.apply(JavaBasePlugin::class.java)
     target.dependencies.components.all(BomAlignmentRule::class.java)
   }
 }
