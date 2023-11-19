@@ -20,6 +20,7 @@ import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.parallel.ResourceLock
 import org.junit.jupiter.api.parallel.Resources
+import java.nio.file.Files
 import java.nio.file.Path
 import java.util.Optional
 import kotlin.io.path.createFile
@@ -60,12 +61,15 @@ abstract class GitVersionPluginTests {
     gradleVersion: Optional<String>,
     vararg tasks: String,
   ): GradleRunner {
-    val arguments = mutableListOf("--stacktrace")
+    val arguments = mutableListOf("--stacktrace", "--debug")
     arguments.addAll(tasks)
+
+    Files.createDirectories(projectDir)
 
     val gradleRunner =
       GradleRunner.create()
         .forwardOutput()
+        .withDebug(true)
         .withPluginClasspath()
         .withProjectDir(projectDir.toFile())
         .withArguments(arguments)

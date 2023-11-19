@@ -17,12 +17,13 @@
 package eu.aylett.gradle.gitversion
 
 import com.google.common.annotations.VisibleForTesting
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.io.BufferedReader
 import java.io.IOException
-import java.io.InputStreamReader
+import java.io.StringWriter
 import java.nio.charset.StandardCharsets
 import java.nio.file.Path
+import java.util.concurrent.TimeUnit
 
 class Git
   @VisibleForTesting
@@ -30,11 +31,13 @@ class Git
     constructor(directory: Path) : this(directory, false)
 
     init {
+      logger.trace("Initialising git support")
       if (!gitCommandExists()) {
         throw GitException("Git not found in project")
       }
       if (testing) {
-        setDefaultBranchToMain()
+        logger.info("Testing mode enabled")
+        setTestingConfiguration()
         if (!checkIfUserIsSet()) {
           setGitUser()
         }
@@ -55,27 +58,32 @@ class Git
       environment.putAll(envvars)
       if (this.testing) {
         environment["HOME"] = directory.toFile().canonicalPath
+        environment["GIT_TERMINAL_PROMPT"] = "0"
+        environment["GIT_OPTIONAL_LOCKS"] = "0"
       }
       pb.directory(directory.toFile())
       pb.redirectErrorStream(true)
       val process = pb.start()
-      val reader = BufferedReader(InputStreamReader(process.inputStream, StandardCharsets.UTF_8))
-      val builder = StringBuilder()
-      var line: String?
-      while (reader.readLine().also { line = it } != null) {
-        builder.append(line)
-        builder.append(System.getProperty("line.separator"))
-      }
-      var exitCode: Int
+      logger.info("Running ${cmdInput.joinToString(" ")} as pid ${process.pid()}")
+      val reader = process.inputReader(StandardCharsets.UTF_8)
+      val builder = StringWriter()
       var interrupted = false
       while (true) {
         try {
-          exitCode = process.waitFor()
-          break
+          while (reader.ready()) {
+            builder.write(reader.read())
+          }
+          if (process.waitFor(10, TimeUnit.MILLISECONDS)) {
+            break
+          }
         } catch (e: InterruptedException) {
+          logger.debug("Interrupted", e)
           interrupted = true
         }
       }
+      reader.transferTo(builder)
+      val exitCode = process.exitValue()
+      logger.debug("Git command pid ${process.pid()} completed")
       if (interrupted) {
         throw GitException("Interrupted when trying to run ${cmdInput.joinToString(" ")}")
       }
@@ -113,8 +121,9 @@ class Git
       runGitCommand("config", "--global", "user.name", "name")
     }
 
-    private fun setDefaultBranchToMain() {
+    private fun setTestingConfiguration() {
       runGitCommand("config", "--global", "init.defaultBranch", "main")
+      runGitCommand("config", "--global", "core.fsmonitor", "false")
     }
 
     val currentBranch: String
@@ -156,4 +165,8 @@ class Git
     }
 
     private val log by lazy { LoggerFactory.getLogger(Git::class.java) }
+
+    companion object {
+      private val logger: Logger = LoggerFactory.getLogger(Git::class.java)
+    }
   }

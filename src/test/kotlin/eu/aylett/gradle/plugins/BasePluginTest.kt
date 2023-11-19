@@ -17,8 +17,11 @@
 package eu.aylett.gradle.plugins
 
 import eu.aylett.gradle.matchers.hasPlugin
+import org.gradle.api.GradleException
 import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 
 class BasePluginTest {
@@ -28,5 +31,17 @@ class BasePluginTest {
     project.pluginManager.apply(BasePlugin::class.java)
 
     assertThat(project.pluginManager, hasPlugin("eu.aylett.plugins.base"))
+  }
+
+  companion object {
+    @JvmStatic
+    @BeforeAll
+    fun `ensure global services is initialised`() {
+      try {
+        ProjectBuilder.builder().build()
+      } catch (e: GradleException) {
+        assertThat(e.message, Matchers.equalTo("Could not inject synthetic classes."))
+      }
+    }
   }
 }

@@ -16,21 +16,30 @@
  */
 package eu.aylett.gradle.gitversion
 
+import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.api.assertThrows
+import java.util.function.Function.identity
+import java.util.stream.Stream
 
 class GitVersionArgsTest {
-  @Test
-  fun allowed_prefixes() {
-    GitVersionArgs().prefix = "@Product@"
-    GitVersionArgs().prefix = "abc@"
-    GitVersionArgs().prefix = "abc@test@"
-    GitVersionArgs().prefix = "Abc-aBc-abC@"
-    GitVersionArgs().prefix = "foo-bar@"
-    GitVersionArgs().prefix = "foo-bar/"
-    GitVersionArgs().prefix = "foo-bar-"
-    GitVersionArgs().prefix = "foo/bar@"
-    GitVersionArgs().prefix = "Foo/Bar@"
+  @TestFactory
+  fun allowed_prefixes(): Stream<DynamicTest> {
+    return DynamicTest.stream(
+      Stream.of(
+        "@Product@",
+        "abc@",
+        "abc@test@",
+        "Abc-aBc-abC@",
+        "foo-bar@",
+        "foo-bar/",
+        "foo-bar-",
+        "foo/bar@",
+        "Foo/Bar@",
+      ),
+      identity(),
+    ) { s -> GitVersionArgs().prefix = s }
   }
 
   @Test

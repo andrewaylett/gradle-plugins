@@ -19,7 +19,9 @@ package eu.aylett.gradle.functionaltests.gitversion
 
 import eu.aylett.gradle.gitversion.Git
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.containsInRelativeOrder
 import org.hamcrest.Matchers.containsString
+import org.hamcrest.Matchers.endsWith
 import org.hamcrest.Matchers.matchesRegex
 import org.junit.jupiter.api.Test
 import java.util.regex.Pattern
@@ -28,7 +30,7 @@ import kotlin.io.path.writeText
 
 private val DETACHED_HEAD_MODE_REGEX: Pattern =
   Pattern.compile(
-    ".*:printVersionDetails\n1\\.0\\.0\n0\n[a-z0-9]{10}\n\n.*",
+    ".*\\[QUIET] \\[system.out] [a-z0-9]{10}",
     Pattern.DOTALL,
   )
 
@@ -61,7 +63,7 @@ class GitVersionPluginCommitStateTests : GitVersionPluginTests() {
     val buildResult = with("printVersionDetails").build()
 
     // then:
-    assertThat(buildResult.output, containsString(":printVersionDetails\nfalse\n"))
+    assertThat(buildResult.output, containsString("[QUIET] [system.out] false\n"))
   }
 
   @Test
@@ -72,13 +74,13 @@ class GitVersionPluginCommitStateTests : GitVersionPluginTests() {
       plugins {
         id "eu.aylett.plugins.version"
       }
-      version gitVersion ()
+      version gitVersion()
       task printVersionDetails {
         doLast {
-          println versionDetails ().lastTag
-          println versionDetails ().commitDistance
-          println versionDetails ().gitHash
-          println versionDetails ().branchName
+          println versionDetails().lastTag
+          println versionDetails().commitDistance
+          println versionDetails().gitHash
+          println versionDetails().branchName
         }
       }
 
@@ -99,8 +101,13 @@ class GitVersionPluginCommitStateTests : GitVersionPluginTests() {
 
     // then:
     assertThat(
-      buildResult.output,
-      matchesRegex(DETACHED_HEAD_MODE_REGEX),
+      buildResult.output.split('\n'),
+      containsInRelativeOrder(
+        endsWith("[QUIET] [system.out] 1.0.0"),
+        endsWith("[QUIET] [system.out] 0"),
+        matchesRegex(DETACHED_HEAD_MODE_REGEX),
+        endsWith("[QUIET] [system.out] "),
+      ),
     )
   }
 
@@ -133,7 +140,7 @@ class GitVersionPluginCommitStateTests : GitVersionPluginTests() {
     val buildResult = with("printVersionDetails").build()
 
     // then:
-    assertThat(buildResult.output, containsString(":printVersionDetails\n1.0.0\n"))
+    assertThat(buildResult.output, containsString("[QUIET] [system.out] 1.0.0\n"))
   }
 
   @Test
@@ -164,7 +171,7 @@ class GitVersionPluginCommitStateTests : GitVersionPluginTests() {
     // then:
     assertThat(
       buildResult.output,
-      containsString(":printVersion\n1.0.0-1-g${commitSha.substring(0, 7)}\n"),
+      containsString("[QUIET] [system.out] 1.0.0-1-g${commitSha.substring(0, 7)}\n"),
     )
   }
 
@@ -196,7 +203,7 @@ class GitVersionPluginCommitStateTests : GitVersionPluginTests() {
     // then:
     assertThat(
       buildResult.output,
-      containsString(":printVersion\n1.0.0-1-g${commitSha.substring(0, 7)}\n"),
+      containsString("[QUIET] [system.out] 1.0.0-1-g${commitSha.substring(0, 7)}\n"),
     )
   }
 }

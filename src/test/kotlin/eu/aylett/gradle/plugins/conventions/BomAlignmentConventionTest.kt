@@ -19,9 +19,11 @@
 package eu.aylett.gradle.plugins.conventions
 
 import eu.aylett.gradle.matchers.ResolvesToContain
+import org.gradle.api.GradleException
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.MatcherAssert
+import org.hamcrest.Matchers
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
@@ -209,12 +211,12 @@ class BomAlignmentConventionTest {
 
     @JvmStatic
     @BeforeAll
-    fun `set up a project`() {
-      // Run this once in isolation, to avoid races between tests setting up static metadata :(
-      val project = ProjectBuilder.builder().withGradleUserHomeDir(userHomeDir).build()
-      project.pluginManager.apply(
-        BomAlignmentConvention::class.java,
-      )
+    fun `ensure global services is initialised`() {
+      try {
+        ProjectBuilder.builder().build()
+      } catch (e: GradleException) {
+        MatcherAssert.assertThat(e.message, Matchers.equalTo("Could not inject synthetic classes."))
+      }
     }
   }
 }

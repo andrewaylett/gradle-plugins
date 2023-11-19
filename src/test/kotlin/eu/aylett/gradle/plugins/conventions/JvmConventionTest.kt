@@ -17,6 +17,7 @@
 package eu.aylett.gradle.plugins.conventions
 
 import eu.aylett.gradle.matchers.hasPlugin
+import org.gradle.api.GradleException
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.jvm.toolchain.JavaLanguageVersion
@@ -24,11 +25,13 @@ import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.property
 import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.not
 import org.hamcrest.core.AllOf.allOf
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformJvmPlugin
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 
 class JvmConventionTest {
@@ -85,5 +88,17 @@ class JvmConventionTest {
     }
 
     assertThat(kotlinToolchain.get(), equalTo(JavaLanguageVersion.of(17)))
+  }
+
+  companion object {
+    @JvmStatic
+    @BeforeAll
+    fun `ensure global services is initialised`() {
+      try {
+        ProjectBuilder.builder().build()
+      } catch (e: GradleException) {
+        assertThat(e.message, Matchers.equalTo("Could not inject synthetic classes."))
+      }
+    }
   }
 }

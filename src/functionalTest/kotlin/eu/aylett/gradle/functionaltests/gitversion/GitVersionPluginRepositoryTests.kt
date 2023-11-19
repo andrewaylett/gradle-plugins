@@ -78,7 +78,7 @@ class GitVersionPluginRepositoryTests : GitVersionPluginTests() {
     val buildResult = with("printVersion").build()
 
     // then:
-    assertThat(buildResult.output, containsString(":printVersion\n1.0.0\n"))
+    assertThat(buildResult.output, containsString("[QUIET] [system.out] 1.0.0\n"))
   }
 
   @Test
@@ -114,7 +114,7 @@ class GitVersionPluginRepositoryTests : GitVersionPluginTests() {
     val buildResult = with("printVersion").build()
 
     // then:
-    assertThat(buildResult.output, containsString(":printVersion\n1.0.0\n"))
+    assertThat(buildResult.output, containsString("[QUIET] [system.out] 1.0.0\n"))
   }
 
   @Test
@@ -152,6 +152,6 @@ class GitVersionPluginRepositoryTests : GitVersionPluginTests() {
     val buildResult = with("printVersion").build()
 
     // then:
-    assertThat(buildResult.output, containsString(":printVersion\n1.0.0\n"))
+    assertThat(buildResult.output, containsString("[QUIET] [system.out] 1.0.0\n"))
   }
 }
