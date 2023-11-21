@@ -16,29 +16,38 @@
  */
 package eu.aylett.gradle.gitversion
 
+import eu.aylett.gradle.extensions.BaseExtension
+import eu.aylett.gradle.plugins.BasePlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.KotlinClosure1
+import org.gradle.kotlin.dsl.apply
 
 @Suppress("unused")
-class GitVersionPlugin : Plugin<Project> {
+class GitVersionPlugin() : Plugin<Project> {
   override fun apply(project: Project) {
-    project.rootProject.pluginManager.apply(GitVersionRootPlugin::class.java)
-    val serviceProvider = GitVersionCacheService.getSharedGitVersionCacheService(project)
+    project.pluginManager.apply(BasePlugin::class)
+    val versionCacheService = GitVersionCacheService.getSharedGitVersionCacheService(project)
 
-    val projectDir = project.projectDir.toPath()
-    project.extensions.extraProperties["gitVersion"] =
-      KotlinClosure1<Any?, String>({
-        serviceProvider.get().getGitVersion(projectDir, this)
-      })
+    val baseExtension = project.extensions.getByType(BaseExtension::class.java)
 
-    project.extensions.extraProperties["versionDetails"] =
-      KotlinClosure1<Any?, VersionDetails>({
-        serviceProvider.get().getVersionDetails(projectDir, this)
-      })
+    val ext =
+      baseExtension.extensions.create(
+        "versions",
+        GitVersionExtension::class.java,
+        versionCacheService,
+      )
+
+    project.extensions.extraProperties["gitVersion"] = ext.gitVersion
+    project.extensions.extraProperties["versionDetails"] = ext.versionDetails
+
+    val versionProperty = project.objects.property(String::class.java)
+    project.afterEvaluate {
+      versionProperty.set(project.version.toString())
+    }
 
     project.tasks.register("printVersion") {
-      doLast { println(project.version) }
+      doNotTrackState("Only prints to stdout")
+      doLast { println(versionProperty.get()) }
       group = "Versioning"
       description = "Prints the project's configured version to standard out"
     }

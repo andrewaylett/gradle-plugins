@@ -1,24 +1,7 @@
-/*
- * Copyright 2023 Andrew Aylett
- * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package eu.aylett.gradle.functionaltests.gitversion
 
 import eu.aylett.gradle.gitversion.Git
-import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.MatcherAssert
 import org.hamcrest.Matchers.containsInRelativeOrder
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.matchesRegex
@@ -32,19 +15,19 @@ private val DETACHED_HEAD_MODE_REGEX: Pattern =
     "[a-z0-9]{10}",
   )
 
-class GitVersionPluginCommitStateTests : GitVersionPluginTests() {
+class GitVersionPluginKotlinTests : GitVersionPluginTests(true) {
   @Test
   fun `isCleanTag should be false when repo dirty on a tag checkout`() {
     // given:
     buildFile.writeText(
       """
       plugins {
-        id "eu.aylett.plugins.version"
+        id("eu.aylett.plugins.version")
       }
-      version gitVersion ()
-      task printVersionDetails {
+      version = aylett.versions.gitVersion()
+      tasks.register("printVersionDetails").configure {
         doLast {
-          println versionDetails ().isCleanTag
+          println(aylett.versions.versionDetails().isCleanTag)
         }
       }
 
@@ -61,7 +44,10 @@ class GitVersionPluginCommitStateTests : GitVersionPluginTests() {
     val buildResult = with("printVersionDetails").build()
 
     // then:
-    assertThat(buildResult.output.split('\n'), containsInRelativeOrder("false"))
+    MatcherAssert.assertThat(
+      buildResult.output.split('\n'),
+      containsInRelativeOrder("false"),
+    )
   }
 
   @Test
@@ -70,15 +56,15 @@ class GitVersionPluginCommitStateTests : GitVersionPluginTests() {
     buildFile.writeText(
       """
       plugins {
-        id "eu.aylett.plugins.version"
+        id("eu.aylett.plugins.version")
       }
-      version gitVersion()
-      task printVersionDetails {
+      version = aylett.versions.gitVersion()
+      tasks.register("printVersionDetails").configure {
         doLast {
-          println versionDetails().lastTag
-          println versionDetails().commitDistance
-          println versionDetails().gitHash
-          println versionDetails().branchName
+          println(aylett.versions.versionDetails().lastTag)
+          println(aylett.versions.versionDetails().commitDistance)
+          println(aylett.versions.versionDetails().gitHash)
+          println(aylett.versions.versionDetails().branchName)
         }
       }
 
@@ -98,7 +84,7 @@ class GitVersionPluginCommitStateTests : GitVersionPluginTests() {
     val buildResult = with("printVersionDetails").build()
 
     // then:
-    assertThat(
+    MatcherAssert.assertThat(
       buildResult.output.split('\n'),
       containsInRelativeOrder(
         equalTo("1.0.0"),
@@ -115,12 +101,12 @@ class GitVersionPluginCommitStateTests : GitVersionPluginTests() {
     buildFile.writeText(
       """
       plugins {
-        id "eu.aylett.plugins.version"
+        id("eu.aylett.plugins.version")
       }
-      version gitVersion (prefix:"my-product@")
-      task printVersionDetails {
+      version = aylett.versions.gitVersion()
+      tasks.register("printVersionDetails").configure {
         doLast {
-          println versionDetails (prefix:"my-product@").lastTag
+          println(aylett.versions.versionDetails("my-product@").lastTag)
         }
       }
       """.trimIndent(),
@@ -132,13 +118,16 @@ class GitVersionPluginCommitStateTests : GitVersionPluginTests() {
     git.runGitCommand("commit", "-m", "initial commit")
     git.runGitCommand("tag", "-a", "my-product@1.0.0", "-m", "my-product@1.0.0")
     git.runGitCommand("commit", "-m", "commit 2", "--allow-empty")
-    git.runGitCommand("tag", "-a", "1.0.0", "-m", "1.0.0")
+    git.runGitCommand("tag", "-a", "2.0.0", "-m", "2.0.0")
 
     // when:
     val buildResult = with("printVersionDetails").build()
 
     // then:
-    assertThat(buildResult.output.split('\n'), containsInRelativeOrder("1.0.0"))
+    MatcherAssert.assertThat(
+      buildResult.output.split('\n'),
+      containsInRelativeOrder(equalTo("1.0.0")),
+    )
   }
 
   @Test
@@ -147,9 +136,9 @@ class GitVersionPluginCommitStateTests : GitVersionPluginTests() {
     buildFile.writeText(
       """
       plugins {
-        id "eu.aylett.plugins.version"
+        id("eu.aylett.plugins.version")
       }
-      version gitVersion ()
+      version = aylett.versions.gitVersion()
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
@@ -167,7 +156,7 @@ class GitVersionPluginCommitStateTests : GitVersionPluginTests() {
     val buildResult = with("printVersion").build()
 
     // then:
-    assertThat(
+    MatcherAssert.assertThat(
       buildResult.output.split('\n'),
       containsInRelativeOrder("1.0.0-1-g${commitSha.substring(0, 7)}"),
     )
@@ -179,9 +168,9 @@ class GitVersionPluginCommitStateTests : GitVersionPluginTests() {
     buildFile.writeText(
       """
       plugins {
-        id "eu.aylett.plugins.version"
+        id("eu.aylett.plugins.version")
       }
-      version gitVersion ()
+      version = aylett.versions.gitVersion()
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
@@ -199,7 +188,7 @@ class GitVersionPluginCommitStateTests : GitVersionPluginTests() {
     val buildResult = with("printVersion").build()
 
     // then:
-    assertThat(
+    MatcherAssert.assertThat(
       buildResult.output.split('\n'),
       containsInRelativeOrder("1.0.0-1-g${commitSha.substring(0, 7)}"),
     )

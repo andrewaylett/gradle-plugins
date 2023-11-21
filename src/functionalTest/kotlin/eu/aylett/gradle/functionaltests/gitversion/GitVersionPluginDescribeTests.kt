@@ -19,7 +19,7 @@ package eu.aylett.gradle.functionaltests.gitversion
 
 import eu.aylett.gradle.gitversion.Git
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.containsString
+import org.hamcrest.Matchers.containsInRelativeOrder
 import org.hamcrest.Matchers.matchesRegex
 import org.junit.jupiter.api.Test
 import java.util.regex.Pattern
@@ -28,8 +28,7 @@ import kotlin.io.path.writeText
 
 private val MERGE_COMMIT_REGEX: Pattern =
   Pattern.compile(
-    ".*\\[QUIET] \\[system.out] 1\\.0\\.0-1-g[a-z0-9]{7}\n.*",
-    Pattern.DOTALL,
+    "1\\.0\\.0-1-g[a-z0-9]{7}",
   )
 
 class GitVersionPluginDescribeTests : GitVersionPluginTests() {
@@ -52,7 +51,29 @@ class GitVersionPluginDescribeTests : GitVersionPluginTests() {
     val buildResult = with("printVersion").build()
 
     // then:
-    assertThat(buildResult.output, containsString("[QUIET] [system.out] unspecified\n"))
+    assertThat(buildResult.output.split('\n'), containsInRelativeOrder("unspecified"))
+  }
+
+  @Test
+  fun `prints a version that is explicitly set`() {
+    // given:
+    buildFile.writeText(
+      """
+      plugins {
+        id "eu.aylett.plugins.version"
+      }
+      version "2.0.0"
+      """.trimIndent(),
+    )
+
+    val git = Git(projectDir, true)
+    git.runGitCommand("init", projectDir.toString())
+
+    // when:
+    val buildResult = with("printVersion").build()
+
+    // then:
+    assertThat(buildResult.output.split('\n'), containsInRelativeOrder("2.0.0"))
   }
 
   @Test
@@ -77,7 +98,7 @@ class GitVersionPluginDescribeTests : GitVersionPluginTests() {
     val buildResult = with("printVersion").build()
 
     // then:
-    assertThat(buildResult.output, containsString("[QUIET] [system.out] 1.0.0\n"))
+    assertThat(buildResult.output.split('\n'), containsInRelativeOrder("1.0.0"))
   }
 
   @Test
@@ -102,7 +123,7 @@ class GitVersionPluginDescribeTests : GitVersionPluginTests() {
     val buildResult = with("printVersion").build()
 
     // then:
-    assertThat(buildResult.output, containsString("[QUIET] [system.out] 1.0.0"))
+    assertThat(buildResult.output.split('\n'), containsInRelativeOrder("1.0.0"))
   }
 
   @Test
@@ -140,8 +161,10 @@ class GitVersionPluginDescribeTests : GitVersionPluginTests() {
 
     // then:
     assertThat(
-      buildResult.output,
-      matchesRegex(MERGE_COMMIT_REGEX),
+      buildResult.output.split('\n'),
+      containsInRelativeOrder(
+        matchesRegex(MERGE_COMMIT_REGEX),
+      ),
     )
   }
 
@@ -184,7 +207,7 @@ class GitVersionPluginDescribeTests : GitVersionPluginTests() {
     val buildResult = with("printVersion").build()
 
     // then:
-    assertThat(buildResult.output, containsString("[QUIET] [system.out] 2.0.0\n"))
+    assertThat(buildResult.output.split('\n'), containsInRelativeOrder("2.0.0"))
   }
 
   @Test
@@ -211,6 +234,6 @@ class GitVersionPluginDescribeTests : GitVersionPluginTests() {
 
     // then:
     // assertThat(buildResult.output, containsString(projectDir.getAbsolutePath())
-    assertThat(buildResult.output, containsString("[QUIET] [system.out] 1.0.0.dirty\n"))
+    assertThat(buildResult.output.split('\n'), containsInRelativeOrder("1.0.0.dirty"))
   }
 }

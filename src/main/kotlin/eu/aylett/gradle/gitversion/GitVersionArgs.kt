@@ -16,30 +16,41 @@
  */
 package eu.aylett.gradle.gitversion
 
-import com.google.common.base.Preconditions
+import com.google.common.base.Preconditions.checkNotNull
+import com.google.common.base.Preconditions.checkState
+import org.gradle.api.provider.Provider
 
-internal class GitVersionArgs {
-  var prefix = ""
-    set(prefix) {
-      Preconditions.checkNotNull(prefix, "prefix must not be null")
-      Preconditions.checkState(
-        prefix.matches(PREFIX_REGEX.toRegex()),
-        "Specified prefix `%s` does not match the allowed format regex `%s`.",
-        prefix,
-        PREFIX_REGEX,
-      )
-      field = prefix
-    }
+internal class GitVersionArgs(val prefix: String = "") {
+  init {
+    checkNotNull(prefix, "prefix must not be null")
+    checkState(
+      prefix.matches(PREFIX_REGEX.toRegex()),
+      "Specified prefix `%s` does not match the allowed format regex `%s`.",
+      prefix,
+      PREFIX_REGEX,
+    )
+  }
 
   companion object {
-    private const val PREFIX_REGEX = "[/@]?([A-Za-z]+[/@-])+"
+    private const val PREFIX_REGEX = "|([/@]?([A-Za-z]+[/@-])+)"
 
     // groovy closure invocation allows any number of args
-    fun fromGroovyClosure(vararg objects: Any?): GitVersionArgs {
-      if (objects.isNotEmpty() && (objects[0] is Map<*, *>)) {
-        val instance = GitVersionArgs()
-        instance.prefix = (objects[0] as Map<*, *>)["prefix"].toString()
-        return instance
+    fun fromGroovyClosure(vararg objects: Any?): GitVersionArgs =
+      if (objects.isNotEmpty()) {
+        if ((objects[0] is Map<*, *>)) {
+          GitVersionArgs((objects[0] as Map<*, *>)["prefix"].toString())
+        } else if ((objects[0] is Provider<*>)) {
+          GitVersionArgs((objects[0] as Provider<*>).get().toString())
+        } else {
+          GitVersionArgs(objects[0].toString())
+        }
+      } else {
+        GitVersionArgs()
+      }
+
+    fun fromProvider(prop: Provider<String>): GitVersionArgs {
+      if (prop.isPresent) {
+        return GitVersionArgs(prop.get())
       }
       return GitVersionArgs()
     }

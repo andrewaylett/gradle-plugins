@@ -20,7 +20,7 @@ package eu.aylett.gradle.functionaltests.gitversion
 import eu.aylett.gradle.gitversion.Git
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInRelativeOrder
-import org.hamcrest.Matchers.endsWith
+import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.matchesRegex
 import org.junit.jupiter.api.Test
 import java.util.regex.Pattern
@@ -28,9 +28,9 @@ import kotlin.io.path.appendText
 import kotlin.io.path.writeText
 
 private val SHA_PATTERN: Pattern =
-  Pattern.compile(".*\\[QUIET] \\[system.out] [a-z0-9]{10}")
+  Pattern.compile("[a-z0-9]{10}")
 private val SHA_FULL_PATTERN: Pattern =
-  Pattern.compile(".*\\[QUIET] \\[system.out] [a-z0-9]{40}")
+  Pattern.compile("[a-z0-9]{40}")
 
 class GitVersionPluginVersionDetailsTests : GitVersionPluginTests() {
   @Test
@@ -68,12 +68,12 @@ class GitVersionPluginVersionDetailsTests : GitVersionPluginTests() {
     assertThat(
       buildResult.output.split('\n'),
       containsInRelativeOrder(
-        endsWith("[QUIET] [system.out] 1.0.0"),
-        endsWith("[QUIET] [system.out] 0"),
+        equalTo("1.0.0"),
+        equalTo("0"),
         matchesRegex(SHA_PATTERN),
         matchesRegex(SHA_FULL_PATTERN),
-        endsWith("[QUIET] [system.out] main"),
-        endsWith("[QUIET] [system.out] true"),
+        equalTo("main"),
+        equalTo("true"),
       ),
     )
   }
@@ -86,7 +86,7 @@ class GitVersionPluginVersionDetailsTests : GitVersionPluginTests() {
       plugins {
         id "eu.aylett.plugins.version"
       }
-      version gitVersion ()
+      version = gitVersion()
       task printVersionDetails {
         doLast {
           println project . getExtensions ().getExtraProperties().get("versionDetails")().lastTag
@@ -109,8 +109,8 @@ class GitVersionPluginVersionDetailsTests : GitVersionPluginTests() {
     assertThat(
       buildResult.output.split('\n'),
       containsInRelativeOrder(
-        endsWith("[QUIET] [system.out] $sha"),
-        endsWith("[QUIET] [system.out] $sha"),
+        sha,
+        sha,
       ),
     )
   }
@@ -151,11 +151,11 @@ class GitVersionPluginVersionDetailsTests : GitVersionPluginTests() {
     assertThat(
       buildResult.output.split('\n'),
       containsInRelativeOrder(
-        endsWith("[QUIET] [system.out] 1.0.0"),
-        endsWith("[QUIET] [system.out] 1"),
+        equalTo("1.0.0"),
+        equalTo("1"),
         matchesRegex(SHA_PATTERN),
-        endsWith("[QUIET] [system.out] main"),
-        endsWith("[QUIET] [system.out] false"),
+        equalTo("main"),
+        equalTo("false"),
       ),
     )
   }

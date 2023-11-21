@@ -20,8 +20,6 @@ package eu.aylett.gradle.functionaltests.gitversion
 import eu.aylett.gradle.gitversion.Git
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInRelativeOrder
-import org.hamcrest.Matchers.containsString
-import org.hamcrest.Matchers.endsWith
 import org.junit.jupiter.api.Test
 import java.nio.file.Files
 import java.time.Duration
@@ -73,8 +71,8 @@ class GitVersionPluginMultiTests : GitVersionPluginTests() {
     assertThat(
       buildResult.output.split('\n'),
       containsInRelativeOrder(
-        endsWith("[QUIET] [system.out] 1.0.0"),
-        endsWith("[QUIET] [system.out] 8.8.8"),
+        "1.0.0",
+        "8.8.8",
       ),
     )
   }
@@ -107,7 +105,7 @@ class GitVersionPluginMultiTests : GitVersionPluginTests() {
     val buildResult = with("printVersion").build()
 
     // then:
-    assertThat(buildResult.output, containsString("[QUIET] [system.out] 2.0.0\n"))
+    assertThat(buildResult.output.split('\n'), containsInRelativeOrder("2.0.0"))
   }
 
   @Test
@@ -180,7 +178,7 @@ class GitVersionPluginMultiTests : GitVersionPluginTests() {
     val buildResult = with("printVersion").build()
 
     // then:
-    assertThat(buildResult.output, containsString("[QUIET] [system.out] 2.0.0\n"))
+    assertThat(buildResult.output.split('\n'), containsInRelativeOrder("2.0.0"))
   }
 
   @Test
@@ -211,7 +209,7 @@ class GitVersionPluginMultiTests : GitVersionPluginTests() {
     val buildResult = with("printVersion").build()
 
     // then:
-    assertThat(buildResult.output, containsString("[QUIET] [system.out] 1.0.0\n"))
+    assertThat(buildResult.output.split('\n'), containsInRelativeOrder("1.0.0"))
   }
 
   @Test
@@ -231,22 +229,21 @@ class GitVersionPluginMultiTests : GitVersionPluginTests() {
     git.runGitCommand("add", ".")
     git.runGitCommand("commit", "-m", "initial commit")
     git.runGitCommand("tag", "-a", "1.0.0", "-m", "1.0.0")
-    var latestCommit = git.currentHeadFullHash
 
     val depth = 100
-    for (i in 0..99) {
+    for (i in 0 until depth) {
       git.runGitCommand("add", ".")
       git.runGitCommand("commit", "-m", "commit-$i", "--allow-empty")
-      latestCommit = git.currentHeadFullHash
     }
+    val latestCommit = git.currentHeadFullHash
 
     // when:
     val buildResult = with("printVersion").build()
 
     // then:
     assertThat(
-      buildResult.output,
-      containsString("[QUIET] [system.out] 1.0.0-$depth-g${latestCommit.substring(0, 7)}\n"),
+      buildResult.output.split('\n'),
+      containsInRelativeOrder("1.0.0-$depth-g${latestCommit.substring(0, 7)}"),
     )
   }
 }

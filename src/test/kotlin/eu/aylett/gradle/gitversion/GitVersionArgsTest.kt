@@ -39,11 +39,11 @@ class GitVersionArgsTest {
         "Foo/Bar@",
       ),
       identity(),
-    ) { s -> GitVersionArgs().prefix = s }
+    ) { s -> GitVersionArgs(s) }
   }
 
   @Test
   fun require_dash_or_at_symbol_at_prefix_end() {
-    assertThrows<IllegalStateException> { GitVersionArgs().prefix = "v" }
+    assertThrows<IllegalStateException> { GitVersionArgs("v") }
   }
 }
