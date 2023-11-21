@@ -30,10 +30,23 @@ abstract class GitVersionCacheService : BuildService<BuildServiceParameters.None
 
   fun getGitVersion(
     project: Path,
-    args: Any?,
+    prefix: Provider<String>,
   ): String {
     val gitDir = getRootGitDir(project)
-    val gitVersionArgs: GitVersionArgs = GitVersionArgs.fromGroovyClosure(args)
+    val gitVersionArgs = GitVersionArgs.fromProvider(prefix)
+    val key = gitDir.toString() + "|" + gitVersionArgs.prefix
+    val value =
+      versionDetailsMap
+        .computeIfAbsent(key) { _ -> createVersionDetails(gitDir, gitVersionArgs) }
+    return value.version
+  }
+
+  fun getGitVersion(
+    project: Path,
+    prefix: Any?,
+  ): String {
+    val gitDir = getRootGitDir(project)
+    val gitVersionArgs = GitVersionArgs.fromGroovyClosure(prefix)
     val key = gitDir.toString() + "|" + gitVersionArgs.prefix
     val value =
       versionDetailsMap
@@ -46,7 +59,19 @@ abstract class GitVersionCacheService : BuildService<BuildServiceParameters.None
     args: Any?,
   ): VersionDetails {
     val gitDir = getRootGitDir(project)
-    val gitVersionArgs: GitVersionArgs = GitVersionArgs.fromGroovyClosure(args)
+    val gitVersionArgs = GitVersionArgs.fromGroovyClosure(args)
+    val key = gitDir.toString() + "|" + gitVersionArgs.prefix
+    return versionDetailsMap.computeIfAbsent(
+      key,
+    ) { _ -> createVersionDetails(gitDir, gitVersionArgs) }
+  }
+
+  fun getVersionDetails(
+    project: Path,
+    prefix: Provider<String>,
+  ): VersionDetails {
+    val gitDir = getRootGitDir(project)
+    val gitVersionArgs = GitVersionArgs.fromProvider(prefix)
     val key = gitDir.toString() + "|" + gitVersionArgs.prefix
     return versionDetailsMap.computeIfAbsent(
       key,

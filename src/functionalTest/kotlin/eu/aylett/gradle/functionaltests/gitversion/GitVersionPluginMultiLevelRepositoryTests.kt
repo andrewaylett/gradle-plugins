@@ -19,18 +19,16 @@ package eu.aylett.gradle.functionaltests.gitversion
 
 import eu.aylett.gradle.gitversion.Git
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers
-import org.hamcrest.Matchers.containsString
+import org.hamcrest.Matchers.containsInRelativeOrder
 import org.junit.jupiter.api.Test
-import java.io.File
-import java.nio.file.Files
 import kotlin.io.path.appendText
 import kotlin.io.path.writeText
 
-class GitVersionPluginRepositoryTests : GitVersionPluginTests() {
+class GitVersionPluginMultiLevelRepositoryTests : GitVersionPluginTests(false, "level1/level2") {
   @Test
-  fun `exception when project root does not have a git repo`() {
+  fun `git describe works when git repo is multiple levels up`() {
     // given:
+    val rootFolder = temporaryFolder
     buildFile.writeText(
       """
       plugins {
@@ -39,52 +37,19 @@ class GitVersionPluginRepositoryTests : GitVersionPluginTests() {
       version gitVersion ()
       """.trimIndent(),
     )
-
-    // when:
-    val buildResult = with("printVersion").buildAndFail()
-
-    // then:
-    assertThat(
-      buildResult.output,
-      containsString("> Cannot find '.git' directory"),
-    )
-  }
-
-  @Test
-  fun `git version can be applied on sub modules`() {
-    // given:
-    val subModuleDir =
-      Files.createDirectories(
-        projectDir
-          .resolve("submodule"),
-      ).toFile()
-    val subModuleBuildFile = File(subModuleDir, "build.gradle")
-    subModuleBuildFile.createNewFile()
-    subModuleBuildFile.writeText(
-      """
-      plugins {
-        id "eu.aylett.plugins.version"
-      }
-      version gitVersion ()
-      """.trimIndent(),
-    )
-
-    settingsFile.appendText(
-      """
-      include "submodule"
-      """.trimIndent(),
-    )
-
-    val git = Git(projectDir, true)
-    git.runGitCommand("init", projectDir.toString())
+    gitIgnoreFile.appendText("build")
+    settingsFile.appendText("")
+    val git = Git(rootFolder, true)
+    git.runGitCommand("init", rootFolder.toFile().absolutePath)
     git.runGitCommand("add", ".")
     git.runGitCommand("commit", "-m", "initial commit")
     git.runGitCommand("tag", "-a", "1.0.0", "-m", "1.0.0")
 
     // when:
+    // will build the project at projectDir
     val buildResult = with("printVersion").build()
 
     // then:
-    assertThat(buildResult.output.split('\n'), Matchers.containsInRelativeOrder("1.0.0"))
+    assertThat(buildResult.output.split('\n'), containsInRelativeOrder("1.0.0"))
   }
 }

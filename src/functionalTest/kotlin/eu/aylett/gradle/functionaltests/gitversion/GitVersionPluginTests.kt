@@ -20,7 +20,7 @@ import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.parallel.ResourceLock
 import org.junit.jupiter.api.parallel.Resources
-import java.nio.file.Files
+import java.nio.file.Files.createDirectories
 import java.nio.file.Path
 import java.util.Optional
 import kotlin.io.path.createFile
@@ -29,26 +29,30 @@ import kotlin.io.path.writeText
 
 @ResourceLock(Resources.SYSTEM_OUT)
 @ResourceLock(Resources.SYSTEM_ERR)
-abstract class GitVersionPluginTests {
-  protected lateinit var temporaryFolder: Path
-  protected lateinit var projectDir: Path
-  protected lateinit var buildFile: Path
-  protected lateinit var gitIgnoreFile: Path
-  protected lateinit var dirtyContentFile: Path
-  protected lateinit var settingsFile: Path
+abstract class GitVersionPluginTests(kotlin: Boolean, projectDirRelative: String = "") {
+  constructor() : this(false)
+
+  protected val temporaryFolder: Path by lazy { createTempDirectory("GitVersionPluginTest") }
+  protected val projectDir: Path by lazy {
+    createDirectories(temporaryFolder.resolve(projectDirRelative))
+  }
+  private val kts: String =
+    if (kotlin) {
+      ".kts"
+    } else {
+      ""
+    }
+  protected val buildFile: Path by lazy { projectDir.resolve("build.gradle$kts").createFile() }
+  protected val gitIgnoreFile: Path by lazy { projectDir.resolve(".gitignore").createFile() }
+  protected val dirtyContentFile: Path by lazy { projectDir.resolve("dirty").createFile() }
+  protected val settingsFile: Path by lazy {
+    projectDir.resolve(
+      "settings.gradle$kts",
+    ).createFile()
+  }
 
   @BeforeEach
   fun setup() {
-    temporaryFolder = createTempDirectory("GitVersionPluginTest")
-    projectDir = temporaryFolder
-    buildFile = temporaryFolder.resolve("build.gradle")
-    buildFile.createFile()
-    settingsFile = temporaryFolder.resolve("settings.gradle")
-    settingsFile.createFile()
-    gitIgnoreFile = temporaryFolder.resolve(".gitignore")
-    gitIgnoreFile.createFile()
-    dirtyContentFile = temporaryFolder.resolve("dirty")
-    dirtyContentFile.createFile()
     settingsFile.writeText("rootProject.name = \"gradle-test\"\n")
     gitIgnoreFile.writeText(".gradle\n")
   }
@@ -61,10 +65,8 @@ abstract class GitVersionPluginTests {
     gradleVersion: Optional<String>,
     vararg tasks: String,
   ): GradleRunner {
-    val arguments = mutableListOf("--stacktrace", "--debug")
+    val arguments = mutableListOf("--stacktrace", "--info")
     arguments.addAll(tasks)
-
-    Files.createDirectories(projectDir)
 
     val gradleRunner =
       GradleRunner.create()
