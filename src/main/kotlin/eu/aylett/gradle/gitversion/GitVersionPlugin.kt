@@ -26,7 +26,10 @@ import org.gradle.kotlin.dsl.apply
 class GitVersionPlugin() : Plugin<Project> {
   override fun apply(project: Project) {
     project.pluginManager.apply(BasePlugin::class)
-    val versionCacheService = GitVersionCacheService.getSharedGitVersionCacheService(project)
+    val versionCacheService =
+      GitVersionCacheService.getSharedGitVersionCacheService(
+        project,
+      )
 
     val baseExtension = project.extensions.getByType(BaseExtension::class.java)
 
@@ -37,6 +40,8 @@ class GitVersionPlugin() : Plugin<Project> {
         versionCacheService,
       )
 
+    ext.isolateGit.convention(true)
+    versionCacheService.get().isolateGit.set(ext.isolateGit)
     project.extensions.extraProperties["gitVersion"] = ext.gitVersion
     project.extensions.extraProperties["versionDetails"] = ext.versionDetails
 

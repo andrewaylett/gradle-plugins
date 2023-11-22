@@ -129,6 +129,6 @@ class VersionDetailsTest {
 
   private fun versionDetails(): VersionDetails {
     val gitDir = temporaryFolder.resolve("./.git")
-    return VersionDetailsImpl(gitDir, GitVersionArgs())
+    return VersionDetailsImpl(gitDir, GitVersionArgs(), true)
   }
 }
