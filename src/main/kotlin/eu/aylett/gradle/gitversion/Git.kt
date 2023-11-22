@@ -16,157 +16,172 @@
  */
 package eu.aylett.gradle.gitversion
 
-import com.google.common.annotations.VisibleForTesting
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.StringWriter
 import java.nio.charset.StandardCharsets
+import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 
-class Git
-  @VisibleForTesting
-  constructor(private val directory: Path, private val testing: Boolean) {
-    constructor(directory: Path) : this(directory, false)
+class Git(private val directory: Path, isolate: Boolean) {
+  interface Isolate {
+    fun apply(environment: MutableMap<String, String>)
+  }
 
-    init {
-      logger.trace("Initialising git support")
-      if (!gitCommandExists()) {
-        throw GitException("Git not found in project")
-      }
-      if (testing) {
-        logger.info("Testing mode enabled")
-        setTestingConfiguration()
-        if (!checkIfUserIsSet()) {
-          setGitUser()
-        }
-      }
+  private val environmentIsolator: Isolate
+
+  init {
+    logger.trace("Initialising git support")
+    if (!gitCommandExists()) {
+      throw GitException("Git not found in project")
     }
+    if (isolate) {
+      logger.info("Isolation mode enabled")
+      environmentIsolator =
+        object : Isolate {
+          val home = Files.createTempDirectory("isolatedGitHome")
 
-    private fun runGitCmd(vararg commands: String): String {
-      return runGitCmd(HashMap(), *commands)
-    }
-
-    private fun runGitCmd(
-      envvars: Map<String, String>,
-      vararg commands: String,
-    ): String {
-      val cmdInput = mutableListOf("git", *commands)
-      val pb = ProcessBuilder(cmdInput)
-      val environment = pb.environment()
-      environment.putAll(envvars)
-      if (this.testing) {
-        environment["HOME"] = directory.toFile().canonicalPath
-        environment["GIT_TERMINAL_PROMPT"] = "0"
-        environment["GIT_OPTIONAL_LOCKS"] = "0"
-      }
-      pb.directory(directory.toFile())
-      pb.redirectErrorStream(true)
-      val process = pb.start()
-      logger.info("Running ${cmdInput.joinToString(" ")} as pid ${process.pid()}")
-      val reader = process.inputReader(StandardCharsets.UTF_8)
-      val builder = StringWriter()
-      var interrupted = false
-      while (true) {
-        try {
-          while (reader.ready()) {
-            builder.write(reader.read())
+          override fun apply(environment: MutableMap<String, String>) {
+            environment.clear()
+            environment["HOME"] = home.toFile().canonicalPath
+            environment["GIT_TERMINAL_PROMPT"] = "0"
+            environment["GIT_OPTIONAL_LOCKS"] = "0"
           }
-          if (process.waitFor(10, TimeUnit.MILLISECONDS)) {
-            break
-          }
-        } catch (e: InterruptedException) {
-          logger.debug("Interrupted", e)
-          interrupted = true
         }
+      setIsolatedConfiguration()
+      if (!checkIfUserIsSet()) {
+        setGitUser()
       }
-      reader.transferTo(builder)
-      val exitCode = process.exitValue()
-      logger.debug("Git command pid ${process.pid()} completed")
-      if (interrupted) {
-        throw GitException("Interrupted when trying to run ${cmdInput.joinToString(" ")}")
-      }
-      if (exitCode != 0) {
-        throw GitException(
-          "Failed to run ${cmdInput.joinToString(" ")}, output ${builder.toString().trim()}",
-          exitCode,
-        )
-      }
-
-      return builder.toString().trim { it <= ' ' }
-    }
-
-    fun runGitCommand(
-      envvar: Map<String, String>,
-      vararg command: String,
-    ): String = runGitCmd(envvar, *command)
-
-    fun runGitCommand(vararg command: String): String = runGitCommand(HashMap(), *command)
-
-    private fun checkIfUserIsSet(): Boolean {
-      try {
-        return runGitCmd("config", "user.email").isNotEmpty()
-      } catch (e: GitException) {
-        if (e.statusCode == 1) {
-          // Per the man page, section is invalid
-          return false
+    } else {
+      environmentIsolator =
+        object : Isolate {
+          override fun apply(environment: MutableMap<String, String>) {}
         }
-        throw e
-      }
-    }
-
-    private fun setGitUser() {
-      runGitCommand("config", "--global", "user.email", "email@example.com")
-      runGitCommand("config", "--global", "user.name", "name")
-    }
-
-    private fun setTestingConfiguration() {
-      runGitCommand("config", "--global", "init.defaultBranch", "main")
-      runGitCommand("config", "--global", "core.fsmonitor", "false")
-    }
-
-    val currentBranch: String
-      get() = runGitCmd("branch", "--show-current")
-
-    val currentHeadFullHash: String
-      get() = runGitCmd("rev-parse", "HEAD")
-
-    val isClean: Boolean
-      get() = runGitCmd("status", "--porcelain").isEmpty()
-
-    fun describe(prefix: String): String =
-      runGitCmd(
-        "describe",
-        "--tags",
-        "--always",
-        "--first-parent",
-        "--abbrev=7",
-        "--match=$prefix*",
-        "HEAD",
-      )
-
-    private fun gitCommandExists(): Boolean {
-      return try {
-        // verify that "git" command exists (throws exception if it does not)
-        val gitVersionProcess = ProcessBuilder("git", "version").start()
-        check(gitVersionProcess.waitFor() == 0) { "error invoking git command" }
-        true
-      } catch (e: IOException) {
-        log.error("Native git command not found", e)
-        false
-      } catch (e: InterruptedException) {
-        log.error("Native git command not found", e)
-        false
-      } catch (e: RuntimeException) {
-        log.error("Native git command not found", e)
-        false
-      }
-    }
-
-    private val log by lazy { LoggerFactory.getLogger(Git::class.java) }
-
-    companion object {
-      private val logger: Logger = LoggerFactory.getLogger(Git::class.java)
     }
   }
+
+  private fun runGitCmd(vararg commands: String): String {
+    return runGitCmd(HashMap(), *commands)
+  }
+
+  private fun runGitCmd(
+    envvars: Map<String, String>,
+    vararg commands: String,
+  ): String {
+    val cmdInput = mutableListOf("git", *commands)
+    val pb = ProcessBuilder(cmdInput)
+    val environment = pb.environment()
+    environmentIsolator.apply(environment)
+    environment.putAll(envvars)
+    pb.directory(directory.toFile())
+    pb.redirectErrorStream(true)
+    val process = pb.start()
+    logger.info("Running ${cmdInput.joinToString(" ")} as pid ${process.pid()}")
+    val reader = process.inputReader(StandardCharsets.UTF_8)
+    val builder = StringWriter()
+    var interrupted = false
+    while (true) {
+      try {
+        while (reader.ready()) {
+          builder.write(reader.read())
+        }
+        if (process.waitFor(10, TimeUnit.MILLISECONDS)) {
+          break
+        }
+      } catch (e: InterruptedException) {
+        logger.debug("Interrupted", e)
+        interrupted = true
+      }
+    }
+    reader.transferTo(builder)
+    val exitCode = process.exitValue()
+    logger.debug("Git command pid ${process.pid()} completed")
+    if (interrupted) {
+      throw GitException("Interrupted when trying to run ${cmdInput.joinToString(" ")}")
+    }
+    if (exitCode != 0) {
+      throw GitException(
+        "Failed to run ${cmdInput.joinToString(" ")}, output ${builder.toString().trim()}",
+        exitCode,
+      )
+    }
+
+    return builder.toString().trim { it <= ' ' }
+  }
+
+  fun runGitCommand(
+    envvar: Map<String, String>,
+    vararg command: String,
+  ): String = runGitCmd(envvar, *command)
+
+  fun runGitCommand(vararg command: String): String = runGitCommand(HashMap(), *command)
+
+  private fun checkIfUserIsSet(): Boolean {
+    try {
+      return runGitCmd("config", "user.email").isNotEmpty()
+    } catch (e: GitException) {
+      if (e.statusCode == 1) {
+        // Per the man page, section is invalid
+        return false
+      }
+      throw e
+    }
+  }
+
+  private fun setGitUser() {
+    runGitCommand("config", "--global", "user.email", "email@example.com")
+    runGitCommand("config", "--global", "user.name", "name")
+  }
+
+  private fun setIsolatedConfiguration() {
+    runGitCommand("config", "--global", "init.defaultBranch", "main")
+    runGitCommand("config", "--global", "core.fsmonitor", "false")
+    runGitCommand("config", "--global", "core.untrackedCache", "false")
+  }
+
+  val currentBranch: String
+    get() = runGitCmd("branch", "--show-current")
+
+  val currentHeadFullHash: String
+    get() = runGitCmd("rev-parse", "HEAD")
+
+  val isClean: Boolean
+    get() = runGitCmd("status", "--porcelain").isEmpty()
+
+  fun describe(prefix: String): String =
+    runGitCmd(
+      "describe",
+      "--tags",
+      "--always",
+      "--first-parent",
+      "--abbrev=7",
+      "--match=$prefix*",
+      "HEAD",
+    )
+
+  private fun gitCommandExists(): Boolean {
+    return try {
+      // verify that "git" command exists (throws exception if it does not)
+      val gitVersionProcess = ProcessBuilder("git", "version").start()
+      check(gitVersionProcess.waitFor() == 0) { "error invoking git command" }
+      true
+    } catch (e: IOException) {
+      log.error("Native git command not found", e)
+      false
+    } catch (e: InterruptedException) {
+      log.error("Native git command not found", e)
+      false
+    } catch (e: RuntimeException) {
+      log.error("Native git command not found", e)
+      false
+    }
+  }
+
+  private val log by lazy { LoggerFactory.getLogger(Git::class.java) }
+
+  companion object {
+    private val logger: Logger = LoggerFactory.getLogger(Git::class.java)
+  }
+}

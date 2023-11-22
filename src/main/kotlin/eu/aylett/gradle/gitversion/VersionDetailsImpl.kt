@@ -27,8 +27,9 @@ private val descriptionDistanceRegex: Regex by lazy {
 internal class VersionDetailsImpl(
   private val gitDir: Path,
   private val args: GitVersionArgs,
+  private val isolateGit: Boolean,
 ) : VersionDetails {
-  private val nativeGitInvoker: Git by lazy { Git(gitDir.parent) }
+  private val nativeGitInvoker: Git by lazy { Git(gitDir.parent, isolateGit) }
 
   private val description: String by lazy {
     nativeGitInvoker
