@@ -36,16 +36,25 @@ internal class GitVersionArgs(val prefix: String = "") {
 
     // groovy closure invocation allows any number of args
     fun fromGroovyClosure(vararg objects: Any?): GitVersionArgs =
-      if (objects.isNotEmpty()) {
-        if ((objects[0] is Map<*, *>)) {
-          GitVersionArgs((objects[0] as Map<*, *>)["prefix"].toString())
-        } else if ((objects[0] is Provider<*>)) {
-          GitVersionArgs((objects[0] as Provider<*>).get().toString())
+      if (objects.size == 1) {
+        val arg = objects[0]
+        if (arg is Map<*, *>) {
+          if (arg.isEmpty()) {
+            GitVersionArgs()
+          } else if (arg.size == 1 && arg.containsKey("prefix")) {
+            GitVersionArgs(arg["prefix"].toString())
+          } else {
+            throw IllegalArgumentException("Closure only accepts a prefix argument")
+          }
+        } else if (arg is Provider<*>) {
+          GitVersionArgs(arg.get().toString())
         } else {
-          GitVersionArgs(objects[0].toString())
+          GitVersionArgs(arg.toString())
         }
-      } else {
+      } else if (objects.isEmpty()) {
         GitVersionArgs()
+      } else {
+        throw IllegalArgumentException("Closure expects at most one argument")
       }
 
     fun fromProvider(prop: Provider<String>): GitVersionArgs {
