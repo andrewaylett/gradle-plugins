@@ -1,7 +1,7 @@
 #
 # Run pitest and update github in a single step. Until and unless I get outside contributions, this suffices
 #
-name: Pitest PR Check
+name: Run Pitest
 on:
   pull_request:
 
@@ -31,7 +31,7 @@ jobs:
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v2
 
-    - name: Execute Gradle build
+    - name: Execute Pitest
       run: ./gradlew --no-configuration-cache pitest-github
       env:
         REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
