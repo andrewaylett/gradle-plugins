@@ -29,7 +29,7 @@ dependencies {
   pitest("com.groupcdg.arcmutate:base:1.2.2")
   pitest("com.groupcdg.pitest:pitest-accelerator-junit5:1.0.6")
   pitest("com.groupcdg:pitest-git-plugin:1.1.2")
-  pitest("com.groupcdg.pitest:pitest-kotlin-plugin:1.1.5")
+  pitest("com.groupcdg.pitest:pitest-kotlin-plugin:1.1.6")
 }
 
 inline fun <T, R> Iterable<T>.transform(crossinline transform: (T) -> R): Iterable<R> {
