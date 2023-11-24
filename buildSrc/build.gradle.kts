@@ -21,7 +21,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
 plugins {
   `java-library`
-  id("eu.aylett.conventions") version "0.2.0"
+  id("eu.aylett.conventions") version "0.3.0"
   `java-gradle-plugin`
   `kotlin-dsl`
   id("com.diffplug.spotless") version "6.22.0"
