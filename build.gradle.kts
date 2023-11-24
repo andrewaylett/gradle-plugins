@@ -32,10 +32,24 @@ dependencies {
   testImplementation("org.jetbrains.kotlin:kotlin-gradle-plugin")
 }
 
-val gitVersion = ext["gitVersion"] as KotlinClosure1<*, *>
-
 group = "eu.aylett"
-version = gitVersion()!!
+version = aylett.versions.gitVersion()
+
+val checkPublishVersion by tasks.registering {
+  doNotTrackState("Either does nothing or fails the build")
+  val versionDetails = aylett.versions.versionDetails()
+  doFirst {
+    if (!versionDetails.isCleanTag) {
+      logger.error("Version details is {}", versionDetails)
+      throw IllegalStateException(
+        "Can't publish a plugin with a version (${versionDetails.version}) that's not a clean tag",
+      )
+    }
+  }
+}
+tasks.named("publishPlugins").configure {
+  dependsOn(checkPublishVersion)
+}
 
 gradlePlugin {
   website = "https://gradle-plugins.aylett.eu/"

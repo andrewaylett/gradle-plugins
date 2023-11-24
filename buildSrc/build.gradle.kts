@@ -23,7 +23,6 @@ plugins {
   `java-library`
   id("eu.aylett.conventions") version "0.2.0"
   `java-gradle-plugin`
-  id("org.jetbrains.kotlin.jvm") version "1.9.10"
   `kotlin-dsl`
   id("com.diffplug.spotless") version "6.22.0"
 }
@@ -38,7 +37,7 @@ dependencies {
   implementation("org.jetbrains.kotlin:kotlin-gradle-plugin-api")
   implementation("org.jetbrains.dokka:dokka-gradle-plugin:1.9.10")
   implementation("com.google.guava:guava:32.1.3-jre")
-  implementation("eu.aylett:gradle-plugins:0.2.0")
+  implementation("eu.aylett:gradle-plugins:0.3.0")
   implementation("com.diffplug.spotless:spotless-plugin-gradle:6.22.0")
   implementation("org.gradle.kotlin:gradle-kotlin-dsl-plugins:4.1.2")
   implementation("org.pitest:pitest:1.15.3")
@@ -64,7 +63,7 @@ spotless {
 
 val spotlessApply = tasks.named("spotlessApply")
 val spotlessCheck = tasks.named("spotlessCheck")
-tasks.named("compileKotlin").configure { dependsOn(spotlessCheck) }
+tasks.named("check").configure { dependsOn(spotlessCheck) }
 spotlessApply.configure { mustRunAfter(tasks.named("clean")) }
 
 val isCI = providers.environmentVariable("CI").isPresent
