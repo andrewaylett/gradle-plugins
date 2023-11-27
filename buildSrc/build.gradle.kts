@@ -43,7 +43,7 @@ dependencies {
   implementation("org.pitest:pitest:1.15.3")
   implementation("com.groupcdg.gradle:common:1.0.6")
   implementation("info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.15.0")
-  implementation("com.groupcdg.pitest.github:com.groupcdg.pitest.github.gradle.plugin:1.0.5")
+  implementation("com.groupcdg.pitest.github:com.groupcdg.pitest.github.gradle.plugin:1.0.6")
 }
 
 tasks.withType<AbstractArchiveTask>().configureEach {
