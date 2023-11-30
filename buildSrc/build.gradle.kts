@@ -24,7 +24,7 @@ plugins {
   id("eu.aylett.conventions") version "0.3.0"
   `java-gradle-plugin`
   `kotlin-dsl`
-  id("com.diffplug.spotless") version "6.23.1"
+  id("com.diffplug.spotless") version "6.23.2"
 }
 
 repositories {
