@@ -16,11 +16,11 @@
 
 package eu.aylett.gradle.matchers
 
-import org.gradle.api.plugins.PluginManager
+import org.gradle.api.plugins.PluginAware
 import org.hamcrest.Description
 import org.hamcrest.TypeSafeMatcher
 
-class HasPluginMatcher(private val pluginName: String) : TypeSafeMatcher<PluginManager>() {
+class HasPluginMatcher(private val pluginName: String) : TypeSafeMatcher<PluginAware>() {
   override fun describeTo(description: Description) {
     description.apply {
       appendText("gradle plugin manager containing plugin ")
@@ -28,8 +28,18 @@ class HasPluginMatcher(private val pluginName: String) : TypeSafeMatcher<PluginM
     }
   }
 
-  override fun matchesSafely(item: PluginManager): Boolean {
-    return item.hasPlugin(pluginName)
+  override fun matchesSafely(item: PluginAware): Boolean {
+    return item.pluginManager.hasPlugin(pluginName)
+  }
+
+  override fun describeMismatchSafely(
+    item: PluginAware,
+    mismatchDescription: Description,
+  ) {
+    mismatchDescription.apply {
+      appendText("gradle plugin manager did not contain $pluginName, but ")
+      appendValueList("[", ", ", "]", item.plugins)
+    }
   }
 }
 

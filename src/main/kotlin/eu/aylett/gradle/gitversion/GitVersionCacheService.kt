@@ -17,7 +17,6 @@
 package eu.aylett.gradle.gitversion
 
 import org.gradle.api.Project
-import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
@@ -28,8 +27,6 @@ import java.util.concurrent.ConcurrentMap
 
 abstract class GitVersionCacheService : BuildService<BuildServiceParameters.None> {
   private val versionDetailsMap: ConcurrentMap<String, VersionDetails> = ConcurrentHashMap()
-
-  abstract val isolateGit: Property<Boolean>
 
   fun getGitVersion(
     project: Path,
@@ -85,7 +82,7 @@ abstract class GitVersionCacheService : BuildService<BuildServiceParameters.None
     gitDir: Path,
     args: GitVersionArgs,
   ): VersionDetails {
-    return VersionDetailsImpl(gitDir, args, isolateGit.get())
+    return VersionDetailsImpl(gitDir, args)
   }
 
   private fun getRootGitDir(currentRoot: Path): Path {

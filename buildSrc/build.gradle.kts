@@ -16,7 +16,6 @@
 
 @file:Suppress("UnstableApiUsage")
 
-import org.gradle.kotlin.dsl.support.expectedKotlinDslPluginsVersion
 import org.jetbrains.kotlin.gradle.dsl.KotlinCommonCompilerOptions
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
@@ -52,6 +51,7 @@ tasks.withType<AbstractArchiveTask>().configureEach {
   isReproducibleFileOrder = true
 }
 
+@Suppress("INACCESSIBLE_TYPE")
 spotless {
   kotlin {
     ktlint()

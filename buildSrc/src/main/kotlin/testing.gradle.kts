@@ -23,6 +23,7 @@ plugins {
   id("eu.aylett.conventions.jvm")
   java
   `jvm-test-suite`
+  `java-test-fixtures`
   id("org.jetbrains.kotlin.jvm")
 }
 
@@ -62,7 +63,7 @@ val testing = extensions.getByType<TestingExtension>().apply {
     register<JvmTestSuite>("functionalTest") {
       targets.configureEach {
         dependencies {
-          implementation(project())
+          implementation(testFixtures(project()))
           implementation(gradleTestKit())
         }
         testTask.configure {

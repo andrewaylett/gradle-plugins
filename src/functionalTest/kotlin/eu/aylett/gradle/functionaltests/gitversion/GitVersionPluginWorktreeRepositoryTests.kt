@@ -17,15 +17,16 @@
 
 package eu.aylett.gradle.functionaltests.gitversion
 
-import eu.aylett.gradle.gitversion.Git
+import eu.aylett.gradle.gitversion.NativeGit
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers
+import org.hamcrest.Matchers.containsInRelativeOrder
+import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.Test
 import kotlin.io.path.writeText
 
 class GitVersionPluginWorktreeRepositoryTests : GitVersionPluginTests(false, "original") {
   @Test
-  fun `git describe works when using worktree`() {
+  fun `git describe fails when using worktree`() {
     // given:
     buildFile.writeText(
       """
@@ -35,7 +36,7 @@ class GitVersionPluginWorktreeRepositoryTests : GitVersionPluginTests(false, "or
       version gitVersion ()
       """.trimIndent(),
     )
-    val git = Git(projectDir, true)
+    val git = NativeGit(projectDir)
     git.runGitCommand("init", projectDir.toFile().absolutePath)
     git.runGitCommand("add", ".")
     git.runGitCommand("commit", "-m", "initial commit")
@@ -49,9 +50,12 @@ class GitVersionPluginWorktreeRepositoryTests : GitVersionPluginTests(false, "or
     val buildResult =
       with("printVersion")
         .withProjectDir(projectDir.resolve(worktreePath).toFile())
-        .build()
+        .buildAndFail()
 
     // then:
-    assertThat(buildResult.output.split('\n'), Matchers.containsInRelativeOrder("1.0.0"))
+    assertThat(
+      buildResult.output.split('\n'),
+      containsInRelativeOrder(containsString("Cannot find git repository")),
+    )
   }
 }
