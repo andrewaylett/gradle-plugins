@@ -17,19 +17,13 @@
 
 package eu.aylett.gradle.functionaltests.gitversion
 
-import eu.aylett.gradle.gitversion.Git
+import eu.aylett.gradle.gitversion.NativeGit
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInRelativeOrder
-import org.hamcrest.Matchers.matchesRegex
+import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.Test
-import java.util.regex.Pattern
 import kotlin.io.path.appendText
 import kotlin.io.path.writeText
-
-private val MERGE_COMMIT_REGEX: Pattern =
-  Pattern.compile(
-    "1\\.0\\.0-1-g[a-z0-9]{7}",
-  )
 
 class GitVersionPluginDescribeTests : GitVersionPluginTests() {
   @Test
@@ -44,7 +38,7 @@ class GitVersionPluginDescribeTests : GitVersionPluginTests() {
       """.trimIndent(),
     )
 
-    val git = Git(projectDir, true)
+    val git = NativeGit(projectDir)
     git.runGitCommand("init", projectDir.toString())
 
     // when:
@@ -66,7 +60,7 @@ class GitVersionPluginDescribeTests : GitVersionPluginTests() {
       """.trimIndent(),
     )
 
-    val git = Git(projectDir, true)
+    val git = NativeGit(projectDir)
     git.runGitCommand("init", projectDir.toString())
 
     // when:
@@ -88,7 +82,7 @@ class GitVersionPluginDescribeTests : GitVersionPluginTests() {
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
-    val git = Git(projectDir, true)
+    val git = NativeGit(projectDir)
     git.runGitCommand("init", projectDir.toString())
     git.runGitCommand("add", ".")
     git.runGitCommand("commit", "-m", "initial commit")
@@ -113,7 +107,7 @@ class GitVersionPluginDescribeTests : GitVersionPluginTests() {
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
-    val git = Git(projectDir, true)
+    val git = NativeGit(projectDir)
     git.runGitCommand("init", projectDir.toString())
     git.runGitCommand("add", ".")
     git.runGitCommand("commit", "-m", "initial commit")
@@ -140,7 +134,7 @@ class GitVersionPluginDescribeTests : GitVersionPluginTests() {
     gitIgnoreFile.appendText("build")
 
     // create repository with a single commit tagged as 1.0.0
-    val git = Git(projectDir, true)
+    val git = NativeGit(projectDir)
     git.runGitCommand("init", projectDir.toString())
     git.runGitCommand("add", ".")
     git.runGitCommand("commit", "-m", "initial commit")
@@ -155,6 +149,7 @@ class GitVersionPluginDescribeTests : GitVersionPluginTests() {
     // switch back to main branch and merge hotfix branch into main branch
     git.runGitCommand("checkout", master)
     git.runGitCommand("merge", commitId, "--no-ff", "-m", "merge commit")
+    val targetId = git.currentHeadFullHash
 
     // when:
     val buildResult = with("printVersion").build()
@@ -163,7 +158,7 @@ class GitVersionPluginDescribeTests : GitVersionPluginTests() {
     assertThat(
       buildResult.output.split('\n'),
       containsInRelativeOrder(
-        matchesRegex(MERGE_COMMIT_REGEX),
+        equalTo("1.0.0-1-g${targetId.substring(0..6)}"),
       ),
     )
   }
@@ -182,7 +177,7 @@ class GitVersionPluginDescribeTests : GitVersionPluginTests() {
     gitIgnoreFile.appendText("build")
 
     // create repository with a single commit tagged as 1.0.0
-    val git = Git(projectDir, true)
+    val git = NativeGit(projectDir)
     git.runGitCommand("init", projectDir.toString())
     git.runGitCommand("add", ".")
     git.runGitCommand("commit", "-m", "initial commit")
@@ -222,7 +217,7 @@ class GitVersionPluginDescribeTests : GitVersionPluginTests() {
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
-    val git = Git(projectDir, true)
+    val git = NativeGit(projectDir)
     git.runGitCommand("init", projectDir.toString())
     git.runGitCommand("add", ".")
     git.runGitCommand("commit", "-m", "initial commit")

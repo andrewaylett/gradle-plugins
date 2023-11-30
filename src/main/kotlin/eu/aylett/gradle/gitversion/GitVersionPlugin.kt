@@ -40,8 +40,6 @@ class GitVersionPlugin() : Plugin<Project> {
         versionCacheService,
       )
 
-    ext.isolateGit.convention(true)
-    versionCacheService.get().isolateGit.set(ext.isolateGit)
     project.extensions.extraProperties["gitVersion"] = ext.gitVersion
     project.extensions.extraProperties["versionDetails"] = ext.versionDetails
 

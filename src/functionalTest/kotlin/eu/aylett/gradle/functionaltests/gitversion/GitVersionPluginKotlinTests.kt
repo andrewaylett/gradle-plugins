@@ -1,6 +1,6 @@
 package eu.aylett.gradle.functionaltests.gitversion
 
-import eu.aylett.gradle.gitversion.Git
+import eu.aylett.gradle.gitversion.NativeGit
 import org.hamcrest.MatcherAssert
 import org.hamcrest.Matchers.containsInRelativeOrder
 import org.hamcrest.Matchers.equalTo
@@ -34,7 +34,7 @@ class GitVersionPluginKotlinTests : GitVersionPluginTests(true) {
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
-    val git = Git(projectDir, true)
+    val git = NativeGit(projectDir)
     git.runGitCommand("init", projectDir.toString())
     git.runGitCommand("add", ".")
     git.runGitCommand("commit", "-m", "initial commit")
@@ -71,7 +71,7 @@ class GitVersionPluginKotlinTests : GitVersionPluginTests(true) {
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
-    val git = Git(projectDir, true)
+    val git = NativeGit(projectDir)
     git.runGitCommand("init", projectDir.toString())
     git.runGitCommand("add", ".")
     git.runGitCommand("commit", "-m", "initial commit")
@@ -112,7 +112,7 @@ class GitVersionPluginKotlinTests : GitVersionPluginTests(true) {
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
-    val git = Git(projectDir, true)
+    val git = NativeGit(projectDir)
     git.runGitCommand("init", projectDir.toString())
     git.runGitCommand("add", ".")
     git.runGitCommand("commit", "-m", "initial commit")
@@ -142,7 +142,7 @@ class GitVersionPluginKotlinTests : GitVersionPluginTests(true) {
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
-    val git = Git(projectDir, true)
+    val git = NativeGit(projectDir)
     git.runGitCommand("init", projectDir.toString())
     git.runGitCommand("add", ".")
     git.runGitCommand("commit", "-m", "initial commit")
@@ -174,7 +174,7 @@ class GitVersionPluginKotlinTests : GitVersionPluginTests(true) {
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
-    val git = Git(projectDir, true)
+    val git = NativeGit(projectDir)
     git.runGitCommand("init", projectDir.toString())
     git.runGitCommand("add", ".")
     git.runGitCommand("commit", "-m", "initial commit")

@@ -17,7 +17,7 @@
 
 package eu.aylett.gradle.functionaltests.gitversion
 
-import eu.aylett.gradle.gitversion.Git
+import eu.aylett.gradle.gitversion.NativeGit
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInRelativeOrder
 import org.junit.jupiter.api.Test
@@ -49,14 +49,14 @@ class GitVersionPluginMultiTests : GitVersionPluginTests() {
     gitIgnoreFile.appendText("build\n")
     gitIgnoreFile.appendText("sub\n")
 
-    val git = Git(projectDir, true)
+    val git = NativeGit(projectDir)
     git.runGitCommand("init", projectDir.toString())
     git.runGitCommand("add", ".")
     git.runGitCommand("commit", "-m", "initial commit")
     git.runGitCommand("tag", "-a", "1.0.0", "-m", "1.0.0")
 
     val subDir = Files.createDirectory(temporaryFolder.resolve("sub"))
-    val subGit = Git(subDir, true)
+    val subGit = NativeGit(subDir)
     subGit.runGitCommand("init", subDir.toString())
     val subDirty = subDir.resolve("subDirty")
     Files.createFile(subDirty)
@@ -93,7 +93,7 @@ class GitVersionPluginMultiTests : GitVersionPluginTests() {
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
-    val git = Git(projectDir, true)
+    val git = NativeGit(projectDir)
     git.runGitCommand("init", projectDir.toString())
     git.runGitCommand("add", ".")
     git.runGitCommand("commit", "-m", "initial commit")
@@ -124,7 +124,7 @@ class GitVersionPluginMultiTests : GitVersionPluginTests() {
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
-    val git = Git(projectDir, true)
+    val git = NativeGit(projectDir)
     git.runGitCommand("init", projectDir.toString())
     git.runGitCommand("add", ".")
     git.runGitCommand("commit", "-m", "initial commit")
@@ -197,7 +197,7 @@ class GitVersionPluginMultiTests : GitVersionPluginTests() {
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
-    val git = Git(projectDir, true)
+    val git = NativeGit(projectDir)
     git.runGitCommand("init", projectDir.toString())
     git.runGitCommand("add", ".")
     git.runGitCommand("commit", "-m", "initial commit")
@@ -224,7 +224,7 @@ class GitVersionPluginMultiTests : GitVersionPluginTests() {
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
-    val git = Git(projectDir, true)
+    val git = NativeGit(projectDir)
     git.runGitCommand("init", projectDir.toString())
     git.runGitCommand("add", ".")
     git.runGitCommand("commit", "-m", "initial commit")

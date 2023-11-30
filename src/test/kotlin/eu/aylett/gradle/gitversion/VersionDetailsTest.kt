@@ -27,7 +27,10 @@ import org.junit.jupiter.api.parallel.ResourceLock
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
+import java.time.Duration
+import java.time.Instant
 import java.util.regex.Pattern
+import kotlin.io.path.writeText
 
 private val HASH_AND_DIRTY_REGEX: Pattern = Pattern.compile("[0-9a-f]{7}\\.dirty")
 private val HASH_REGEX: Pattern = Pattern.compile("[0-9a-f]{7}")
@@ -36,12 +39,12 @@ private val HASH_REGEX: Pattern = Pattern.compile("[0-9a-f]{7}")
 class VersionDetailsTest {
   @TempDir
   lateinit var temporaryFolder: Path
-  private lateinit var git: Git
+  private lateinit var git: NativeGit
   private val formattedTime = "'2005-04-07T22:13:13'"
 
   @BeforeEach
   fun before() {
-    git = Git(temporaryFolder, true)
+    git = NativeGit(temporaryFolder)
     git.runGitCommand("init", temporaryFolder.toString())
   }
 
@@ -63,6 +66,79 @@ class VersionDetailsTest {
     git.runGitCommand("commit", "-m", "'initial commit'")
     git.runGitCommand("tag", "-a", "1.0.0", "-m", "unused")
     assertThat(versionDetails().version, equalTo("1.0.0"))
+  }
+
+  @Test
+  fun `unspecified when no commit exists`() {
+    assertThat(versionDetails().version, equalTo("unspecified"))
+  }
+
+  @Test
+  fun `multiple tags picks the annotated tag`() {
+    temporaryFolder.resolve("file").writeText("Content")
+    git.runGitCommand("add", ".")
+    git.runGitCommand("commit", "-m", "initial commit")
+    git.runGitCommand("tag", "1.0.0")
+    git.runGitCommand("tag", "-a", "2.0.0", "-m", "2.0.0")
+    git.runGitCommand("tag", "3.0.0")
+    assertThat(versionDetails().version, equalTo("2.0.0"))
+  }
+
+  @Test
+  fun `test multiple tags on same commit - most recent annotated tag`() {
+    // given:
+    temporaryFolder.resolve("file").writeText("Content")
+    git.runGitCommand("add", ".")
+    git.runGitCommand("commit", "-m", "initial commit")
+    val now = Instant.now()
+    val d1 = now - Duration.ofSeconds(1)
+    val envvar1 = HashMap<String, String>()
+    envvar1["GIT_COMMITTER_DATE"] = d1.toString()
+    git.runGitCommand(
+      envvar1,
+      "-c",
+      "user.name=\"name\"",
+      "-c",
+      "user.email=email@example.com",
+      "tag",
+      "-a",
+      "1.0.0",
+      "-m",
+      "1.0.0",
+    )
+    val d2 = now
+    val envvar2 = HashMap<String, String>()
+    envvar2["GIT_COMMITTER_DATE"] = d2.toString()
+    git.runGitCommand(
+      envvar2,
+      "-c",
+      "user.name=\"name\"",
+      "-c",
+      "user.email=email@example.com",
+      "tag",
+      "-a",
+      "2.0.0",
+      "-m",
+      "2.0.0",
+    )
+    val d3 = now - Duration.ofSeconds(1)
+    val envvar3 = HashMap<String, String>()
+    envvar3["GIT_COMMITTER_DATE"] = d3.toString()
+    git.runGitCommand(
+      envvar3,
+      "-c",
+      "user.name=\"name\"",
+      "-c",
+      "user.email=email@example.com",
+      "tag",
+      "-a",
+      "3.0.0",
+      "-m",
+      "3.0.0",
+    )
+
+    // then:
+    assertThat(versionDetails().version, equalTo("2.0.0"))
   }
 
   @Test
@@ -129,6 +205,6 @@ class VersionDetailsTest {
 
   private fun versionDetails(): VersionDetails {
     val gitDir = temporaryFolder.resolve("./.git")
-    return VersionDetailsImpl(gitDir, GitVersionArgs(), true)
+    return VersionDetailsImpl(gitDir, GitVersionArgs())
   }
 }
