@@ -17,7 +17,6 @@
 
 package eu.aylett.gradle.functionaltests.gitversion
 
-import eu.aylett.gradle.gitversion.NativeGit
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers
 import org.hamcrest.Matchers.containsString
@@ -75,11 +74,12 @@ class GitVersionPluginRepositoryTests : GitVersionPluginTests() {
       """.trimIndent(),
     )
 
-    val git = NativeGit(projectDir)
-    git.runGitCommand("init", projectDir.toString())
-    git.runGitCommand("add", ".")
-    git.runGitCommand("commit", "-m", "initial commit")
-    git.runGitCommand("tag", "-a", "1.0.0", "-m", "1.0.0")
+    git(projectDir) {
+      init(projectDir.toString())
+      add(".")
+      commit("-m", "initial commit")
+      tag("-a", "1.0.0", "-m", "1.0.0")
+    }
 
     // when:
     val buildResult = with("printVersion").build()

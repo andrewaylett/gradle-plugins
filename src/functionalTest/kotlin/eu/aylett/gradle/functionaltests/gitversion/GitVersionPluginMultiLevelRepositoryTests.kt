@@ -17,7 +17,6 @@
 
 package eu.aylett.gradle.functionaltests.gitversion
 
-import eu.aylett.gradle.gitversion.NativeGit
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInRelativeOrder
 import org.junit.jupiter.api.Test
@@ -39,11 +38,12 @@ class GitVersionPluginMultiLevelRepositoryTests : GitVersionPluginTests(false, "
     )
     gitIgnoreFile.appendText("build")
     settingsFile.appendText("")
-    val git = NativeGit(projectDir)
-    git.runGitCommand("init", rootFolder.toFile().absolutePath)
-    git.runGitCommand("add", ".")
-    git.runGitCommand("commit", "-m", "initial commit")
-    git.runGitCommand("tag", "-a", "1.0.0", "-m", "1.0.0")
+    git(projectDir) {
+      init(rootFolder.toFile().absolutePath)
+      add(".")
+      commit("-m", "initial commit")
+      tag("-a", "1.0.0", "-m", "1.0.0")
+    }
 
     // when:
     // will build the project at projectDir

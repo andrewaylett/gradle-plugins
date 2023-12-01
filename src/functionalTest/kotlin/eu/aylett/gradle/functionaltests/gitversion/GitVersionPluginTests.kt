@@ -16,6 +16,7 @@
  */
 package eu.aylett.gradle.functionaltests.gitversion
 
+import eu.aylett.gradle.gitversion.NativeGit
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.parallel.ResourceLock
@@ -79,5 +80,14 @@ abstract class GitVersionPluginTests(kotlin: Boolean, projectDirRelative: String
     gradleVersion.ifPresent { version -> gradleRunner.withGradleVersion(version) }
 
     return gradleRunner
+  }
+
+  protected fun git(
+    projectDir: Path,
+    action: NativeGit.() -> Unit,
+  ): NativeGit {
+    val git = NativeGit(projectDir)
+    action.invoke(git)
+    return git
   }
 }

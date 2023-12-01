@@ -17,7 +17,6 @@
 
 package eu.aylett.gradle.functionaltests.gitversion
 
-import eu.aylett.gradle.gitversion.NativeGit
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInRelativeOrder
 import org.hamcrest.Matchers.equalTo
@@ -38,8 +37,9 @@ class GitVersionPluginDescribeTests : GitVersionPluginTests() {
       """.trimIndent(),
     )
 
-    val git = NativeGit(projectDir)
-    git.runGitCommand("init", projectDir.toString())
+    git(projectDir) {
+      init(projectDir.toString())
+    }
 
     // when:
     val buildResult = with("printVersion").build()
@@ -60,8 +60,9 @@ class GitVersionPluginDescribeTests : GitVersionPluginTests() {
       """.trimIndent(),
     )
 
-    val git = NativeGit(projectDir)
-    git.runGitCommand("init", projectDir.toString())
+    git(projectDir) {
+      init(projectDir.toString())
+    }
 
     // when:
     val buildResult = with("printVersion").build()
@@ -82,11 +83,12 @@ class GitVersionPluginDescribeTests : GitVersionPluginTests() {
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
-    val git = NativeGit(projectDir)
-    git.runGitCommand("init", projectDir.toString())
-    git.runGitCommand("add", ".")
-    git.runGitCommand("commit", "-m", "initial commit")
-    git.runGitCommand("tag", "-a", "1.0.0", "-m", "1.0.0")
+    git(projectDir) {
+      init(projectDir.toString())
+      add(".")
+      commit("-m", "initial commit")
+      tag("-a", "1.0.0", "-m", "1.0.0")
+    }
 
     // when:
     val buildResult = with("printVersion").build()
@@ -107,11 +109,12 @@ class GitVersionPluginDescribeTests : GitVersionPluginTests() {
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
-    val git = NativeGit(projectDir)
-    git.runGitCommand("init", projectDir.toString())
-    git.runGitCommand("add", ".")
-    git.runGitCommand("commit", "-m", "initial commit")
-    git.runGitCommand("tag", "1.0.0")
+    git(projectDir) {
+      init(projectDir.toString())
+      add(".")
+      commit("-m", "initial commit")
+      tag("1.0.0")
+    }
 
     // when:
     val buildResult = with("printVersion").build()
@@ -134,33 +137,34 @@ class GitVersionPluginDescribeTests : GitVersionPluginTests() {
     gitIgnoreFile.appendText("build")
 
     // create repository with a single commit tagged as 1.0.0
-    val git = NativeGit(projectDir)
-    git.runGitCommand("init", projectDir.toString())
-    git.runGitCommand("add", ".")
-    git.runGitCommand("commit", "-m", "initial commit")
-    git.runGitCommand("tag", "-a", "1.0.0", "-m", "1.0.0")
+    git(projectDir) {
+      init(projectDir.toString())
+      add(".")
+      commit("-m", "initial commit")
+      tag("-a", "1.0.0", "-m", "1.0.0")
 
-    // create a new branch called "hotfix" that has a single commit and is tagged with "1.0.0-hotfix"
-    val master = git.currentHeadFullHash.substring(0, 7)
-    git.runGitCommand("checkout", "-b", "hotfix")
-    git.runGitCommand("commit", "-m", "hot fix for issue", "--allow-empty")
-    git.runGitCommand("tag", "-a", "1.0.0-hotfix", "-m", "1.0.0-hotfix")
-    val commitId = git.currentHeadFullHash
-    // switch back to main branch and merge hotfix branch into main branch
-    git.runGitCommand("checkout", master)
-    git.runGitCommand("merge", commitId, "--no-ff", "-m", "merge commit")
-    val targetId = git.currentHeadFullHash
+      // create a new branch called "hotfix" that has a single commit and is tagged with "1.0.0-hotfix"
+      val master = currentHeadFullHash.substring(0, 7)
+      checkout("-b", "hotfix")
+      commit("-m", "hot fix for issue", "--allow-empty")
+      tag("-a", "1.0.0-hotfix", "-m", "1.0.0-hotfix")
+      val commitId = currentHeadFullHash
+      // switch back to main branch and merge hotfix branch into main branch
+      checkout(master)
+      merge(commitId, "--no-ff", "-m", "merge commit")
+      val targetId = currentHeadFullHash
 
-    // when:
-    val buildResult = with("printVersion").build()
+      // when:
+      val buildResult = with("printVersion").build()
 
-    // then:
-    assertThat(
-      buildResult.output.split('\n'),
-      containsInRelativeOrder(
-        equalTo("1.0.0-1-g${targetId.substring(0..6)}"),
-      ),
-    )
+      // then:
+      assertThat(
+        buildResult.output.split('\n'),
+        containsInRelativeOrder(
+          equalTo("1.0.0-1-g${targetId.substring(0..6)}"),
+        ),
+      )
+    }
   }
 
   @Test
@@ -177,26 +181,27 @@ class GitVersionPluginDescribeTests : GitVersionPluginTests() {
     gitIgnoreFile.appendText("build")
 
     // create repository with a single commit tagged as 1.0.0
-    val git = NativeGit(projectDir)
-    git.runGitCommand("init", projectDir.toString())
-    git.runGitCommand("add", ".")
-    git.runGitCommand("commit", "-m", "initial commit")
-    git.runGitCommand("tag", "-a", "1.0.0", "-m", "1.0.0")
+    git(projectDir) {
+      init(projectDir.toString())
+      add(".")
+      commit("-m", "initial commit")
+      tag("-a", "1.0.0", "-m", "1.0.0")
 
-    // create a new branch called "hotfix" that has a single commit and is tagged with "1.0.0-hotfix"
+      // create a new branch called "hotfix" that has a single commit and is tagged with "1.0.0-hotfix"
 
-    val master = git.currentHeadFullHash.substring(0, 7)
-    git.runGitCommand("checkout", "-b", "hotfix")
-    git.runGitCommand("commit", "-m", "hot fix for issue", "--allow-empty")
-    git.runGitCommand("tag", "-a", "1.0.0-hotfix", "-m", "1.0.0-hotfix")
-    val commitId = git.currentHeadFullHash
+      val main = currentHeadFullHash.substring(0, 7)
+      checkout("-b", "hotfix")
+      commit("-m", "hot fix for issue", "--allow-empty")
+      tag("-a", "1.0.0-hotfix", "-m", "1.0.0-hotfix")
+      val commitId = currentHeadFullHash
 
-    // switch back to main branch and merge hotfix branch into main branch
-    git.runGitCommand("checkout", master)
-    git.runGitCommand("merge", commitId, "--no-ff", "-m", "merge commit")
+      // switch back to main branch and merge hotfix branch into main branch
+      checkout(main)
+      merge(commitId, "--no-ff", "-m", "merge commit")
 
-    // tag merge commit on main branch as 2.0.0
-    git.runGitCommand("tag", "-a", "2.0.0", "-m", "2.0.0")
+      // tag merge commit on main branch as 2.0.0
+      tag("-a", "2.0.0", "-m", "2.0.0")
+    }
 
     // when:
     val buildResult = with("printVersion").build()
@@ -217,11 +222,12 @@ class GitVersionPluginDescribeTests : GitVersionPluginTests() {
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
-    val git = NativeGit(projectDir)
-    git.runGitCommand("init", projectDir.toString())
-    git.runGitCommand("add", ".")
-    git.runGitCommand("commit", "-m", "initial commit")
-    git.runGitCommand("tag", "-a", "1.0.0", "-m", "1.0.0")
+    git(projectDir) {
+      init(projectDir.toString())
+      add(".")
+      commit("-m", "initial commit")
+      tag("-a", "1.0.0", "-m", "1.0.0")
+    }
     dirtyContentFile.writeText("dirty-content")
 
     // when:

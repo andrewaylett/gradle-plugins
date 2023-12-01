@@ -17,7 +17,6 @@
 
 package eu.aylett.gradle.functionaltests.gitversion
 
-import eu.aylett.gradle.gitversion.NativeGit
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInRelativeOrder
 import org.junit.jupiter.api.Test
@@ -49,20 +48,22 @@ class GitVersionPluginMultiTests : GitVersionPluginTests() {
     gitIgnoreFile.appendText("build\n")
     gitIgnoreFile.appendText("sub\n")
 
-    val git = NativeGit(projectDir)
-    git.runGitCommand("init", projectDir.toString())
-    git.runGitCommand("add", ".")
-    git.runGitCommand("commit", "-m", "initial commit")
-    git.runGitCommand("tag", "-a", "1.0.0", "-m", "1.0.0")
+    git(projectDir) {
+      init(projectDir.toString())
+      add(".")
+      commit("-m", "initial commit")
+      tag("-a", "1.0.0", "-m", "1.0.0")
+    }
 
     val subDir = Files.createDirectory(temporaryFolder.resolve("sub"))
-    val subGit = NativeGit(subDir)
-    subGit.runGitCommand("init", subDir.toString())
-    val subDirty = subDir.resolve("subDirty")
-    Files.createFile(subDirty)
-    subGit.runGitCommand("add", ".")
-    subGit.runGitCommand("commit", "-m", "initial commit sub")
-    subGit.runGitCommand("tag", "-a", "8.8.8", "-m", "8.8.8")
+    git(subDir) {
+      init(subDir.toString())
+      val subDirty = subDir.resolve("subDirty")
+      Files.createFile(subDirty)
+      add(".")
+      commit("-m", "initial commit sub")
+      tag("-a", "8.8.8", "-m", "8.8.8")
+    }
 
     // when:
     val buildResult = with("printVersion", ":sub:printVersion").build()
@@ -93,13 +94,14 @@ class GitVersionPluginMultiTests : GitVersionPluginTests() {
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
-    val git = NativeGit(projectDir)
-    git.runGitCommand("init", projectDir.toString())
-    git.runGitCommand("add", ".")
-    git.runGitCommand("commit", "-m", "initial commit")
-    git.runGitCommand("tag", "1.0.0")
-    git.runGitCommand("tag", "-a", "2.0.0", "-m", "2.0.0")
-    git.runGitCommand("tag", "3.0.0")
+    git(projectDir) {
+      init(projectDir.toString())
+      add(".")
+      commit("-m", "initial commit")
+      tag("1.0.0")
+      tag("-a", "2.0.0", "-m", "2.0.0")
+      tag("3.0.0")
+    }
 
     // when:
     val buildResult = with("printVersion").build()
@@ -124,55 +126,56 @@ class GitVersionPluginMultiTests : GitVersionPluginTests() {
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
-    val git = NativeGit(projectDir)
-    git.runGitCommand("init", projectDir.toString())
-    git.runGitCommand("add", ".")
-    git.runGitCommand("commit", "-m", "initial commit")
-    val d1 = Instant.now() - Duration.ofSeconds(1)
-    val envvar1 = HashMap<String, String>()
-    envvar1["GIT_COMMITTER_DATE"] = d1.toString()
-    git.runGitCommand(
-      envvar1,
-      "-c",
-      "user.name=\"name\"",
-      "-c",
-      "user.email=email@example.com",
-      "tag",
-      "-a",
-      "1.0.0",
-      "-m",
-      "1.0.0",
-    )
-    val d2 = Instant.now()
-    val envvar2 = HashMap<String, String>()
-    envvar2["GIT_COMMITTER_DATE"] = d2.toString()
-    git.runGitCommand(
-      envvar2,
-      "-c",
-      "user.name=\"name\"",
-      "-c",
-      "user.email=email@example.com",
-      "tag",
-      "-a",
-      "2.0.0",
-      "-m",
-      "2.0.0",
-    )
-    val d3 = Instant.now() - Duration.ofSeconds(1)
-    val envvar3 = HashMap<String, String>()
-    envvar3["GIT_COMMITTER_DATE"] = d3.toString()
-    git.runGitCommand(
-      envvar3,
-      "-c",
-      "user.name=\"name\"",
-      "-c",
-      "user.email=email@example.com",
-      "tag",
-      "-a",
-      "3.0.0",
-      "-m",
-      "3.0.0",
-    )
+    git(projectDir) {
+      init(projectDir.toString())
+      add(".")
+      commit("-m", "initial commit")
+      val d1 = Instant.now() - Duration.ofSeconds(1)
+      val envvar1 = HashMap<String, String>()
+      envvar1["GIT_COMMITTER_DATE"] = d1.toString()
+      runGitCommand(
+        envvar1,
+        "-c",
+        "user.name=\"name\"",
+        "-c",
+        "user.email=email@example.com",
+        "tag",
+        "-a",
+        "1.0.0",
+        "-m",
+        "1.0.0",
+      )
+      val d2 = Instant.now()
+      val envvar2 = HashMap<String, String>()
+      envvar2["GIT_COMMITTER_DATE"] = d2.toString()
+      runGitCommand(
+        envvar2,
+        "-c",
+        "user.name=\"name\"",
+        "-c",
+        "user.email=email@example.com",
+        "tag",
+        "-a",
+        "2.0.0",
+        "-m",
+        "2.0.0",
+      )
+      val d3 = Instant.now() - Duration.ofSeconds(1)
+      val envvar3 = HashMap<String, String>()
+      envvar3["GIT_COMMITTER_DATE"] = d3.toString()
+      runGitCommand(
+        envvar3,
+        "-c",
+        "user.name=\"name\"",
+        "-c",
+        "user.email=email@example.com",
+        "tag",
+        "-a",
+        "3.0.0",
+        "-m",
+        "3.0.0",
+      )
+    }
 
     // when:
     val buildResult = with("printVersion").build()
@@ -197,13 +200,14 @@ class GitVersionPluginMultiTests : GitVersionPluginTests() {
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
-    val git = NativeGit(projectDir)
-    git.runGitCommand("init", projectDir.toString())
-    git.runGitCommand("add", ".")
-    git.runGitCommand("commit", "-m", "initial commit")
-    git.runGitCommand("tag", "2.0.0")
-    git.runGitCommand("tag", "1.0.0")
-    git.runGitCommand("tag", "3.0.0")
+    git(projectDir) {
+      init(projectDir.toString())
+      add(".")
+      commit("-m", "initial commit")
+      tag("2.0.0")
+      tag("1.0.0")
+      tag("3.0.0")
+    }
 
     // when:
     val buildResult = with("printVersion").build()
@@ -224,17 +228,19 @@ class GitVersionPluginMultiTests : GitVersionPluginTests() {
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
-    val git = NativeGit(projectDir)
-    git.runGitCommand("init", projectDir.toString())
-    git.runGitCommand("add", ".")
-    git.runGitCommand("commit", "-m", "initial commit")
-    git.runGitCommand("tag", "-a", "1.0.0", "-m", "1.0.0")
-
     val depth = 100
-    for (i in 0 until depth) {
-      git.runGitCommand("add", ".")
-      git.runGitCommand("commit", "-m", "commit-$i", "--allow-empty")
-    }
+    val git =
+      git(projectDir) {
+        init(projectDir.toString())
+        add(".")
+        commit("-m", "initial commit")
+        tag("-a", "1.0.0", "-m", "1.0.0")
+
+        for (i in 0 until depth) {
+          add(".")
+          commit("-m", "commit-$i", "--allow-empty")
+        }
+      }
     val latestCommit = git.currentHeadFullHash
 
     // when:
