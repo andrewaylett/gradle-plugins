@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-package eu.aylett.gradle.functionaltests.gitversion
+package eu.aylett.gradle.gitversion
 
+import org.gradle.kotlin.dsl.invoke
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.containsInRelativeOrder
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.matchesRegex
 import org.junit.jupiter.api.Test
@@ -61,59 +61,51 @@ class GitVersionPluginVersionDetailsTests : GitVersionPluginTests() {
       tag("-a", "1.0.0", "-m", "1.0.0")
     }
 
-    // when:
-    val buildResult = with("printVersionDetails").build()
-
     // then:
-    assertThat(
-      buildResult.output.split('\n'),
-      containsInRelativeOrder(
-        equalTo("1.0.0"),
-        equalTo("0"),
-        matchesRegex(SHA_PATTERN),
-        matchesRegex(SHA_FULL_PATTERN),
-        equalTo("main"),
-        equalTo("true"),
-      ),
-    )
+    assertThat(project.versionDetails().lastTag, equalTo("1.0.0"))
+    assertThat(project.versionDetails().commitDistance, equalTo(0))
+    assertThat(project.versionDetails().gitHash, matchesRegex(SHA_PATTERN))
+    assertThat(project.versionDetails().gitHashFull, matchesRegex(SHA_FULL_PATTERN))
+    assertThat(project.versionDetails().branchName, equalTo("main"))
+    assertThat(project.versionDetails().isCleanTag, equalTo(true))
   }
 
   @Test
-  fun `version details can be accessed using extra properties method`() {
+  fun `version details when commit distance to tag is gt 0`() {
     // given:
     buildFile.writeText(
       """
       plugins {
         id "eu.aylett.plugins.version"
       }
-      version = gitVersion()
+      version gitVersion ()
       task printVersionDetails {
         doLast {
-          println project . getExtensions ().getExtraProperties().get("versionDetails")().lastTag
-          println project . getExtensions ().getExtraProperties().get("gitVersion")()
+          println versionDetails ().lastTag
+          println versionDetails ().commitDistance
+          println versionDetails ().gitHash
+          println versionDetails ().branchName
+          println versionDetails ().isCleanTag
         }
       }
+
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
-    val git =
-      git(projectDir) {
-        init(projectDir.toString())
-        add(".")
-        commit("-m", "initial commit")
-      }
-    val sha = git.currentHeadFullHash.subSequence(0, 7)
-
-    // when:
-    val buildResult = with("printVersionDetails").build()
+    git(projectDir) {
+      init(projectDir.toString())
+      add(".")
+      commit("-m", "initial commit")
+      tag("-a", "1.0.0", "-m", "1.0.0")
+      commit("-m", "commit 2", "--allow-empty")
+    }
 
     // then:
-    assertThat(
-      buildResult.output.split('\n'),
-      containsInRelativeOrder(
-        sha,
-        sha,
-      ),
-    )
+    assertThat(project.versionDetails().lastTag, equalTo("1.0.0"))
+    assertThat(project.versionDetails().commitDistance, equalTo(1))
+    assertThat(project.versionDetails().gitHash, matchesRegex(SHA_PATTERN))
+    assertThat(project.versionDetails().gitHashFull, matchesRegex(SHA_FULL_PATTERN))
+    assertThat(project.versionDetails().branchName, equalTo("main"))
+    assertThat(project.versionDetails().isCleanTag, equalTo(false))
   }
 }

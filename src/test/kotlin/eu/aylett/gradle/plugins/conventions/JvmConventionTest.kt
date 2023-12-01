@@ -29,8 +29,8 @@ import org.hamcrest.Matchers
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.not
 import org.hamcrest.core.AllOf.allOf
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
-import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformJvmPlugin
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinMultiplatformPluginWrapper
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 
@@ -46,7 +46,7 @@ class JvmConventionTest {
     val project = ProjectBuilder.builder().build()
     project.pluginManager.apply(JvmConvention::class.java)
 
-    assertThat(project.pluginManager, allOf(not(hasPlugin("java")), not(hasPlugin("kotlin"))))
+    assertThat(project, allOf(not(hasPlugin("java")), not(hasPlugin("kotlin"))))
   }
 
   @Test
@@ -58,7 +58,7 @@ class JvmConventionTest {
     // Trigger project evaluation
     project.getTasksByName("check", false)
 
-    assertThat(project.pluginManager, allOf(hasPlugin("java"), not(hasPlugin("kotlin"))))
+    assertThat(project, allOf(hasPlugin("java"), not(hasPlugin("kotlin"))))
 
     assertThat(
       project.extensions.getByType<JavaPluginExtension>().toolchain.languageVersion.get(),
@@ -70,12 +70,12 @@ class JvmConventionTest {
   fun `Configures kotlin if present`() {
     val project = ProjectBuilder.builder().build()
     project.pluginManager.apply(JvmConvention::class.java)
-    project.pluginManager.apply(KotlinPlatformJvmPlugin::class.java)
+    project.pluginManager.apply(KotlinMultiplatformPluginWrapper::class.java)
+
+    project.extensions.getByType<KotlinMultiplatformExtension>().jvm()
 
     // Trigger project evaluation
     project.getTasksByName("check", false)
-
-    assertThat(project.pluginManager, allOf(hasPlugin("java"), hasPlugin("kotlin")))
 
     assertThat(
       project.extensions.getByType<JavaPluginExtension>().toolchain.languageVersion.get(),
@@ -83,7 +83,7 @@ class JvmConventionTest {
     )
 
     val kotlinToolchain = project.objects.property<JavaLanguageVersion>()
-    project.extensions.getByType<KotlinJvmProjectExtension>().jvmToolchain {
+    project.extensions.getByType<KotlinMultiplatformExtension>().jvmToolchain {
       kotlinToolchain.set(languageVersion)
     }
 

@@ -25,6 +25,7 @@ plugins {
 }
 
 val check = tasks.named("check")
+@Suppress("INACCESSIBLE_TYPE")
 extensions.getByType<SpotlessExtension>().apply {
   kotlin {
     ktlint()
