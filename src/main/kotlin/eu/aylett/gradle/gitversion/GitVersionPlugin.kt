@@ -23,7 +23,7 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 
 @Suppress("unused")
-class GitVersionPlugin() : Plugin<Project> {
+class GitVersionPlugin : Plugin<Project> {
   override fun apply(project: Project) {
     project.pluginManager.apply(BasePlugin::class)
     val versionCacheService =

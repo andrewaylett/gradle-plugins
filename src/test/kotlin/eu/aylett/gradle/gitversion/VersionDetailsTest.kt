@@ -23,7 +23,6 @@ import org.hamcrest.Matchers.notNullValue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
-import org.junit.jupiter.api.parallel.ResourceLock
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
@@ -35,7 +34,6 @@ import kotlin.io.path.writeText
 private val HASH_AND_DIRTY_REGEX: Pattern = Pattern.compile("[0-9a-f]{7}\\.dirty")
 private val HASH_REGEX: Pattern = Pattern.compile("[0-9a-f]{7}")
 
-@ResourceLock(value = "git")
 class VersionDetailsTest {
   @TempDir
   lateinit var temporaryFolder: Path

@@ -18,6 +18,7 @@ package eu.aylett.gradle.gitversion
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.lib.Constants.R_TAGS
+import org.eclipse.jgit.lib.Repository.shortenRefName
 import org.eclipse.jgit.revwalk.RevWalk
 import java.nio.file.Path
 import java.util.stream.Collectors
@@ -34,7 +35,14 @@ class Git(gitDir: Path) : AutoCloseable {
 
   private val repository: FileRepository by lazy { FileRepository(gitDir.toFile()) }
   private val git: Git by lazy { Git(repository) }
-  val currentBranch: String by lazy { repository.branch }
+  val currentBranch: String by lazy {
+    val head = repository.exactRef("HEAD")
+    if (head.isSymbolic) {
+      shortenRefName(head.target.name)
+    } else {
+      ""
+    }
+  }
   val currentHeadFullHash: String by lazy { repository.findRef("HEAD").objectId.name }
   val isClean: Boolean by lazy { git.status().call().isClean }
 

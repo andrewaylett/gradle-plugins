@@ -14,14 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package eu.aylett.gradle.functionaltests.gitversion
+package eu.aylett.gradle.gitversion
 
-import eu.aylett.gradle.gitversion.NativeGit
-import org.gradle.testkit.runner.GradleRunner
+import eu.aylett.gradle.extensions.BaseExtension
+import groovy.lang.Closure
+import org.gradle.api.Project
+import org.gradle.kotlin.dsl.provideDelegate
+import org.gradle.testfixtures.ProjectBuilder
 import org.junit.jupiter.api.BeforeEach
 import java.nio.file.Files.createDirectories
 import java.nio.file.Path
-import java.util.Optional
 import kotlin.io.path.createFile
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.writeText
@@ -51,32 +53,26 @@ abstract class GitVersionPluginTests(kotlin: Boolean, projectDirRelative: String
   @BeforeEach
   fun setup() {
     settingsFile.writeText("rootProject.name = \"gradle-test\"\n")
-    gitIgnoreFile.writeText(".gradle\n")
+    gitIgnoreFile.writeText(".gradle\nuserHome\n")
   }
 
-  protected fun with(vararg tasks: String): GradleRunner {
-    return with(Optional.empty(), *tasks)
+  protected val project: Project by lazy {
+    val project = ProjectBuilder.builder().withProjectDir(projectDir.toFile()).build()
+    project.pluginManager.apply(GitVersionPlugin::class.java)
+    project
   }
 
-  protected fun with(
-    gradleVersion: Optional<String>,
-    vararg tasks: String,
-  ): GradleRunner {
-    val arguments = mutableListOf("--stacktrace", "--info")
-    arguments.addAll(tasks)
+  val Project.aylett: BaseExtension
+    get() = this.extensions.getByType(BaseExtension::class.java)
 
-    val gradleRunner =
-      GradleRunner.create()
-        .forwardOutput()
-        .withDebug(true)
-        .withPluginClasspath()
-        .withProjectDir(projectDir.toFile())
-        .withArguments(arguments)
+  val BaseExtension.versions: GitVersionExtension
+    get() = this.extensions.getByType(GitVersionExtension::class.java)
 
-    gradleVersion.ifPresent { version -> gradleRunner.withGradleVersion(version) }
+  val Project.versionDetails: Closure<VersionDetails>
+    get() = this.aylett.versions.versionDetails
 
-    return gradleRunner
-  }
+  val Project.gitVersion: Closure<String>
+    get() = this.aylett.versions.gitVersion
 
   protected fun git(
     projectDir: Path,

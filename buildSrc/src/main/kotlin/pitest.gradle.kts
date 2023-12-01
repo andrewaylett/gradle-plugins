@@ -48,7 +48,8 @@ inline fun <T, R> Iterable<T>.transform(crossinline transform: (T) -> R): Iterab
 val isCI = providers.environmentVariable("CI").isPresent
 pitest {
   targetClasses.add("eu.aylett.*")
-  testSourceSets.set(testing.suites.withType<JvmTestSuite>().transform { it.sources })
+  // Not much point in running functional tests, they don't pick up mutations
+  //testSourceSets.set(testing.suites.withType<JvmTestSuite>().transform { it.sources })
   // Don't mutate the class that calls git
   excludedClasses.add("eu.aylett.gradle.gitversion.Git")
 
