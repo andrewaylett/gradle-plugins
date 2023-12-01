@@ -98,6 +98,22 @@ class NativeGit(private val directory: Path) {
 
   fun runGitCommand(vararg command: String): String = runGitCommand(HashMap(), *command)
 
+  fun init(vararg params: String): String = runGitCmd("init", *params)
+
+  fun commit(vararg params: String): String = runGitCmd("commit", *params)
+
+  fun add(vararg params: String): String = runGitCmd("add", *params)
+
+  fun tag(vararg params: String): String = runGitCmd("tag", *params)
+
+  fun branch(vararg params: String): String = runGitCmd("branch", *params)
+
+  fun worktree(vararg params: String): String = runGitCmd("worktree", *params)
+
+  fun checkout(vararg params: String): String = runGitCmd("checkout", *params)
+
+  fun merge(vararg params: String): String = runGitCmd("merge", *params)
+
   private fun checkIfUserIsSet(): Boolean {
     try {
       return runGitCmd("config", "user.email").isNotEmpty()

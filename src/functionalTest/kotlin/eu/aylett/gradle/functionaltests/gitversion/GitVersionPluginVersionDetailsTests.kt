@@ -17,7 +17,6 @@
 
 package eu.aylett.gradle.functionaltests.gitversion
 
-import eu.aylett.gradle.gitversion.NativeGit
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInRelativeOrder
 import org.hamcrest.Matchers.equalTo
@@ -55,11 +54,12 @@ class GitVersionPluginVersionDetailsTests : GitVersionPluginTests() {
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
-    val git = NativeGit(projectDir)
-    git.runGitCommand("init", projectDir.toString())
-    git.runGitCommand("add", ".")
-    git.runGitCommand("commit", "-m", "initial commit")
-    git.runGitCommand("tag", "-a", "1.0.0", "-m", "1.0.0")
+    git(projectDir) {
+      init(projectDir.toString())
+      add(".")
+      commit("-m", "initial commit")
+      tag("-a", "1.0.0", "-m", "1.0.0")
+    }
 
     // when:
     val buildResult = with("printVersionDetails").build()
@@ -96,10 +96,12 @@ class GitVersionPluginVersionDetailsTests : GitVersionPluginTests() {
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
-    val git = NativeGit(projectDir)
-    git.runGitCommand("init", projectDir.toString())
-    git.runGitCommand("add", ".")
-    git.runGitCommand("commit", "-m", "initial commit")
+    val git =
+      git(projectDir) {
+        init(projectDir.toString())
+        add(".")
+        commit("-m", "initial commit")
+      }
     val sha = git.currentHeadFullHash.subSequence(0, 7)
 
     // when:
@@ -137,12 +139,13 @@ class GitVersionPluginVersionDetailsTests : GitVersionPluginTests() {
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
-    val git = NativeGit(projectDir)
-    git.runGitCommand("init", projectDir.toString())
-    git.runGitCommand("add", ".")
-    git.runGitCommand("commit", "-m", "initial commit")
-    git.runGitCommand("tag", "-a", "1.0.0", "-m", "1.0.0")
-    git.runGitCommand("commit", "-m", "commit 2", "--allow-empty")
+    git(projectDir) {
+      init(projectDir.toString())
+      add(".")
+      commit("-m", "initial commit")
+      tag("-a", "1.0.0", "-m", "1.0.0")
+      commit("-m", "commit 2", "--allow-empty")
+    }
 
     // when:
     val buildResult = with("printVersionDetails").build()

@@ -17,7 +17,6 @@
 
 package eu.aylett.gradle.functionaltests.gitversion
 
-import eu.aylett.gradle.gitversion.NativeGit
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInRelativeOrder
 import org.hamcrest.Matchers.containsString
@@ -36,14 +35,15 @@ class GitVersionPluginWorktreeRepositoryTests : GitVersionPluginTests(false, "or
       version gitVersion ()
       """.trimIndent(),
     )
-    val git = NativeGit(projectDir)
-    git.runGitCommand("init", projectDir.toFile().absolutePath)
-    git.runGitCommand("add", ".")
-    git.runGitCommand("commit", "-m", "initial commit")
-    git.runGitCommand("tag", "-a", "1.0.0", "-m", "1.0.0")
-    git.runGitCommand("branch", "newbranch")
     val worktreePath = "../worktree"
-    git.runGitCommand("worktree", "add", worktreePath, "newbranch")
+    git(projectDir) {
+      init(projectDir.toFile().absolutePath)
+      add(".")
+      commit("-m", "initial commit")
+      tag("-a", "1.0.0", "-m", "1.0.0")
+      branch("newbranch")
+      worktree("add", worktreePath, "newbranch")
+    }
 
     // when:
     // will build the project at projectDir

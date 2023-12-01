@@ -17,7 +17,6 @@
 
 package eu.aylett.gradle.functionaltests.gitversion
 
-import eu.aylett.gradle.gitversion.NativeGit
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInRelativeOrder
 import org.hamcrest.Matchers.equalTo
@@ -51,10 +50,11 @@ class GitVersionPluginCommitStateTests : GitVersionPluginTests() {
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
-    val git = NativeGit(projectDir)
-    git.runGitCommand("init", projectDir.toString())
-    git.runGitCommand("add", ".")
-    git.runGitCommand("commit", "-m", "initial commit")
+    git(projectDir) {
+      init(projectDir.toString())
+      add(".")
+      commit("-m", "initial commit")
+    }
     dirtyContentFile.writeText("dirty-content")
 
     // when:
@@ -85,14 +85,15 @@ class GitVersionPluginCommitStateTests : GitVersionPluginTests() {
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
-    val git = NativeGit(projectDir)
-    git.runGitCommand("init", projectDir.toString())
-    git.runGitCommand("add", ".")
-    git.runGitCommand("commit", "-m", "initial commit")
-    val commitId = git.currentHeadFullHash
-    git.runGitCommand("tag", "-a", "1.0.0", "-m", "1.0.0")
-    git.runGitCommand("commit", "-m", "commit 2", "--allow-empty")
-    git.runGitCommand("checkout", commitId)
+    git(projectDir) {
+      init(projectDir.toString())
+      add(".")
+      commit("-m", "initial commit")
+      val commitId = currentHeadFullHash
+      tag("-a", "1.0.0", "-m", "1.0.0")
+      commit("-m", "commit 2", "--allow-empty")
+      checkout(commitId)
+    }
 
     // when:
     val buildResult = with("printVersionDetails").build()
@@ -126,13 +127,14 @@ class GitVersionPluginCommitStateTests : GitVersionPluginTests() {
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
-    val git = NativeGit(projectDir)
-    git.runGitCommand("init", projectDir.toString())
-    git.runGitCommand("add", ".")
-    git.runGitCommand("commit", "-m", "initial commit")
-    git.runGitCommand("tag", "-a", "my-product@1.0.0", "-m", "my-product@1.0.0")
-    git.runGitCommand("commit", "-m", "commit 2", "--allow-empty")
-    git.runGitCommand("tag", "-a", "1.0.0", "-m", "1.0.0")
+    git(projectDir) {
+      init(projectDir.toString())
+      add(".")
+      commit("-m", "initial commit")
+      tag("-a", "my-product@1.0.0", "-m", "my-product@1.0.0")
+      commit("-m", "commit 2", "--allow-empty")
+      tag("-a", "1.0.0", "-m", "1.0.0")
+    }
 
     // when:
     val buildResult = with("printVersionDetails").build()
@@ -153,24 +155,25 @@ class GitVersionPluginCommitStateTests : GitVersionPluginTests() {
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
-    val git = NativeGit(projectDir)
-    git.runGitCommand("init", projectDir.toString())
-    git.runGitCommand("add", ".")
-    git.runGitCommand("commit", "-m", "initial commit")
-    git.runGitCommand("tag", "-a", "v1.0.0", "-m", "1.0.0")
-    dirtyContentFile.writeText("dirty-content")
-    git.runGitCommand("add", ".")
-    git.runGitCommand("commit", "-m", "add some stuff")
-    val commitSha = git.currentHeadFullHash
+    git(projectDir) {
+      init(projectDir.toString())
+      add(".")
+      commit("-m", "initial commit")
+      tag("-a", "v1.0.0", "-m", "1.0.0")
+      dirtyContentFile.writeText("dirty-content")
+      add(".")
+      commit("-m", "add some stuff")
+      val commitSha = currentHeadFullHash
 
-    // when:
-    val buildResult = with("printVersion").build()
+      // when:
+      val buildResult = with("printVersion").build()
 
-    // then:
-    assertThat(
-      buildResult.output.split('\n'),
-      containsInRelativeOrder("1.0.0-1-g${commitSha.substring(0, 7)}"),
-    )
+      // then:
+      assertThat(
+        buildResult.output.split('\n'),
+        containsInRelativeOrder("1.0.0-1-g${commitSha.substring(0, 7)}"),
+      )
+    }
   }
 
   @Test
@@ -185,23 +188,24 @@ class GitVersionPluginCommitStateTests : GitVersionPluginTests() {
       """.trimIndent(),
     )
     gitIgnoreFile.appendText("build")
-    val git = NativeGit(projectDir)
-    git.runGitCommand("init", projectDir.toString())
-    git.runGitCommand("add", ".")
-    git.runGitCommand("commit", "-m", "initial commit")
-    git.runGitCommand("tag", "v1.0.0")
-    dirtyContentFile.writeText("dirty-content")
-    git.runGitCommand("add", ".")
-    git.runGitCommand("commit", "-m", "add some stuff")
-    val commitSha = git.currentHeadFullHash
+    git(projectDir) {
+      init(projectDir.toString())
+      add(".")
+      commit("-m", "initial commit")
+      tag("v1.0.0")
+      dirtyContentFile.writeText("dirty-content")
+      add(".")
+      commit("-m", "add some stuff")
+      val commitSha = currentHeadFullHash
 
-    // when:
-    val buildResult = with("printVersion").build()
+      // when:
+      val buildResult = with("printVersion").build()
 
-    // then:
-    assertThat(
-      buildResult.output.split('\n'),
-      containsInRelativeOrder("1.0.0-1-g${commitSha.substring(0, 7)}"),
-    )
+      // then:
+      assertThat(
+        buildResult.output.split('\n'),
+        containsInRelativeOrder("1.0.0-1-g${commitSha.substring(0, 7)}"),
+      )
+    }
   }
 }
