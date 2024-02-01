@@ -25,7 +25,7 @@ plugins {
 
 dependencies {
   pitest("org.slf4j:slf4j-api:2.0.9")
-  pitest("ch.qos.logback:logback-classic:1.4.13")
+  pitest("ch.qos.logback:logback-classic:1.4.14")
   pitest("com.groupcdg.arcmutate:base:1.2.2")
   pitest("com.groupcdg.pitest:pitest-accelerator-junit5:1.0.6")
   pitest("com.groupcdg:pitest-git-plugin:1.1.4")
