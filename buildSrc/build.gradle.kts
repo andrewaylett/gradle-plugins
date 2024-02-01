@@ -40,7 +40,7 @@ dependencies {
   implementation("eu.aylett:gradle-plugins:0.3.0")
   implementation("com.diffplug.spotless:spotless-plugin-gradle:6.23.0")
   implementation("org.gradle.kotlin:gradle-kotlin-dsl-plugins:4.1.2")
-  implementation("org.pitest:pitest:1.15.3")
+  implementation("org.pitest:pitest:1.15.6")
   implementation("com.groupcdg.gradle:common:1.0.7")
   implementation("info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.15.0")
   implementation("com.groupcdg.pitest.github:com.groupcdg.pitest.github.gradle.plugin:1.0.7")
