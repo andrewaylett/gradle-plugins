@@ -39,7 +39,7 @@ dependencies {
   implementation("com.google.guava:guava:32.1.3-jre")
   implementation("eu.aylett:gradle-plugins:0.3.0")
   implementation("com.diffplug.spotless:spotless-plugin-gradle:6.25.0")
-  implementation("org.gradle.kotlin:gradle-kotlin-dsl-plugins:4.1.2")
+  implementation("org.gradle.kotlin:gradle-kotlin-dsl-plugins:4.5.0")
   implementation("org.pitest:pitest:1.15.6")
   implementation("com.groupcdg.gradle:common:1.0.7")
   implementation("info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.15.0")
