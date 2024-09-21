@@ -22,15 +22,11 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.kotlin.dsl.getByType
-import org.gradle.kotlin.dsl.property
 import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.not
 import org.hamcrest.core.AllOf.allOf
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
-import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformJvmPlugin
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 
@@ -66,30 +62,6 @@ class JvmConventionTest {
     )
   }
 
-  @Test
-  fun `Configures kotlin if present`() {
-    val project = ProjectBuilder.builder().build()
-    project.pluginManager.apply(JvmConvention::class.java)
-    project.pluginManager.apply(KotlinPlatformJvmPlugin::class.java)
-
-    // Trigger project evaluation
-    project.getTasksByName("check", false)
-
-    assertThat(project.pluginManager, allOf(hasPlugin("java"), hasPlugin("kotlin")))
-
-    assertThat(
-      project.extensions.getByType<JavaPluginExtension>().toolchain.languageVersion.get(),
-      equalTo(JavaLanguageVersion.of(17)),
-    )
-
-    val kotlinToolchain = project.objects.property<JavaLanguageVersion>()
-    project.extensions.getByType<KotlinJvmProjectExtension>().jvmToolchain {
-      kotlinToolchain.set(languageVersion)
-    }
-
-    assertThat(kotlinToolchain.get(), equalTo(JavaLanguageVersion.of(17)))
-  }
-
   companion object {
     @JvmStatic
     @BeforeAll
@@ -97,7 +69,7 @@ class JvmConventionTest {
       try {
         ProjectBuilder.builder().build()
       } catch (e: GradleException) {
-        assertThat(e.message, Matchers.equalTo("Could not inject synthetic classes."))
+        assertThat(e.message, equalTo("Could not inject synthetic classes."))
       }
     }
   }

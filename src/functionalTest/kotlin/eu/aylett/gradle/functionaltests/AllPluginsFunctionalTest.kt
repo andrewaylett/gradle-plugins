@@ -24,8 +24,10 @@ import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+import org.junit.jupiter.api.parallel.Isolated
 import java.io.File
 
+@Isolated
 class AllPluginsFunctionalTest {
   @TempDir
   lateinit var testProjectDir: File
