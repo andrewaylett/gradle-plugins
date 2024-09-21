@@ -19,6 +19,7 @@ package eu.aylett.gradle.functionaltests.gitversion
 
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInRelativeOrder
+import org.hamcrest.Matchers.hasItems
 import org.junit.jupiter.api.Test
 import java.nio.file.Files
 import kotlin.io.path.appendText
@@ -109,7 +110,7 @@ class GitVersionPluginMultiTests : GitVersionPluginTests() {
     // then:
     assertThat(
       buildResult.output.split('\n'),
-      containsInRelativeOrder("1.0.0-$depth-g${latestCommit.substring(0, 7)}"),
+      hasItems("1.0.0-$depth-g${latestCommit.substring(0, 7)}"),
     )
   }
 }

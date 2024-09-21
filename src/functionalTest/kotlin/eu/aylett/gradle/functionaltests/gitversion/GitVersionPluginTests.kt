@@ -47,6 +47,11 @@ abstract class GitVersionPluginTests(kotlin: Boolean, projectDirRelative: String
       "settings.gradle$kts",
     ).createFile()
   }
+  protected val propertiesFile: Path by lazy {
+    projectDir.resolve(
+      "gradle.properties",
+    ).createFile()
+  }
 
   @BeforeEach
   fun setup() {

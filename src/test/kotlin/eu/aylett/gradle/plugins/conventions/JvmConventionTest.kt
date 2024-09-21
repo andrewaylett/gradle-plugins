@@ -22,15 +22,11 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.kotlin.dsl.getByType
-import org.gradle.kotlin.dsl.property
 import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.not
 import org.hamcrest.core.AllOf.allOf
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
-import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformJvmPlugin
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 
