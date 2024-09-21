@@ -36,7 +36,7 @@ repositories {
 dependencies {
   implementation(platform("org.jetbrains.kotlin:kotlin-bom:$embeddedKotlinVersion"))
   implementation("org.jetbrains.kotlin:kotlin-gradle-plugin-api")
-  implementation("org.jetbrains.dokka:dokka-gradle-plugin:1.9.10")
+  implementation("org.jetbrains.dokka:dokka-gradle-plugin:1.9.20")
   implementation("com.google.guava:guava:32.1.3-jre")
   implementation("eu.aylett:gradle-plugins:0.3.0")
   implementation("com.diffplug.spotless:spotless-plugin-gradle:6.25.0")
