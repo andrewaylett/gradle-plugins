@@ -27,12 +27,11 @@ private val descriptionDistanceRegex: Regex by lazy {
 internal class VersionDetailsImpl(
   private val gitDir: Path,
   private val args: GitVersionArgs,
-  private val isolateGit: Boolean,
 ) : VersionDetails {
-  private val nativeGitInvoker: Git by lazy { Git(gitDir.parent, isolateGit) }
+  private val gitInvoker: Git by lazy { Git(gitDir) }
 
   private val description: String by lazy {
-    nativeGitInvoker
+    gitInvoker
       .describe(args.prefix)
       .replaceFirst(prefixPattern, "")
   }
@@ -61,7 +60,7 @@ internal class VersionDetailsImpl(
 
   private val clean: Boolean by lazy {
     try {
-      nativeGitInvoker.isClean
+      gitInvoker.isClean
     } catch (e: GitException) {
       if (e.statusCode != null) {
         false
@@ -121,9 +120,9 @@ internal class VersionDetailsImpl(
     gitHashFull.substring(0, VERSION_ABBR_LENGTH)
   }
 
-  override val gitHashFull: String by lazy { nativeGitInvoker.currentHeadFullHash }
+  override val gitHashFull: String by lazy { gitInvoker.currentHeadFullHash }
 
-  override val branchName: String by lazy { nativeGitInvoker.currentBranch }
+  override val branchName: String by lazy { gitInvoker.currentBranch }
 
   override fun toString(): String =
     "VersionDetails($version, $gitHash, $gitHashFull, $branchName, $isCleanTag)"

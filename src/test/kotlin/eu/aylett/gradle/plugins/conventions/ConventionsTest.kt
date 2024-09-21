@@ -30,7 +30,7 @@ class ConventionsTest {
     val project = ProjectBuilder.builder().build()
     project.pluginManager.apply(BomAlignmentConvention::class.java)
     assertThat(
-      project.pluginManager,
+      project,
       hasPlugin("eu.aylett.conventions.bom-alignment"),
     )
   }
@@ -40,7 +40,7 @@ class ConventionsTest {
     val project = ProjectBuilder.builder().build()
     project.pluginManager.apply(Conventions::class.java)
 
-    assertThat(project.pluginManager, hasPlugin("eu.aylett.plugins.base"))
+    assertThat(project, hasPlugin("eu.aylett.plugins.base"))
   }
 
   companion object {

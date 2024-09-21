@@ -52,6 +52,7 @@ tasks.withType<AbstractArchiveTask>().configureEach {
   isReproducibleFileOrder = true
 }
 
+@Suppress("INACCESSIBLE_TYPE")
 spotless {
   kotlin {
     ktlint()

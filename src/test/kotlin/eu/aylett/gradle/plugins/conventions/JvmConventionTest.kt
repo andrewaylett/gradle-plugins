@@ -42,7 +42,7 @@ class JvmConventionTest {
     val project = ProjectBuilder.builder().build()
     project.pluginManager.apply(JvmConvention::class.java)
 
-    assertThat(project.pluginManager, allOf(not(hasPlugin("java")), not(hasPlugin("kotlin"))))
+    assertThat(project, allOf(not(hasPlugin("java")), not(hasPlugin("kotlin"))))
   }
 
   @Test
@@ -54,7 +54,7 @@ class JvmConventionTest {
     // Trigger project evaluation
     project.getTasksByName("check", false)
 
-    assertThat(project.pluginManager, allOf(hasPlugin("java"), not(hasPlugin("kotlin"))))
+    assertThat(project, allOf(hasPlugin("java"), not(hasPlugin("kotlin"))))
 
     assertThat(
       project.extensions.getByType<JavaPluginExtension>().toolchain.languageVersion.get(),

@@ -26,6 +26,7 @@ plugins {
 dependencies {
   implementation(platform("org.jetbrains.kotlin:kotlin-bom:$embeddedKotlinVersion"))
   implementation("com.google.guava:guava:32.1.3-jre")
+  implementation("org.eclipse.jgit:org.eclipse.jgit:6.7.0.202309050840-r")
 
   testImplementation("com.fasterxml.jackson.core:jackson-core:2.16.1")
   testImplementation("com.fasterxml.jackson.core:jackson-databind")

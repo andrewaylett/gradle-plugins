@@ -17,15 +17,15 @@
 
 package eu.aylett.gradle.functionaltests.gitversion
 
-import eu.aylett.gradle.gitversion.Git
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers
+import org.hamcrest.Matchers.containsInRelativeOrder
+import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.Test
 import kotlin.io.path.writeText
 
 class GitVersionPluginWorktreeRepositoryTests : GitVersionPluginTests(false, "original") {
   @Test
-  fun `git describe works when using worktree`() {
+  fun `git describe fails when using worktree`() {
     // given:
     buildFile.writeText(
       """
@@ -35,23 +35,27 @@ class GitVersionPluginWorktreeRepositoryTests : GitVersionPluginTests(false, "or
       version gitVersion ()
       """.trimIndent(),
     )
-    val git = Git(projectDir, true)
-    git.runGitCommand("init", projectDir.toFile().absolutePath)
-    git.runGitCommand("add", ".")
-    git.runGitCommand("commit", "-m", "initial commit")
-    git.runGitCommand("tag", "-a", "1.0.0", "-m", "1.0.0")
-    git.runGitCommand("branch", "newbranch")
     val worktreePath = "../worktree"
-    git.runGitCommand("worktree", "add", worktreePath, "newbranch")
+    git(projectDir) {
+      init(projectDir.toFile().absolutePath)
+      add(".")
+      commit("-m", "initial commit")
+      tag("-a", "1.0.0", "-m", "1.0.0")
+      branch("newbranch")
+      worktree("add", worktreePath, "newbranch")
+    }
 
     // when:
     // will build the project at projectDir
     val buildResult =
       with("printVersion")
         .withProjectDir(projectDir.resolve(worktreePath).toFile())
-        .build()
+        .buildAndFail()
 
     // then:
-    assertThat(buildResult.output.split('\n'), Matchers.containsInRelativeOrder("1.0.0"))
+    assertThat(
+      buildResult.output.split('\n'),
+      containsInRelativeOrder(containsString("Cannot find git repository")),
+    )
   }
 }

@@ -18,17 +18,51 @@
 package eu.aylett.gradle.functionaltests.gitversion
 
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers
-import org.hamcrest.Matchers.containsString
+import org.hamcrest.Matchers.hasItems
 import org.junit.jupiter.api.Test
-import java.io.File
-import java.nio.file.Files
-import kotlin.io.path.appendText
 import kotlin.io.path.writeText
 
-class GitVersionPluginRepositoryTests : GitVersionPluginTests() {
+class GitVersionPluginConfigurationCacheTests : GitVersionPluginTests() {
   @Test
-  fun `exception when project root does not have a git repo`() {
+  fun `caches and prints a version that is explicitly set`() {
+    // given:
+    buildFile.writeText(
+      """
+      plugins {
+        id "eu.aylett.plugins.version"
+      }
+      version "2.0.0"
+      """.trimIndent(),
+    )
+    propertiesFile.writeText(
+      """
+      org.gradle.parallel=true
+      org.gradle.caching=true
+      org.gradle.configuration-cache=true
+      """.trimIndent(),
+    )
+
+    git(projectDir) {
+      init(projectDir.toString())
+    }
+
+    // when:
+    val buildResult = with("printVersion").build()
+    val buildResult2 = with("printVersion").build()
+
+    // then:
+    assertThat(
+      buildResult.output.split('\n'),
+      hasItems("2.0.0", "Configuration cache entry stored."),
+    )
+    assertThat(
+      buildResult2.output.split('\n'),
+      hasItems("2.0.0", "Configuration cache entry reused."),
+    )
+  }
+
+  @Test
+  fun `caches and prints a version from a tag`() {
     // given:
     buildFile.writeText(
       """
@@ -38,39 +72,11 @@ class GitVersionPluginRepositoryTests : GitVersionPluginTests() {
       version gitVersion ()
       """.trimIndent(),
     )
-
-    // when:
-    val buildResult = with("printVersion").buildAndFail()
-
-    // then:
-    assertThat(
-      buildResult.output,
-      containsString("> Cannot find '.git' directory"),
-    )
-  }
-
-  @Test
-  fun `git version can be applied on sub modules`() {
-    // given:
-    val subModuleDir =
-      Files.createDirectories(
-        projectDir
-          .resolve("submodule"),
-      ).toFile()
-    val subModuleBuildFile = File(subModuleDir, "build.gradle")
-    subModuleBuildFile.createNewFile()
-    subModuleBuildFile.writeText(
+    propertiesFile.writeText(
       """
-      plugins {
-        id "eu.aylett.plugins.version"
-      }
-      version gitVersion ()
-      """.trimIndent(),
-    )
-
-    settingsFile.appendText(
-      """
-      include "submodule"
+      org.gradle.parallel=true
+      org.gradle.caching=true
+      org.gradle.configuration-cache=true
       """.trimIndent(),
     )
 
@@ -78,13 +84,21 @@ class GitVersionPluginRepositoryTests : GitVersionPluginTests() {
       init(projectDir.toString())
       add(".")
       commit("-m", "initial commit")
-      tag("-a", "1.0.0", "-m", "1.0.0")
+      tag("-a", "v1.0.0", "-m", "1.0.0")
     }
 
     // when:
     val buildResult = with("printVersion").build()
+    val buildResult2 = with("printVersion").build()
 
     // then:
-    assertThat(buildResult.output.split('\n'), Matchers.containsInRelativeOrder("1.0.0"))
+    assertThat(
+      buildResult.output.split('\n'),
+      hasItems("1.0.0", "Configuration cache entry stored."),
+    )
+    assertThat(
+      buildResult2.output.split('\n'),
+      hasItems("1.0.0", "Configuration cache entry reused."),
+    )
   }
 }

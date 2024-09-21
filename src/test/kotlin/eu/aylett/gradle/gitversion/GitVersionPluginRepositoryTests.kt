@@ -15,12 +15,15 @@
  * limitations under the License.
  */
 
-package eu.aylett.gradle.functionaltests.gitversion
+package eu.aylett.gradle.gitversion
 
+import org.gradle.kotlin.dsl.invoke
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers
 import org.hamcrest.Matchers.containsString
+import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.io.File
 import java.nio.file.Files
 import kotlin.io.path.appendText
@@ -39,13 +42,10 @@ class GitVersionPluginRepositoryTests : GitVersionPluginTests() {
       """.trimIndent(),
     )
 
-    // when:
-    val buildResult = with("printVersion").buildAndFail()
-
     // then:
     assertThat(
-      buildResult.output,
-      containsString("> Cannot find '.git' directory"),
+      assertThrows<Exception> { project.gitVersion() },
+      Matchers.hasToString(containsString("Cannot find '.git' directory")),
     )
   }
 
@@ -81,10 +81,7 @@ class GitVersionPluginRepositoryTests : GitVersionPluginTests() {
       tag("-a", "1.0.0", "-m", "1.0.0")
     }
 
-    // when:
-    val buildResult = with("printVersion").build()
-
     // then:
-    assertThat(buildResult.output.split('\n'), Matchers.containsInRelativeOrder("1.0.0"))
+    assertThat(project.gitVersion(), equalTo("1.0.0"))
   }
 }

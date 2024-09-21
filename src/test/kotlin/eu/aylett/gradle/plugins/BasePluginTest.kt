@@ -30,7 +30,7 @@ class BasePluginTest {
     val project = ProjectBuilder.builder().build()
     project.pluginManager.apply(BasePlugin::class.java)
 
-    assertThat(project.pluginManager, hasPlugin("eu.aylett.plugins.base"))
+    assertThat(project, hasPlugin("eu.aylett.plugins.base"))
   }
 
   companion object {
