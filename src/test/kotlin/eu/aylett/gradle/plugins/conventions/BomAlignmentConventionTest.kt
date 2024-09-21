@@ -28,10 +28,12 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
+import org.junit.jupiter.api.parallel.Isolated
 import java.io.File
 import java.nio.file.Path
 import java.util.stream.Stream
 
+@Isolated
 class BomAlignmentConventionTest {
   private val extraDeps =
     listOf(
