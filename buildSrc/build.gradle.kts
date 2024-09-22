@@ -38,7 +38,7 @@ dependencies {
   implementation("org.jetbrains.kotlin:kotlin-gradle-plugin-api")
   implementation("org.jetbrains.dokka:dokka-gradle-plugin:1.9.20")
   implementation("com.google.guava:guava:33.3.0-jre")
-  implementation("eu.aylett:gradle-plugins:0.3.0")
+  implementation("eu.aylett:gradle-plugins:0.4.0")
   implementation("com.diffplug.spotless:spotless-plugin-gradle:6.25.0")
   implementation("org.gradle.kotlin:gradle-kotlin-dsl-plugins:$expectedKotlinDslPluginsVersion")
   implementation("org.pitest:pitest:1.17.0")
