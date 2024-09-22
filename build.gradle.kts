@@ -21,6 +21,7 @@ plugins {
   id("eu.aylett.plugins.version")
   `java-gradle-plugin`
   id("com.gradle.plugin-publish") version "1.3.0"
+  `maven-publish`
 }
 
 dependencies {
@@ -50,6 +51,19 @@ val checkPublishVersion by tasks.registering {
 }
 tasks.named("publishPlugins").configure {
   dependsOn(checkPublishVersion)
+}
+
+publishing {
+  repositories {
+    maven {
+      name = "GitHubPackages"
+      url = uri("https://maven.pkg.github.com/andrewaylett/gradle-plugins")
+      credentials {
+        username = System.getenv("GITHUB_ACTOR")
+        password = System.getenv("GITHUB_TOKEN")
+      }
+    }
+  }
 }
 
 gradlePlugin {
