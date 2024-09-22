@@ -75,7 +75,7 @@ val testing = extensions.getByType<TestingExtension>().apply {
     withType<JvmTestSuite>().configureEach {
       useJUnitJupiter("5.10.0")
       dependencies {
-        implementation("org.hamcrest:hamcrest:2.2")
+        implementation("org.hamcrest:hamcrest:3.0")
         implementation(gradleApi())
       }
       targets.configureEach {
