@@ -34,7 +34,7 @@ jobs:
       uses: gradle/gradle-build-action@v3
 
     - name: Execute Gradle build
-      run: ./gradlew --info :buildSrc:check build
+      run: ./gradlew :buildSrc:check build
 
     - name: Publish to GitHub Packages
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
