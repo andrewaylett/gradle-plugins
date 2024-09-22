@@ -18,6 +18,8 @@ jobs:
     steps:
     - name: Check out
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # so we can work out our version correctly
 
     - name: Validate Gradle Wrapper
       uses: gradle/wrapper-validation-action@v3
