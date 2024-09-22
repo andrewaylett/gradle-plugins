@@ -37,7 +37,7 @@ dependencies {
   implementation(platform("org.jetbrains.kotlin:kotlin-bom:$embeddedKotlinVersion"))
   implementation("org.jetbrains.kotlin:kotlin-gradle-plugin-api")
   implementation("org.jetbrains.dokka:dokka-gradle-plugin:1.9.20")
-  implementation("com.google.guava:guava:32.1.3-jre")
+  implementation("com.google.guava:guava:33.3.0-jre")
   implementation("eu.aylett:gradle-plugins:0.3.0")
   implementation("com.diffplug.spotless:spotless-plugin-gradle:6.25.0")
   implementation("org.gradle.kotlin:gradle-kotlin-dsl-plugins:$expectedKotlinDslPluginsVersion")
@@ -52,7 +52,6 @@ tasks.withType<AbstractArchiveTask>().configureEach {
   isReproducibleFileOrder = true
 }
 
-@Suppress("INACCESSIBLE_TYPE")
 spotless {
   kotlin {
     ktlint()
