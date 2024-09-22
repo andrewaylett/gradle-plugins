@@ -3,6 +3,8 @@
 #
 name: Run Pitest
 on:
+  push:
+    branches: [ "renovate/*" ]
   pull_request:
 
 permissions:
