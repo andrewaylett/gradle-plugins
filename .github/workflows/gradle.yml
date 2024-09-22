@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
 
     steps:
@@ -31,7 +32,7 @@ jobs:
       uses: gradle/gradle-build-action@v2
 
     - name: Execute Gradle build
-      run: ./gradlew --info build
+      run: ./gradlew --info :buildSrc:check build
 
     - name: Publish Test Report
       uses: mikepenz/action-junit-report@v4
@@ -54,3 +55,14 @@ jobs:
           **/build/
           !**/cache/
           !**/caches/
+
+  pre-commit:
+    name: Pre-Commit
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out
+      uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+    - uses: pre-commit/action@v3.0.1
+      env:
+        SKIP: "spotless,check"
