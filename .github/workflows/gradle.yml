@@ -41,13 +41,13 @@ jobs:
         report_paths: '**/build/test-results/*/TEST-*.xml'
 
     - name: Upload JAR
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: JAR
         path: build/libs/*.jar
 
     - name: Upload Build Output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: failure() # we don't care so much about working builds
       with:
         name: Built-Output
