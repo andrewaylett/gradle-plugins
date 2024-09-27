@@ -29,7 +29,7 @@ dependencies {
   implementation("com.google.guava:guava:33.3.1-jre")
   implementation("org.eclipse.jgit:org.eclipse.jgit:7.0.0.202409031743-r")
 
-  testImplementation("com.fasterxml.jackson.core:jackson-core:2.17.2")
+  testImplementation("com.fasterxml.jackson.core:jackson-core:2.18.0")
   testImplementation("com.fasterxml.jackson.core:jackson-databind")
   testImplementation("org.jetbrains.kotlin:kotlin-gradle-plugin")
 }
