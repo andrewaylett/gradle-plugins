@@ -22,16 +22,16 @@ import org.hamcrest.Matchers.hasItems
 import org.junit.jupiter.api.Test
 import kotlin.io.path.writeText
 
-class GitVersionPluginConfigurationCacheTests : GitVersionPluginTests() {
+class GitVersionPluginConfigurationCacheKotlinTests : GitVersionPluginTests(kotlin = true) {
   @Test
   fun `caches and prints a version that is explicitly set`() {
     // given:
     buildFile.writeText(
       """
       plugins {
-        id "eu.aylett.plugins.version"
+        id("eu.aylett.plugins.version")
       }
-      version "2.0.0"
+      version = "2.0.0"
       """.trimIndent(),
     )
     propertiesFile.writeText(
@@ -67,9 +67,35 @@ class GitVersionPluginConfigurationCacheTests : GitVersionPluginTests() {
     buildFile.writeText(
       """
       plugins {
-        id "eu.aylett.plugins.version"
+        id("eu.aylett.conventions.jvm")
+        id("eu.aylett.plugins.version")
+        `java-library`
+        id("com.gradle.plugin-publish") version "1.3.0"
       }
-      version aylett.versions.gitVersion ()
+      version = aylett.versions.gitVersion()
+
+      val checkPublishVersion by tasks.registering {
+        doNotTrackState("Either does nothing or fails the build")
+        doFirst {
+          val versionDetails = aylett.versions.versionDetails()
+          if (!versionDetails.isCleanTag) {
+            logger.error("Version details is {}", versionDetails)
+            throw IllegalStateException(
+              "Can't publish a plugin with a version that's not a clean tag",
+            )
+          }
+        }
+      }
+      tasks.named("publishPlugins").configure {
+        dependsOn(checkPublishVersion)
+      }
+
+      aylett {
+        jvm {
+          jvmVersion.set(17)
+        }
+      }
+
       """.trimIndent(),
     )
     propertiesFile.writeText(
@@ -77,6 +103,11 @@ class GitVersionPluginConfigurationCacheTests : GitVersionPluginTests() {
       org.gradle.parallel=true
       org.gradle.caching=true
       org.gradle.configuration-cache=true
+      """.trimIndent(),
+    )
+    settingsFile.writeText(
+      """
+      enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
       """.trimIndent(),
     )
 
