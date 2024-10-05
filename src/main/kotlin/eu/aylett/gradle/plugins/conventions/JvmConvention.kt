@@ -72,7 +72,7 @@ class JvmConvention : Plugin<Project> {
           JvmConventionExtension::class.java,
         )
 
-      conventionExtension.jvmVersion.convention(17)
+      conventionExtension.jvmVersion.convention(21)
 
       plugins.withType<JavaBasePlugin>().configureEach {
         target.extensions.getByType<JavaPluginExtension>().toolchain {
