@@ -44,7 +44,7 @@ tasks.withType<AbstractArchiveTask>().configureEach {
 
 aylett {
   jvm {
-    jvmVersion.set(17)
+    jvmVersion.set(21)
   }
 }
 
@@ -52,14 +52,14 @@ tasks.withType<DokkaTask>().configureEach {
   dokkaSourceSets {
     configureEach {
       includes.from(projectDir.resolve("module.md"))
-      jdkVersion.set(17)
+      jdkVersion.set(21)
 
       sourceLink {
         localDirectory.set(projectDir.resolve("src"))
         remoteUrl.set(URI("https://github.com/andrewaylett/gradle-plugins/tree/main/src").toURL())
         remoteLineSuffix.set("#L")
         externalDocumentationLink {
-          url.set(URI("https://docs.gradle.org/8.4/javadoc/").toURL())
+          url.set(URI("https://docs.gradle.org/${gradle.gradleVersion}/javadoc/").toURL())
         }
       }
     }

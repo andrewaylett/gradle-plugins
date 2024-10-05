@@ -58,7 +58,7 @@ class JvmConventionTest {
 
     assertThat(
       project.extensions.getByType<JavaPluginExtension>().toolchain.languageVersion.get(),
-      equalTo(JavaLanguageVersion.of(17)),
+      equalTo(JavaLanguageVersion.of(21)),
     )
   }
 

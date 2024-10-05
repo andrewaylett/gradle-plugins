@@ -18,7 +18,6 @@
 
 plugins {
   id("component")
-  id("eu.aylett.plugins.version")
   `java-gradle-plugin`
   id("com.gradle.plugin-publish") version "1.3.0"
   `maven-publish`
@@ -39,8 +38,8 @@ version = aylett.versions.gitVersion()
 
 val checkPublishVersion by tasks.registering {
   doNotTrackState("Either does nothing or fails the build")
-  val versionDetails = aylett.versions.versionDetails()
   doFirst {
+    val versionDetails = aylett.versions.versionDetails()
     if (!versionDetails.isCleanTag) {
       logger.error("Version details is {}", versionDetails)
       throw IllegalStateException(
