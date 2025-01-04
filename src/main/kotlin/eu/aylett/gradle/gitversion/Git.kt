@@ -15,96 +15,108 @@
  */
 package eu.aylett.gradle.gitversion
 
-import org.eclipse.jgit.api.Git
-import org.eclipse.jgit.internal.storage.file.FileRepository
-import org.eclipse.jgit.lib.Constants.R_TAGS
-import org.eclipse.jgit.lib.Repository.shortenRefName
-import org.eclipse.jgit.revwalk.RevWalk
+import org.gradle.api.Action
+import org.gradle.api.provider.ProviderFactory
+import org.gradle.kotlin.dsl.provideDelegate
+import org.gradle.problems.internal.impl.logger
+import org.gradle.process.ExecSpec
 import java.nio.file.Path
-import java.util.stream.Collectors
 import kotlin.io.path.isDirectory
 
-class Git(gitDir: Path) : AutoCloseable {
+@Suppress("UnstableApiUsage")
+class Git(private val gitDir: Path, private val providers: ProviderFactory) {
   init {
     if (!gitDir.isDirectory()) {
       throw UnsupportedOperationException(
-        "Cannot find git repository.  Detached work trees are unsupported.",
+        "Cannot find project repository.",
       )
     }
   }
 
-  private val repository: FileRepository by lazy { FileRepository(gitDir.toFile()) }
-  private val git: Git by lazy { Git(repository) }
-  val currentBranch: String by lazy {
-    val head = repository.exactRef("HEAD")
-    if (head.isSymbolic) {
-      shortenRefName(head.target.name)
+  private fun exec(action: Action<in ExecSpec?>?): String {
+    var spec: ExecSpec? = null
+    val result =
+      providers.exec {
+        val base = this
+        spec = this
+        isIgnoreExitValue = true
+        workingDir(gitDir.toFile())
+        environment("GIT_TERMINAL_PROMPT", "0")
+        environment("GIT_OPTIONAL_LOCKS", "0")
+        environment("GIT_CONFIG_GLOBAL", "/dev/null")
+        environment("GIT_CONFIG_SYSTEM", "/dev/null")
+        action?.execute(
+          object : ExecSpec by this {
+            override fun commandLine(vararg args: Any?): ExecSpec {
+              val withConfiguration =
+                listOf(
+                  args[0],
+                  "-c",
+                  "user.email=no@example.com",
+                  "-c",
+                  "user.name=no_name",
+                  "-c",
+                  "core.fsmonitor=false",
+                  "-c",
+                  "core.untrackedCache=false",
+                  "-c",
+                  "init.defaultBranch=main",
+                ) + args.drop(1)
+              return base.commandLine(*withConfiguration.toTypedArray())
+            }
+          },
+        )
+      }
+    if (result.result.get().exitValue == 0) {
+      val output = result.standardOutput.asText.get().trim()
+      logger.warn("Git command output: $output")
+      return output
     } else {
-      ""
+      throw GitException(
+        result.standardError.asText.get().trim(),
+        result.result.get().exitValue,
+        spec,
+      )
     }
   }
-  val currentHeadFullHash: String by lazy { repository.findRef("HEAD").objectId.name }
-  val isClean: Boolean by lazy { git.status().call().isClean }
+
+  val currentBranch: String by lazy {
+    exec {
+      commandLine("git", "branch", "--show-current")
+    }
+  }
+  val currentHeadFullHash: String by lazy {
+    assertHead()
+    exec {
+      commandLine("git", "rev-parse", "HEAD")
+    }
+  }
+  val isClean: Boolean by lazy {
+    exec {
+      commandLine("git", "status", "--porcelain")
+    }.isEmpty()
+  }
 
   fun describe(prefix: String): String {
-    /*
-      "--tags",
-      "--always",
-      "--first-parent",
-      "--abbrev=7",
-      "--match=$prefix*",
-      "HEAD",
-     */
-    val head = repository.findRef("HEAD")
-
-    val objectId = head?.objectId ?: return ""
-
-    val shortHash = objectId.name.substring(0..6)
-
-    val tagList = repository.refDatabase.getRefsByPrefix(R_TAGS + prefix)
-    val tags =
-      tagList.stream().collect(
-        Collectors.groupingBy {
-          repository.refDatabase.peel(it).peeledObjectId ?: it.objectId
-        },
+    assertHead()
+    return exec {
+      workingDir(gitDir.toFile())
+      commandLine(
+        "git",
+        "describe",
+        "--tags",
+        "--always",
+        "--first-parent",
+        "--abbrev=7",
+        "--match=$prefix*",
+        "HEAD",
       )
-
-    val walker = RevWalk(repository)
-    walker.isFirstParent = true
-    var candidate = walker.parseCommit(head.objectId)
-    var candidateDistance = 0
-    while (candidate.parentCount > 0) {
-      if (candidate.id in tags) {
-        break
-      }
-      candidateDistance += 1
-      candidate = repository.parseCommit(candidate.getParent(0))
-    }
-
-    val candidateRefs =
-      tags[candidate.id]
-        ?: return if (candidateDistance == 0) shortHash else "$candidateDistance-g$shortHash"
-
-    val annotatedTags =
-      candidateRefs.filter {
-        it.objectId != candidate.id
-      }
-
-    val tag =
-      annotatedTags.maxByOrNull {
-        walker.parseTag(it.objectId).taggerIdent.whenAsInstant
-      } ?: candidateRefs[0]
-
-    val shortTag = tag.name.substringAfter("refs/tags/")
-    return if (candidateDistance == 0) {
-      shortTag
-    } else {
-      "$shortTag-$candidateDistance-g$shortHash"
     }
   }
 
-  override fun close() {
-    git.close()
-    repository.close()
+  private fun assertHead() {
+    exec {
+      commandLine("git", "show-ref", "-q", "--verify", "--", "HEAD")
+    }
   }
 }

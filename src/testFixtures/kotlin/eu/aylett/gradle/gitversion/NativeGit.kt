@@ -54,11 +54,12 @@ class NativeGit(private val directory: Path) {
     environment["HOME"] = home.toFile().canonicalPath
     environment["GIT_TERMINAL_PROMPT"] = "0"
     environment["GIT_OPTIONAL_LOCKS"] = "0"
+    environment["GIT_CONFIG_NOSYSTEM"] = "1"
     environment.putAll(envvars)
     pb.directory(directory.toFile())
     pb.redirectErrorStream(true)
     val process = pb.start()
-    logger.info("Running ${cmdInput.joinToString(" ")} as pid ${process.pid()}")
+    System.err.println("Running ${cmdInput.joinToString(" ")} as pid ${process.pid()}")
     val reader = process.inputReader(StandardCharsets.UTF_8)
     val builder = StringWriter()
     var interrupted = false
@@ -84,7 +85,9 @@ class NativeGit(private val directory: Path) {
     if (exitCode != 0) {
       throw GitException(
         "Failed to run ${cmdInput.joinToString(" ")}, output ${builder.toString().trim()}",
+        null,
         exitCode,
+        null,
       )
     }
 

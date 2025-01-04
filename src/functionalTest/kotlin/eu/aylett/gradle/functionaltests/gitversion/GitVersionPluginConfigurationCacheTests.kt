@@ -20,6 +20,7 @@ package eu.aylett.gradle.functionaltests.gitversion
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.hasItems
 import org.junit.jupiter.api.Test
+import kotlin.io.path.appendText
 import kotlin.io.path.writeText
 
 class GitVersionPluginConfigurationCacheTests : GitVersionPluginTests() {
@@ -41,6 +42,7 @@ class GitVersionPluginConfigurationCacheTests : GitVersionPluginTests() {
       org.gradle.configuration-cache=true
       """.trimIndent(),
     )
+    gitIgnoreFile.appendText("build")
 
     git(projectDir) {
       init(projectDir.toString())
@@ -79,6 +81,7 @@ class GitVersionPluginConfigurationCacheTests : GitVersionPluginTests() {
       org.gradle.configuration-cache=true
       """.trimIndent(),
     )
+    gitIgnoreFile.appendText("build")
 
     git(projectDir) {
       init(projectDir.toString())

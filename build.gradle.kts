@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Andrew Aylett
+ * Copyright 2023-2025 Andrew Aylett
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ plugins {
 dependencies {
   implementation(platform("org.jetbrains.kotlin:kotlin-bom:$embeddedKotlinVersion"))
   implementation("com.google.guava:guava:33.4.0-jre")
-  implementation("org.eclipse.jgit:org.eclipse.jgit:7.1.0.202411261347-r")
 
   testImplementation("com.fasterxml.jackson.core:jackson-core:2.18.2")
   testImplementation("com.fasterxml.jackson.core:jackson-databind")

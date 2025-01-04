@@ -16,6 +16,9 @@
  */
 package eu.aylett.gradle.gitversion
 
+import org.gradle.api.Project
+import org.gradle.kotlin.dsl.provideDelegate
+import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.matchesRegex
@@ -39,11 +42,15 @@ class VersionDetailsTest {
   lateinit var temporaryFolder: Path
   private lateinit var git: NativeGit
   private val formattedTime = "'2005-04-07T22:13:13'"
+  private val project: Project by lazy {
+    ProjectBuilder.builder().withProjectDir(temporaryFolder.toFile()).build()
+  }
 
   @BeforeEach
   fun before() {
     git = NativeGit(temporaryFolder)
     git.runGitCommand("init", temporaryFolder.toString())
+    temporaryFolder.resolve(".gitignore").writeText(".gradle\nuserHome\n")
   }
 
   @Test
@@ -63,12 +70,12 @@ class VersionDetailsTest {
     git.runGitCommand("add", ".")
     git.runGitCommand("commit", "-m", "'initial commit'")
     git.runGitCommand("tag", "-a", "1.0.0", "-m", "unused")
-    assertThat(versionDetails().version, equalTo("1.0.0"))
+    assertThat("In $temporaryFolder", versionDetails().version, equalTo("1.0.0"))
   }
 
   @Test
   fun `unspecified when no commit exists`() {
-    assertThat(versionDetails().version, equalTo("unspecified"))
+    assertThat("In $temporaryFolder", versionDetails().version, equalTo("unspecified"))
   }
 
   @Test
@@ -79,7 +86,7 @@ class VersionDetailsTest {
     git.runGitCommand("tag", "1.0.0")
     git.runGitCommand("tag", "-a", "2.0.0", "-m", "2.0.0")
     git.runGitCommand("tag", "3.0.0")
-    assertThat(versionDetails().version, equalTo("2.0.0"))
+    assertThat("In $temporaryFolder", versionDetails().version, equalTo("2.0.0"))
   }
 
   @Test
@@ -136,7 +143,7 @@ class VersionDetailsTest {
     )
 
     // then:
-    assertThat(versionDetails().version, equalTo("2.0.0"))
+    assertThat("In $temporaryFolder", versionDetails().version, equalTo("2.0.0"))
   }
 
   @Test
@@ -158,7 +165,7 @@ class VersionDetailsTest {
       "--date=$formattedTime",
       "--allow-empty",
     )
-    assertThat(versionDetails().version, matchesRegex(HASH_REGEX))
+    assertThat("In $temporaryFolder", versionDetails().version, matchesRegex(HASH_REGEX))
   }
 
   @Test
@@ -202,7 +209,7 @@ class VersionDetailsTest {
   }
 
   private fun versionDetails(): VersionDetails {
-    val gitDir = temporaryFolder.resolve("./.git")
-    return VersionDetailsImpl(gitDir, GitVersionArgs())
+    val gitDir = temporaryFolder
+    return VersionDetailsImpl(gitDir, GitVersionArgs(), project.providers)
   }
 }

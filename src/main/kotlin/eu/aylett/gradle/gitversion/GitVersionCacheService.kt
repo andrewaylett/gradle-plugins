@@ -18,9 +18,9 @@ package eu.aylett.gradle.gitversion
 
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
-import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
@@ -31,79 +31,59 @@ abstract class GitVersionCacheService : BuildService<BuildServiceParameters.None
   fun getGitVersion(
     project: Path,
     prefix: Provider<String>,
+    providers: ProviderFactory,
   ): String {
-    val gitDir = getRootGitDir(project)
     val gitVersionArgs = GitVersionArgs.fromProvider(prefix)
-    val key = gitDir.toString() + "|" + gitVersionArgs.prefix
+    val key = project.toString() + "|" + gitVersionArgs.prefix
     val value =
       versionDetailsMap
-        .computeIfAbsent(key) { _ -> createVersionDetails(gitDir, gitVersionArgs) }
+        .computeIfAbsent(key) { _ -> createVersionDetails(project, gitVersionArgs, providers) }
     return value.version
   }
 
   fun getGitVersion(
     project: Path,
     prefix: Any?,
+    providers: ProviderFactory,
   ): String {
-    val gitDir = getRootGitDir(project)
     val gitVersionArgs = GitVersionArgs.fromGroovyClosure(prefix)
-    val key = gitDir.toString() + "|" + gitVersionArgs.prefix
+    val key = project.toString() + "|" + gitVersionArgs.prefix
     val value =
       versionDetailsMap
-        .computeIfAbsent(key) { _ -> createVersionDetails(gitDir, gitVersionArgs) }
+        .computeIfAbsent(key) { _ -> createVersionDetails(project, gitVersionArgs, providers) }
     return value.version
   }
 
   fun getVersionDetails(
     project: Path,
     args: Any?,
+    providers: ProviderFactory,
   ): VersionDetails {
-    val gitDir = getRootGitDir(project)
     val gitVersionArgs = GitVersionArgs.fromGroovyClosure(args)
-    val key = gitDir.toString() + "|" + gitVersionArgs.prefix
+    val key = project.toString() + "|" + gitVersionArgs.prefix
     return versionDetailsMap.computeIfAbsent(
       key,
-    ) { _ -> createVersionDetails(gitDir, gitVersionArgs) }
+    ) { _ -> createVersionDetails(project, gitVersionArgs, providers) }
   }
 
   fun getVersionDetails(
     project: Path,
     prefix: Provider<String>,
+    providers: ProviderFactory,
   ): VersionDetails {
-    val gitDir = getRootGitDir(project)
     val gitVersionArgs = GitVersionArgs.fromProvider(prefix)
-    val key = gitDir.toString() + "|" + gitVersionArgs.prefix
+    val key = project.toString() + "|" + gitVersionArgs.prefix
     return versionDetailsMap.computeIfAbsent(
       key,
-    ) { _ -> createVersionDetails(gitDir, gitVersionArgs) }
+    ) { _ -> createVersionDetails(project, gitVersionArgs, providers) }
   }
 
   private fun createVersionDetails(
     gitDir: Path,
     args: GitVersionArgs,
+    providers: ProviderFactory,
   ): VersionDetails {
-    return VersionDetailsImpl(gitDir, args)
-  }
-
-  private fun getRootGitDir(currentRoot: Path): Path {
-    val gitDir = scanForRootGitDir(currentRoot)
-    require(Files.exists(gitDir)) { "Cannot find '.git' directory" }
-    return gitDir
-  }
-
-  private fun scanForRootGitDir(currentRoot: Path): Path {
-    val gitDir = currentRoot.resolve(".git")
-    if (Files.exists(gitDir)) {
-      return gitDir
-    }
-
-    // stop at the root directory, return non-existing Path object;
-    return if (currentRoot.parent == null) {
-      gitDir
-    } else {
-      // look in parent directory;
-      scanForRootGitDir(currentRoot.parent)
-    }
+    return VersionDetailsImpl(gitDir, args, providers)
   }
 
   companion object {
