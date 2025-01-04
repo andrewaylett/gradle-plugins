@@ -35,6 +35,11 @@ dependencies {
 group = "eu.aylett"
 version = aylett.versions.gitVersion()
 
+java {
+  withSourcesJar()
+  withJavadocJar()
+}
+
 val checkPublishVersion by tasks.registering {
   doNotTrackState("Either does nothing or fails the build")
   doFirst {
