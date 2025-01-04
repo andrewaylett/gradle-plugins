@@ -35,7 +35,23 @@ dependencies {
 group = "eu.aylett"
 version = aylett.versions.gitVersion()
 
+configurations.matching { it.isCanBeConsumed && !it.isCanBeResolved }.configureEach {
+  resolutionStrategy {
+    failOnVersionConflict()
+  }
+}
+
+configurations.configureEach {
+  resolutionStrategy {
+    failOnNonReproducibleResolution()
+  }
+}
+
 java {
+  consistentResolution {
+    useCompileClasspathVersions()
+  }
+
   withSourcesJar()
   withJavadocJar()
 }
