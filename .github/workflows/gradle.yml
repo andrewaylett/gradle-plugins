@@ -73,4 +73,4 @@ jobs:
     - uses: actions/setup-python@v5
     - uses: pre-commit/action@v3.0.1
       with:
-        extra_args: '--hook-stage pre-merge-commit'
+        extra_args: '--all-files --hook-stage pre-merge-commit'
