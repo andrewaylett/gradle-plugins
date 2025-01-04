@@ -45,7 +45,7 @@ class GitVersionPluginRepositoryTests : GitVersionPluginTests() {
     // then:
     assertThat(
       assertThrows<Exception> { project.gitVersion() },
-      Matchers.hasToString(containsString("Cannot find '.git' directory")),
+      Matchers.hasToString(containsString("not a git repository")),
     )
   }
 

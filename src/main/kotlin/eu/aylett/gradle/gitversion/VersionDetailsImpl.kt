@@ -16,6 +16,7 @@
  */
 package eu.aylett.gradle.gitversion
 
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.kotlin.dsl.provideDelegate
 import java.nio.file.Path
 
@@ -27,8 +28,9 @@ private val descriptionDistanceRegex: Regex by lazy {
 internal class VersionDetailsImpl(
   private val gitDir: Path,
   private val args: GitVersionArgs,
+  private val providers: ProviderFactory,
 ) : VersionDetails {
-  private val gitInvoker: Git by lazy { Git(gitDir) }
+  private val gitInvoker: Git by lazy { Git(gitDir, providers) }
 
   private val description: String by lazy {
     gitInvoker
@@ -50,10 +52,10 @@ internal class VersionDetailsImpl(
         "$description.dirty"
       }
     } catch (e: GitException) {
-      if (e.statusCode != null) {
+      if (e.statusCode != null && e.statusCode != 128) {
         "unspecified"
       } else {
-        throw GitException(null, e, null)
+        throw e
       }
     }
   }
@@ -62,10 +64,10 @@ internal class VersionDetailsImpl(
     try {
       gitInvoker.isClean
     } catch (e: GitException) {
-      if (e.statusCode != null) {
+      if (e.statusCode != null && e.statusCode != 128) {
         false
       } else {
-        throw GitException(null, e, null)
+        throw e
       }
     }
   }
@@ -83,10 +85,10 @@ internal class VersionDetailsImpl(
     try {
       !plainTagRegex.matches(description)
     } catch (e: GitException) {
-      if (e.statusCode != null) {
+      if (e.statusCode != null && e.statusCode != 128) {
         false
       } else {
-        throw GitException(null, e, null)
+        throw e
       }
     }
   }

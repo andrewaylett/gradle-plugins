@@ -16,13 +16,18 @@
 
 package eu.aylett.gradle.gitversion
 
-class GitException(message: String?, cause: Throwable?, val statusCode: Int?) : RuntimeException(
-  message,
-  cause,
-) {
+import org.gradle.process.ExecSpec
+
+class GitException(message: String?, cause: Throwable?, val statusCode: Int?, val spec: ExecSpec?) :
+  RuntimeException(
+    "$message; $spec",
+    cause,
+  ) {
   constructor(
     message: String,
     statusCode: Int,
-  ) : this("$message. Status code $statusCode", null, statusCode)
-  constructor(message: String) : this(message, null, null)
+    spec: ExecSpec?,
+  ) : this("$message. Status code $statusCode", null, statusCode, spec)
+
+  constructor(message: String) : this(message, null, null, null)
 }

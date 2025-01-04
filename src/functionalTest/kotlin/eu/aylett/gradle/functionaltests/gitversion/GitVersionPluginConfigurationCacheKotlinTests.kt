@@ -20,6 +20,7 @@ package eu.aylett.gradle.functionaltests.gitversion
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.hasItems
 import org.junit.jupiter.api.Test
+import kotlin.io.path.appendText
 import kotlin.io.path.writeText
 
 class GitVersionPluginConfigurationCacheKotlinTests : GitVersionPluginTests(kotlin = true) {
@@ -110,6 +111,7 @@ class GitVersionPluginConfigurationCacheKotlinTests : GitVersionPluginTests(kotl
       enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
       """.trimIndent(),
     )
+    gitIgnoreFile.appendText("build")
 
     git(projectDir) {
       init(projectDir.toString())

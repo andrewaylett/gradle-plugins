@@ -29,10 +29,13 @@ class GitVersionPluginDescribeTests : GitVersionPluginTests() {
     // given:
     git(projectDir) {
       init(projectDir.toString())
-    }
+      add(".")
+      commit("-m", "initial commit")
+      val targetId = currentHeadFullHash
 
-    // then:
-    assertThat(project.gitVersion(), equalTo("unspecified"))
+      // then:
+      assertThat(project.gitVersion(), equalTo(targetId.substring(0..6)))
+    }
   }
 
   @Test
