@@ -74,6 +74,10 @@ jobs:
           !**/cache/
           !**/caches/
 
+      # Because releases have been given a `dirty` version.
+    - name: Show Git Status
+      run: git status
+
   pre-commit:
     name: Pre-Commit
     runs-on: ubuntu-latest
