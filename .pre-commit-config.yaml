@@ -58,7 +58,7 @@ repos:
   - id: insert-license
     # Like the above, but not updating to the latest year
     stages:
-    - manual
+    - pre-merge-commit
     types:
     - kotlin
     exclude: .*/gitversion/.*
