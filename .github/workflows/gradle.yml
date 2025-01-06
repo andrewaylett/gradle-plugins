@@ -46,11 +46,19 @@ jobs:
     - name: Execute Gradle build
       run: ./gradlew :buildSrc:check build
 
-    - name: Publish to GitHub Packages
+    - name: Publish to GitHub Packages Snapshots
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      run: ./gradlew publishPluginMavenPublicationToGitHubPackagesRepository
+      run: ./gradlew publishPluginMavenPublicationToGitHubSnapshotsRepository
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Publish to OSSRH Snapshots
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: ./gradlew --no-configuration-cache -Dorg.gradle.unsafe.isolated-projects=false publishPluginMavenPublicationToOSSRHSnapshotsRepository
+      env:
+        OSSRH_TOKEN_USER: ${{ secrets.OSSRH_TOKEN_USER }}
+        OSSRH_TOKEN_PASSWORD: ${{ secrets.OSSRH_TOKEN_PASSWORD }}
+        GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
 
     - name: Publish Test Report
       uses: mikepenz/action-junit-report@v5

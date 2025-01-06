@@ -16,12 +16,16 @@
 
 @file:Suppress("UnstableApiUsage")
 
+import okio.ByteString.Companion.decodeBase64
+
+
 plugins {
   id("component")
   id("eu.aylett.plugins.version") version "0.5.1"
   `java-gradle-plugin`
   id("com.gradle.plugin-publish") version "1.3.0"
   `maven-publish`
+  signing
 }
 
 dependencies {
@@ -79,14 +83,53 @@ tasks.named("publishPlugins").configure {
 publishing {
   repositories {
     maven {
-      name = "GitHubPackages"
-      url = uri("https://maven.pkg.github.com/andrewaylett/gradle-plugins")
+      name = "GitHubReleases"
+      url = uri("https://maven.pkg.github.com/andrewaylett/releases")
       credentials {
         username = System.getenv("GITHUB_ACTOR")
         password = System.getenv("GITHUB_TOKEN")
       }
     }
+    maven {
+      name = "GitHubSnapshots"
+      url = uri("https://maven.pkg.github.com/andrewaylett/snapshots")
+      credentials {
+        username = System.getenv("GITHUB_ACTOR")
+        password = System.getenv("GITHUB_TOKEN")
+      }
+    }
+    maven {
+      name = "OSSRH"
+      url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
+      credentials {
+        username = System.getenv("OSSRH_TOKEN_USER")
+        password = System.getenv("OSSRH_TOKEN_PASSWORD")
+      }
+    }
+    maven {
+      name = "OSSRHSnapshots"
+      url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
+      credentials {
+        username = System.getenv("OSSRH_TOKEN_USER")
+        password = System.getenv("OSSRH_TOKEN_PASSWORD")
+      }
+    }
   }
+}
+
+publishing.publications.withType<MavenPublication>().configureEach {
+  suppressPomMetadataWarningsFor("testFixturesApiElements")
+  suppressPomMetadataWarningsFor("testFixturesRuntimeElements")
+}
+
+signing {
+  setRequired({
+    gradle.taskGraph.hasTask(":publishPluginMavenPublicationToOSSRHRepository") ||
+      gradle.taskGraph.hasTask(":publishPluginMavenPublicationToOSSRHSnapshotsRepository")
+  })
+  val signingKey: String? = System.getenv("GPG_SIGNING_KEY")?.decodeBase64()?.utf8()
+  useInMemoryPgpKeys(signingKey, "")
+  sign(publishing.publications)
 }
 
 gradlePlugin {
