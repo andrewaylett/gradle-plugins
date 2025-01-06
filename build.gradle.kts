@@ -26,6 +26,7 @@ plugins {
   id("com.gradle.plugin-publish") version "1.3.0"
   `maven-publish`
   signing
+  id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
 }
 
 dependencies {
@@ -39,6 +40,7 @@ dependencies {
 
 group = "eu.aylett"
 version = aylett.versions.gitVersion()
+description = "Andrew's favourite Gradle conventions"
 
 configurations.matching { it.isCanBeConsumed && !it.isCanBeResolved }.configureEach {
   resolutionStrategy {
@@ -90,21 +92,14 @@ publishing {
         password = System.getenv("GITHUB_TOKEN")
       }
     }
-    maven {
-      name = "OSSRH"
-      url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
-      credentials {
-        username = System.getenv("OSSRH_TOKEN_USER")
-        password = System.getenv("OSSRH_TOKEN_PASSWORD")
-      }
-    }
-    maven {
-      name = "OSSRHSnapshots"
-      url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
-      credentials {
-        username = System.getenv("OSSRH_TOKEN_USER")
-        password = System.getenv("OSSRH_TOKEN_PASSWORD")
-      }
+  }
+}
+
+nexusPublishing {
+  repositories {
+    sonatype {
+      username = System.getenv("OSSRH_TOKEN_USER")
+      password = System.getenv("OSSRH_TOKEN_PASSWORD")
     }
   }
 }
@@ -112,12 +107,34 @@ publishing {
 publishing.publications.withType<MavenPublication>().configureEach {
   suppressPomMetadataWarningsFor("testFixturesApiElements")
   suppressPomMetadataWarningsFor("testFixturesRuntimeElements")
+  pom {
+    url.set("https://gradle-plugins.aylett.eu/")
+    licenses {
+      license {
+        name.set("Apache-2.0")
+        url.set("http://www.apache.org/licenses/LICENSE-2.0")
+      }
+    }
+    developers {
+      developer {
+        id.set("aylett")
+        name.set("Andrew Aylett")
+        email.set("andrew@aylett.eu")
+        organization.set("Andrew Aylett")
+        organizationUrl.set("https://www.aylett.co.uk/")
+      }
+    }
+    scm {
+      connection.set("scm:git:https://github.com/andrewaylett/gradle-plugins.git")
+      developerConnection.set("scm:git:ssh://git@github.com:andrewaylett/gradle-plugins.git")
+      url.set("https://github.com/andrewaylett/gradle-plugins/")
+    }
+  }
 }
 
 signing {
   setRequired({
-    gradle.taskGraph.hasTask(":publishPluginMavenPublicationToOSSRHRepository") ||
-      gradle.taskGraph.hasTask(":publishPluginMavenPublicationToOSSRHSnapshotsRepository")
+    gradle.taskGraph.hasTask(":publishPluginMavenPublicationToSonatypeHRepository")
   })
   val signingKey: String? = System.getenv("GPG_SIGNING_KEY")?.decodeBase64()?.utf8()
   useInMemoryPgpKeys(signingKey, "")

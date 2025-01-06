@@ -54,7 +54,7 @@ jobs:
 
     - name: Publish to OSSRH Snapshots
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      run: ./gradlew --no-configuration-cache -Dorg.gradle.unsafe.isolated-projects=false publishPluginMavenPublicationToOSSRHSnapshotsRepository
+      run: ./gradlew --no-configuration-cache -Dorg.gradle.unsafe.isolated-projects=false publishPluginMavenPublicationToSonatypeRepository closeSonatypeStagingRepository
       env:
         OSSRH_TOKEN_USER: ${{ secrets.OSSRH_TOKEN_USER }}
         OSSRH_TOKEN_PASSWORD: ${{ secrets.OSSRH_TOKEN_PASSWORD }}
