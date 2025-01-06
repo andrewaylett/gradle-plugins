@@ -40,7 +40,7 @@ tasks.withType<AbstractArchiveTask>().configureEach {
   isReproducibleFileOrder = true
 }
 
-tasks.withType<DokkaTask>().configureEach {
+dokka {
   dokkaSourceSets {
     configureEach {
       includes.from(projectDir.resolve("module.md"))
@@ -48,11 +48,11 @@ tasks.withType<DokkaTask>().configureEach {
 
       sourceLink {
         localDirectory.set(projectDir.resolve("src"))
-        remoteUrl.set(URI("https://github.com/andrewaylett/gradle-plugins/tree/main/src").toURL())
+        remoteUrl("https://github.com/andrewaylett/gradle-plugins/tree/main/src")
         remoteLineSuffix.set("#L")
-        externalDocumentationLink {
-          url.set(URI("https://docs.gradle.org/${gradle.gradleVersion}/javadoc/").toURL())
-        }
+//        externalDocumentationLink {
+//          url.set(URI("https://docs.gradle.org/${gradle.gradleVersion}/javadoc/"))
+//        }
       }
     }
   }
