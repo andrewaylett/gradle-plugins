@@ -108,6 +108,8 @@ publishing.publications.withType<MavenPublication>().configureEach {
   suppressPomMetadataWarningsFor("testFixturesApiElements")
   suppressPomMetadataWarningsFor("testFixturesRuntimeElements")
   pom {
+    name.set("Gradle plugins: eu.aylett.gradle-plugins")
+    description.set("Andrew's favourite Gradle conventions")
     url.set("https://gradle-plugins.aylett.eu/")
     licenses {
       license {
