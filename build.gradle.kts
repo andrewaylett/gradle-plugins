@@ -83,16 +83,8 @@ tasks.named("publishPlugins").configure {
 publishing {
   repositories {
     maven {
-      name = "GitHubReleases"
-      url = uri("https://maven.pkg.github.com/andrewaylett/releases")
-      credentials {
-        username = System.getenv("GITHUB_ACTOR")
-        password = System.getenv("GITHUB_TOKEN")
-      }
-    }
-    maven {
-      name = "GitHubSnapshots"
-      url = uri("https://maven.pkg.github.com/andrewaylett/snapshots")
+      name = "GitHubPackages"
+      url = uri("https://maven.pkg.github.com/andrewaylett/gradle-plugins")
       credentials {
         username = System.getenv("GITHUB_ACTOR")
         password = System.getenv("GITHUB_TOKEN")

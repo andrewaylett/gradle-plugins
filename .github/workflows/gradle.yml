@@ -48,7 +48,7 @@ jobs:
 
     - name: Publish to GitHub Packages Snapshots
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      run: ./gradlew publishPluginMavenPublicationToGitHubSnapshotsRepository
+      run: ./gradlew publishPluginMavenPublicationToGitHubPackagesRepository
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
