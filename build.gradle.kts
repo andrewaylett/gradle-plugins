@@ -18,6 +18,7 @@
 
 plugins {
   id("component")
+  id("eu.aylett.plugins.version") version "0.5.0"
   `java-gradle-plugin`
   id("com.gradle.plugin-publish") version "1.3.0"
   `maven-publish`
@@ -54,6 +55,9 @@ java {
 
   withSourcesJar()
   withJavadocJar()
+  toolchain {
+    languageVersion.set(JavaLanguageVersion.of(17))
+  }
 }
 
 val checkPublishVersion by tasks.registering {
