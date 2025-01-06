@@ -31,13 +31,13 @@ jobs:
         build-scan-terms-of-use-url: https://gradle.com/help/legal-terms-of-use
 
     - name: Execute Gradle publish
-      run: ./gradlew publishPlugins
+      run: ./gradlew --no-configuration-cache -Dorg.gradle.unsafe.isolated-projects=false publishPlugins
       env:
         GRADLE_PUBLISH_KEY: hBnkAIS8CiAqxp0aU0dZzoaeH6u2zC6t
         GRADLE_PUBLISH_SECRET: ${{secrets.gradle_publish_secret}}
 
     - name: Publish to GitHub Packages
-      run: ./gradlew publishPluginMavenPublicationToGitHubPackagesRepository
+      run: ./gradlew --no-configuration-cache -Dorg.gradle.unsafe.isolated-projects=false publishPluginMavenPublicationToGitHubPackagesRepository
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
