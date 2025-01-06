@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Andrew Aylett
+ * Copyright 2023-2025 Andrew Aylett
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  */
 
 @file:Suppress("UnstableApiUsage")
+
+import eu.aylett.gradle.generated.InternalDepsVersions
+
 
 plugins {
   `jvm-test-suite`
@@ -53,9 +56,9 @@ pitest {
   // Don't mutate the class that calls git
   excludedClasses.add("eu.aylett.gradle.gitversion.Git")
 
-  junit5PluginVersion = "1.2.1"
+  junit5PluginVersion = InternalDepsVersions.PITEST_JUNIT5_PLUGIN
   verbosity = "VERBOSE_NO_SPINNER"
-  pitestVersion = "1.15.1"
+  pitestVersion = InternalDepsVersions.PITEST
   failWhenNoMutations = false
   mutators = listOf("STRONGER", "EXTENDED")
   timeoutFactor = BigDecimal.TEN

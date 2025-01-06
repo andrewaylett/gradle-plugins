@@ -44,6 +44,6 @@ jobs:
         build-scan-terms-of-use-url: https://gradle.com/help/legal-terms-of-use
 
     - name: Execute Pitest
-      run: ./gradlew --no-configuration-cache pitest-github
+      run: ./gradlew --no-configuration-cache -Dorg.gradle.unsafe.isolated-projects=false pitest-github
       env:
         REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}

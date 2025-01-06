@@ -17,15 +17,14 @@
 @file:Suppress("UnstableApiUsage")
 
 import org.gradle.kotlin.dsl.support.expectedKotlinDslPluginsVersion
-import org.jetbrains.kotlin.gradle.dsl.KotlinCommonCompilerOptions
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
+import java.util.Locale
 
 plugins {
   `java-library`
-  id("eu.aylett.conventions") version "0.4.0"
   `java-gradle-plugin`
   `kotlin-dsl`
   id("com.diffplug.spotless") version "6.25.0"
+  idea
 }
 
 repositories {
@@ -33,18 +32,65 @@ repositories {
   gradlePluginPortal()
 }
 
+val internalDeps: Configuration by configurations.creating {
+  isCanBeDeclared = true
+  isCanBeConsumed = false
+  isCanBeResolved = true
+  shouldResolveConsistentlyWith(configurations.compileClasspath.get())
+  extendsFrom(configurations.implementation.get())
+}
+
 dependencies {
   implementation(platform("org.jetbrains.kotlin:kotlin-bom:$embeddedKotlinVersion"))
   implementation("org.jetbrains.kotlin:kotlin-gradle-plugin-api")
   implementation("org.jetbrains.dokka:dokka-gradle-plugin:2.0.0")
   implementation("com.google.guava:guava:33.4.0-jre")
-  implementation("eu.aylett:gradle-plugins:0.4.0")
   implementation("com.diffplug.spotless:spotless-plugin-gradle:6.25.0")
   implementation("org.gradle.kotlin:gradle-kotlin-dsl-plugins:$expectedKotlinDslPluginsVersion")
   implementation("org.pitest:pitest:1.17.3")
   implementation("com.groupcdg.gradle:common:1.0.7")
   implementation("info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.15.0")
   implementation("com.groupcdg.pitest.github:com.groupcdg.pitest.github.gradle.plugin:1.0.7")
+
+  internalDeps("org.junit.jupiter:junit-jupiter:5.11.4")
+  internalDeps("org.pitest:pitest-junit5-plugin:1.2.1")
+}
+
+val generateInternalDepsVersions by tasks.registering {
+  val outputDir = layout.buildDirectory.dir("generated-sources/internal-deps")
+  outputs.dir(outputDir)
+  dependsOn(internalDeps)
+
+  doLast {
+    internalDeps.resolve()
+    val versionsFile =
+      outputDir.get().file(
+        "eu/aylett/gradle/generated/InternalDepsVersions.kt",
+      ).asFile
+    versionsFile.parentFile.mkdirs()
+    versionsFile.writeText(
+      buildString {
+        appendLine("package eu.aylett.gradle.generated")
+        appendLine()
+        appendLine("@Suppress(\"unused\")")
+        appendLine("object InternalDepsVersions {")
+        internalDeps.allDependencies.filter {
+          it.name != "unspecified" &&
+            !it.name.contains(
+              ".",
+            )
+        }.forEach {
+          appendLine(
+            "    const val ${it.name.replace(
+              "-",
+              "_",
+            ).uppercase(Locale.getDefault())}: String = \"${it.version}\"",
+          )
+        }
+        appendLine("}")
+      },
+    )
+  }
 }
 
 tasks.withType<AbstractArchiveTask>().configureEach {
@@ -62,8 +108,8 @@ spotless {
   }
 }
 
-val spotlessApply = tasks.named("spotlessApply")
-val spotlessCheck = tasks.named("spotlessCheck")
+val spotlessApply: TaskProvider<Task> by tasks.existing
+val spotlessCheck: TaskProvider<Task> by tasks.existing
 tasks.named("check").configure { dependsOn(spotlessCheck) }
 spotlessApply.configure { mustRunAfter(tasks.named("clean")) }
 
@@ -72,10 +118,10 @@ if (!isCI) {
   spotlessCheck.configure { dependsOn(spotlessApply) }
 }
 
-val spotlessKotlinApply = tasks.named("spotlessKotlinApply")
-val spotlessKotlinCheck = tasks.named("spotlessKotlinCheck")
+val spotlessKotlinApply: TaskProvider<Task> by tasks.existing
+val spotlessKotlinCheck: TaskProvider<Task> by tasks.existing
 
-tasks.withType<KotlinCompilationTask<KotlinCommonCompilerOptions>>().configureEach {
+tasks.withType<SourceTask>().configureEach {
   mustRunAfter(spotlessKotlinApply)
   shouldRunAfter(spotlessKotlinCheck)
 }
@@ -95,5 +141,20 @@ configurations.configureEach {
 java {
   consistentResolution {
     useCompileClasspathVersions()
+  }
+}
+
+sourceSets {
+  main {
+    kotlin {
+      srcDir(generateInternalDepsVersions)
+    }
+  }
+}
+
+idea {
+  module {
+    isDownloadJavadoc = true
+    isDownloadSources = true
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Andrew Aylett
+ * Copyright 2023-2025 Andrew Aylett
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 @file:Suppress("UnstableApiUsage")
 
+import eu.aylett.gradle.generated.InternalDepsVersions
 import java.nio.file.Files
 
 
 plugins {
-  id("eu.aylett.conventions.jvm")
   java
   `jvm-test-suite`
   `java-test-fixtures`
@@ -73,7 +73,7 @@ val testing = extensions.getByType<TestingExtension>().apply {
     }
 
     withType<JvmTestSuite>().configureEach {
-      useJUnitJupiter("5.10.0")
+      useJUnitJupiter(InternalDepsVersions.JUNIT_JUPITER)
       dependencies {
         implementation("org.hamcrest:hamcrest:3.0")
         implementation(gradleApi())

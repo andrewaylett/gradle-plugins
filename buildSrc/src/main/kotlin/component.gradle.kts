@@ -18,8 +18,6 @@ import org.jetbrains.dokka.gradle.DokkaTask
 import java.net.URI
 
 plugins {
-  id("eu.aylett.conventions")
-  id("eu.aylett.plugins.version")
   id("testing")
   id("spotless")
   id("pitest")
@@ -40,12 +38,6 @@ dependencies {
 tasks.withType<AbstractArchiveTask>().configureEach {
   isPreserveFileTimestamps = false
   isReproducibleFileOrder = true
-}
-
-aylett {
-  jvm {
-    jvmVersion.set(21)
-  }
 }
 
 tasks.withType<DokkaTask>().configureEach {

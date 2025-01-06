@@ -69,7 +69,7 @@ class Git(private val gitDir: Path, private val providers: ProviderFactory) {
       }
     if (result.result.get().exitValue == 0) {
       val output = result.standardOutput.asText.get().trim()
-      logger.warn("Git command output: $output")
+      logger.debug("Git command output: {}", output)
       return output
     } else {
       throw GitException(
