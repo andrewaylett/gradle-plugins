@@ -2,7 +2,7 @@ name: Gradle Build
 
 on:
   push:
-    branches: [ "main", "renovate/*" ]
+    branches: ["main", "renovate/*"]
   pull_request:
 
 permissions:
@@ -82,7 +82,7 @@ jobs:
           !**/cache/
           !**/caches/
 
-      # Because releases have been given a `dirty` version.
+        # Because releases have been given a `dirty` version.
     - name: Show Git Status
       run: git status
 

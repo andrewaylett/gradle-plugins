@@ -27,6 +27,7 @@ ij_kotlin_method_parameters_wrap = on_every_item
 [{*.yml,*.yaml}]
 indent_size = 2
 tab_width = 2
+ij_yaml_indent_sequence_value = false
 
 [gradlew.bat]
 end_of_line = crlf
