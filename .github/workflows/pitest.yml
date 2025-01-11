@@ -4,7 +4,7 @@
 name: Run Pitest
 on:
   push:
-    branches: [ "renovate/*" ]
+    branches: ["renovate/*"]
   pull_request:
 
 permissions:

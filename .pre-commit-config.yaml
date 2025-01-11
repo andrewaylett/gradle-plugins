@@ -1,9 +1,8 @@
----
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 default_install_hook_types:
-  - pre-commit
-  - pre-push
+- pre-commit
+- pre-push
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v5.0.0
@@ -19,6 +18,10 @@ repos:
   - id: check-added-large-files
   - id: mixed-line-ending
 
+- repo: https://github.com/google/yamlfmt
+  rev: v0.14.0
+  hooks:
+  - id: yamlfmt
 - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
   rev: 3.0.3
   hooks:
@@ -44,8 +47,8 @@ repos:
   - id: insert-license
     # Skipped in CI because we don't want to update all files even if unchanged
     stages:
-      - pre-commit
-      - pre-push
+    - pre-commit
+    - pre-push
     types:
     - kotlin
     exclude: .*/gitversion/.*
@@ -70,25 +73,25 @@ repos:
     - '/*| *| */'
 - repo: local
   hooks:
-    - id: spotless
-      stages:
-        - pre-commit
-        - pre-push
-      name: Spotless
-      language: system
-      pass_filenames: false
-      entry: ./gradlew :buildSrc:spotlessApply :spotlessApply
-      types_or:
-        - java
-        - kotlin
-    - id: check
-      stages:
-        - pre-commit
-        - pre-push
-      name: Gradle Check
-      language: system
-      pass_filenames: false
-      entry: ./gradlew :buildSrc:check :check
-      types_or:
-        - java
-        - kotlin
+  - id: spotless
+    stages:
+    - pre-commit
+    - pre-push
+    name: Spotless
+    language: system
+    pass_filenames: false
+    entry: ./gradlew :buildSrc:spotlessApply :spotlessApply
+    types_or:
+    - java
+    - kotlin
+  - id: check
+    stages:
+    - pre-commit
+    - pre-push
+    name: Gradle Check
+    language: system
+    pass_filenames: false
+    entry: ./gradlew :buildSrc:check :check
+    types_or:
+    - java
+    - kotlin

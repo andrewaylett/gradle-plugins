@@ -136,7 +136,7 @@ publishing.publications.withType<MavenPublication>().configureEach {
 
 signing {
   setRequired({
-    gradle.taskGraph.hasTask(":publishPluginMavenPublicationToSonatypeHRepository")
+    gradle.taskGraph.hasTask(":publishPluginMavenPublicationToSonatypeRepository")
   })
   val signingKey: String? = System.getenv("GPG_SIGNING_KEY")?.decodeBase64()?.utf8()
   useInMemoryPgpKeys(signingKey, "")
