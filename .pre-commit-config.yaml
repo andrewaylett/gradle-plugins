@@ -18,6 +18,10 @@ repos:
   - id: check-added-large-files
   - id: mixed-line-ending
 
+- repo: https://github.com/rhysd/actionlint
+  rev: v1.7.6
+  hooks:
+  - id: actionlint
 - repo: https://github.com/google/yamlfmt
   rev: v0.14.0
   hooks:
