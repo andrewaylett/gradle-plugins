@@ -69,9 +69,12 @@ class GitVersionPluginMultiTests : GitVersionPluginTests() {
 
     // when:
     val subproject =
-      ProjectBuilder.builder().withParent(
-        project,
-      ).withProjectDir(subDir.toFile()).build()
+      ProjectBuilder
+        .builder()
+        .withParent(
+          project,
+        ).withProjectDir(subDir.toFile())
+        .build()
 
     subproject.pluginManager.apply(GitVersionPlugin::class.java)
     // then:

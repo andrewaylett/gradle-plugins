@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Andrew Aylett
+ * Copyright 2023-2025 Andrew Aylett
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,8 @@ class BomAlignmentConventionsFunctionalTest {
   @Test
   fun `can successfully apply the project and run a (system) task`() {
     val result =
-      GradleRunner.create()
+      GradleRunner
+        .create()
         .withProjectDir(testProjectDir)
         .withArguments("dependencies")
         .withPluginClasspath()

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Andrew Aylett
+ * Copyright 2023-2025 Andrew Aylett
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,9 @@ import org.hamcrest.SelfDescribing
 import org.hamcrest.TypeSafeMatcher
 import java.util.List.copyOf
 
-class ResolvesToContain(dependencies: List<ExternalModuleDependency>) :
-  TypeSafeMatcher<Set<ResolvedArtifact>>() {
+class ResolvesToContain(
+  dependencies: List<ExternalModuleDependency>,
+) : TypeSafeMatcher<Set<ResolvedArtifact>>() {
   private val dependencies = copyOf(dependencies)
 
   override fun describeTo(description: org.hamcrest.Description) {
@@ -44,8 +45,7 @@ class ResolvesToContain(dependencies: List<ExternalModuleDependency>) :
     for (required in dependencies) {
       if (!item.any { required.matchesStrictly(it.moduleVersion.id) }) {
         mismatches.add(
-          SelfDescribing {
-              d ->
+          SelfDescribing { d ->
             d.appendText("(${required.group}:${required.name}:${required.version})")
           },
         )

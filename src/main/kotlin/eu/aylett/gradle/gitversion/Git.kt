@@ -24,7 +24,10 @@ import java.nio.file.Path
 import kotlin.io.path.isDirectory
 
 @Suppress("UnstableApiUsage")
-class Git(private val gitDir: Path, private val providers: ProviderFactory) {
+class Git(
+  private val gitDir: Path,
+  private val providers: ProviderFactory,
+) {
   init {
     if (!gitDir.isDirectory()) {
       throw UnsupportedOperationException(
@@ -68,12 +71,17 @@ class Git(private val gitDir: Path, private val providers: ProviderFactory) {
         )
       }
     if (result.result.get().exitValue == 0) {
-      val output = result.standardOutput.asText.get().trim()
+      val output =
+        result.standardOutput.asText
+          .get()
+          .trim()
       logger.debug("Git command output: {}", output)
       return output
     } else {
       throw GitException(
-        result.standardError.asText.get().trim(),
+        result.standardError.asText
+          .get()
+          .trim(),
         result.result.get().exitValue,
         spec,
       )

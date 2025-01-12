@@ -18,8 +18,12 @@ package eu.aylett.gradle.gitversion
 
 import org.gradle.process.ExecSpec
 
-class GitException(message: String?, cause: Throwable?, val statusCode: Int?, val spec: ExecSpec?) :
-  RuntimeException(
+class GitException(
+  message: String?,
+  cause: Throwable?,
+  val statusCode: Int?,
+  val spec: ExecSpec?,
+) : RuntimeException(
     "$message; $spec",
     cause,
   ) {

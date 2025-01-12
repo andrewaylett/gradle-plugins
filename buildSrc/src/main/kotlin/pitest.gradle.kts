@@ -36,10 +36,10 @@ dependencies {
 }
 
 inline fun <T, R> Iterable<T>.transform(crossinline transform: (T) -> R): Iterable<R> {
-  return object: Iterable<R> {
+  return object : Iterable<R> {
     override fun iterator(): Iterator<R> {
       val wrapped = this@transform.iterator()
-      return object: Iterator<R> {
+      return object : Iterator<R> {
         override fun hasNext(): Boolean = wrapped.hasNext()
 
         override fun next(): R = transform.invoke(wrapped.next())
@@ -52,7 +52,7 @@ val isCI = providers.environmentVariable("CI").isPresent
 pitest {
   targetClasses.add("eu.aylett.*")
   // Not much point in running functional tests, they don't pick up mutations
-  //testSourceSets.set(testing.suites.withType<JvmTestSuite>().transform { it.sources })
+  // testSourceSets.set(testing.suites.withType<JvmTestSuite>().transform { it.sources })
   // Don't mutate the class that calls git
   excludedClasses.add("eu.aylett.gradle.gitversion.Git")
 

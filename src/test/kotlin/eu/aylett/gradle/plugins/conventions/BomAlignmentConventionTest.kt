@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Andrew Aylett
+ * Copyright 2023-2025 Andrew Aylett
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -206,10 +206,11 @@ class BomAlignmentConventionTest {
 
   companion object {
     private val userHomeDir: File =
-      Path.of(
-        eu.aylett.gradle.generated.PROJECT_DIR,
-        "./build/cache",
-      ).toFile()
+      Path
+        .of(
+          eu.aylett.gradle.generated.PROJECT_DIR,
+          "./build/cache",
+        ).toFile()
 
     @JvmStatic
     @BeforeAll

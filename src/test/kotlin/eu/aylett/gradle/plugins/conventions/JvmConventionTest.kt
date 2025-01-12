@@ -57,7 +57,10 @@ class JvmConventionTest {
     assertThat(project, allOf(hasPlugin("java"), not(hasPlugin("kotlin"))))
 
     assertThat(
-      project.extensions.getByType<JavaPluginExtension>().toolchain.languageVersion.get(),
+      project.extensions
+        .getByType<JavaPluginExtension>()
+        .toolchain.languageVersion
+        .get(),
       equalTo(JavaLanguageVersion.of(21)),
     )
   }

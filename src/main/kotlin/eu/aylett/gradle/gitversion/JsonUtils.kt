@@ -23,15 +23,15 @@ internal object JsonUtils {
     // Manually writing the json string here rather than using a library to avoid dependencies in this incredibly
     // widely used plugin.
     val middleJson =
-      map.entries.stream()
+      map.entries
+        .stream()
         .map { (key, value) ->
           String.format(
             "\"%s\":%s",
             key,
             value.toString(),
           )
-        }
-        .collect(Collectors.joining(","))
+        }.collect(Collectors.joining(","))
     return "{$middleJson}"
   }
 }

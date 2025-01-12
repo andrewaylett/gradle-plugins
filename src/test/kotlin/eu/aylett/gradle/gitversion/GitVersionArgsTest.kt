@@ -30,8 +30,8 @@ import java.util.stream.Stream
 
 class GitVersionArgsTest {
   @TestFactory
-  fun allowed_prefixes(): Stream<DynamicTest> {
-    return DynamicTest.stream(
+  fun allowed_prefixes(): Stream<DynamicTest> =
+    DynamicTest.stream(
       Stream.of(
         "@Product@",
         "abc@",
@@ -45,14 +45,16 @@ class GitVersionArgsTest {
       ),
       identity(),
     ) { s -> GitVersionArgs(s) }
-  }
 
   @Test
   fun require_dash_or_at_symbol_at_prefix_end() {
     assertThrows<IllegalStateException> { GitVersionArgs("v") }
   }
 
-  data class Arg(val arg: Array<Any?>, val prefix: String) {
+  data class Arg(
+    val arg: Array<Any?>,
+    val prefix: String,
+  ) {
     override fun equals(other: Any?): Boolean {
       if (this === other) return true
       if (javaClass != other?.javaClass) return false
@@ -62,9 +64,7 @@ class GitVersionArgsTest {
       return arg.contentEquals(other.arg)
     }
 
-    override fun hashCode(): Int {
-      return arg.contentHashCode()
-    }
+    override fun hashCode(): Int = arg.contentHashCode()
   }
 
   @TestFactory

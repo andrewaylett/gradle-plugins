@@ -26,7 +26,10 @@ import kotlin.io.path.createFile
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.writeText
 
-abstract class GitVersionPluginTests(kotlin: Boolean, projectDirRelative: String = "") {
+abstract class GitVersionPluginTests(
+  kotlin: Boolean,
+  projectDirRelative: String = "",
+) {
   constructor() : this(false)
 
   protected val temporaryFolder: Path by lazy { createTempDirectory("GitVersionPluginTest") }
@@ -43,14 +46,16 @@ abstract class GitVersionPluginTests(kotlin: Boolean, projectDirRelative: String
   protected val gitIgnoreFile: Path by lazy { projectDir.resolve(".gitignore").createFile() }
   protected val dirtyContentFile: Path by lazy { projectDir.resolve("dirty").createFile() }
   protected val settingsFile: Path by lazy {
-    projectDir.resolve(
-      "settings.gradle$kts",
-    ).createFile()
+    projectDir
+      .resolve(
+        "settings.gradle$kts",
+      ).createFile()
   }
   protected val propertiesFile: Path by lazy {
-    projectDir.resolve(
-      "gradle.properties",
-    ).createFile()
+    projectDir
+      .resolve(
+        "gradle.properties",
+      ).createFile()
   }
 
   @BeforeEach
@@ -59,9 +64,7 @@ abstract class GitVersionPluginTests(kotlin: Boolean, projectDirRelative: String
     gitIgnoreFile.writeText(".gradle\n")
   }
 
-  protected fun with(vararg tasks: String): GradleRunner {
-    return with(Optional.empty(), *tasks)
-  }
+  protected fun with(vararg tasks: String): GradleRunner = with(Optional.empty(), *tasks)
 
   protected fun with(
     gradleVersion: Optional<String>,
@@ -71,7 +74,8 @@ abstract class GitVersionPluginTests(kotlin: Boolean, projectDirRelative: String
     arguments.addAll(tasks)
 
     val gradleRunner =
-      GradleRunner.create()
+      GradleRunner
+        .create()
         .forwardOutput()
         .withDebug(true)
         .withPluginClasspath()

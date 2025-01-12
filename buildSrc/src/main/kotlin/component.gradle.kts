@@ -14,22 +14,29 @@
  * limitations under the License.
  */
 
-import org.jetbrains.dokka.gradle.DokkaTask
-import java.net.URI
+import eu.aylett.gradle.generated.InternalDepsVersions
+import org.gradle.plugins.ide.idea.model.IdeaModel
+import org.jetbrains.dokka.gradle.DokkaExtension
+import org.jmailen.gradle.kotlinter.KotlinterExtension
+import org.jmailen.gradle.kotlinter.tasks.FormatTask
+import org.jmailen.gradle.kotlinter.tasks.LintTask
 
 plugins {
   id("testing")
-  id("spotless")
   id("pitest")
   id("org.gradle.kotlin.kotlin-dsl")
   id("org.jetbrains.dokka")
+  id("org.jmailen.kotlinter")
   `java-library`
+  idea
 }
 
 repositories {
   mavenCentral()
   gradlePluginPortal()
 }
+
+val implementation by configurations.existing
 
 dependencies {
   implementation(platform("org.jetbrains.kotlin:kotlin-bom:$embeddedKotlinVersion"))
@@ -40,7 +47,9 @@ tasks.withType<AbstractArchiveTask>().configureEach {
   isReproducibleFileOrder = true
 }
 
-dokka {
+val dokka = extensions.getByType<DokkaExtension>()
+
+dokka.apply {
   dokkaSourceSets {
     configureEach {
       includes.from(projectDir.resolve("module.md"))
@@ -55,5 +64,46 @@ dokka {
 //        }
       }
     }
+  }
+}
+
+val kotlinter = extensions.getByType<KotlinterExtension>()
+
+kotlinter.apply {
+  ktlintVersion = InternalDepsVersions.KTLINT_RULE_ENGINE
+}
+
+val formatKotlin: TaskProvider<Task> by tasks.existing
+val lintKotlin: TaskProvider<Task> by tasks.existing
+formatKotlin.configure {
+  mustRunAfter(tasks.named("clean"))
+}
+
+val isCI = providers.environmentVariable("CI").isPresent
+if (!isCI) {
+  lintKotlin.configure { dependsOn(formatKotlin) }
+}
+
+tasks.configureEach {
+  if (name.startsWith("compile") && name.endsWith("Kotlin")) {
+    mustRunAfter(formatKotlin)
+    shouldRunAfter(lintKotlin)
+  }
+}
+
+tasks.withType<LintTask> {
+  this.source = this.source.minus(fileTree("build/")).asFileTree
+}
+
+tasks.withType<FormatTask> {
+  this.source = this.source.minus(fileTree("build/")).asFileTree
+}
+
+val idea = extensions.getByType<IdeaModel>()
+
+idea.apply {
+  module {
+    isDownloadJavadoc = true
+    isDownloadSources = true
   }
 }

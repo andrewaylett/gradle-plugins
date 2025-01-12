@@ -28,7 +28,10 @@ import kotlin.io.path.createFile
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.writeText
 
-abstract class GitVersionPluginTests(kotlin: Boolean, projectDirRelative: String = "") {
+abstract class GitVersionPluginTests(
+  kotlin: Boolean,
+  projectDirRelative: String = "",
+) {
   constructor() : this(false)
 
   protected val temporaryFolder: Path by lazy { createTempDirectory("GitVersionPluginTest") }
@@ -45,9 +48,10 @@ abstract class GitVersionPluginTests(kotlin: Boolean, projectDirRelative: String
   protected val gitIgnoreFile: Path by lazy { projectDir.resolve(".gitignore").createFile() }
   protected val dirtyContentFile: Path by lazy { projectDir.resolve("dirty").createFile() }
   protected val settingsFile: Path by lazy {
-    projectDir.resolve(
-      "settings.gradle$kts",
-    ).createFile()
+    projectDir
+      .resolve(
+        "settings.gradle$kts",
+      ).createFile()
   }
 
   @BeforeEach

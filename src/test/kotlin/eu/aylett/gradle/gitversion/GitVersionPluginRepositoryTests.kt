@@ -53,10 +53,11 @@ class GitVersionPluginRepositoryTests : GitVersionPluginTests() {
   fun `git version can be applied on sub modules`() {
     // given:
     val subModuleDir =
-      Files.createDirectories(
-        projectDir
-          .resolve("submodule"),
-      ).toFile()
+      Files
+        .createDirectories(
+          projectDir
+            .resolve("submodule"),
+        ).toFile()
     val subModuleBuildFile = File(subModuleDir, "build.gradle")
     subModuleBuildFile.createNewFile()
     subModuleBuildFile.writeText(
