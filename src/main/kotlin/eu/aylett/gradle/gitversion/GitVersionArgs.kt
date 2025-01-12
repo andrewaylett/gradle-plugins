@@ -20,7 +20,9 @@ import com.google.common.base.Preconditions.checkNotNull
 import com.google.common.base.Preconditions.checkState
 import org.gradle.api.provider.Provider
 
-internal class GitVersionArgs(val prefix: String = "") {
+internal class GitVersionArgs(
+  val prefix: String = "",
+) {
   init {
     checkNotNull(prefix, "prefix must not be null")
     checkState(

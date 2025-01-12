@@ -82,18 +82,15 @@ abstract class GitVersionCacheService : BuildService<BuildServiceParameters.None
     gitDir: Path,
     args: GitVersionArgs,
     providers: ProviderFactory,
-  ): VersionDetails {
-    return VersionDetailsImpl(gitDir, args, providers)
-  }
+  ): VersionDetails = VersionDetailsImpl(gitDir, args, providers)
 
   companion object {
-    fun getSharedGitVersionCacheService(project: Project): Provider<GitVersionCacheService> {
-      return project.gradle
+    fun getSharedGitVersionCacheService(project: Project): Provider<GitVersionCacheService> =
+      project.gradle
         .sharedServices
         .registerIfAbsent(
           "GitVersionCacheService",
           GitVersionCacheService::class.java,
         ) {}
-    }
   }
 }

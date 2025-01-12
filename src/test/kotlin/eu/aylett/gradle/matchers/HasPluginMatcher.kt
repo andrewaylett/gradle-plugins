@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Andrew Aylett
+ * Copyright 2023-2025 Andrew Aylett
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,9 @@ import org.gradle.api.plugins.PluginAware
 import org.hamcrest.Description
 import org.hamcrest.TypeSafeMatcher
 
-class HasPluginMatcher(private val pluginName: String) : TypeSafeMatcher<PluginAware>() {
+class HasPluginMatcher(
+  private val pluginName: String,
+) : TypeSafeMatcher<PluginAware>() {
   override fun describeTo(description: Description) {
     description.apply {
       appendText("gradle plugin manager containing plugin ")
@@ -28,9 +30,7 @@ class HasPluginMatcher(private val pluginName: String) : TypeSafeMatcher<PluginA
     }
   }
 
-  override fun matchesSafely(item: PluginAware): Boolean {
-    return item.pluginManager.hasPlugin(pluginName)
-  }
+  override fun matchesSafely(item: PluginAware): Boolean = item.pluginManager.hasPlugin(pluginName)
 
   override fun describeMismatchSafely(
     item: PluginAware,
@@ -43,6 +43,4 @@ class HasPluginMatcher(private val pluginName: String) : TypeSafeMatcher<PluginA
   }
 }
 
-fun hasPlugin(pluginName: String): HasPluginMatcher {
-  return HasPluginMatcher(pluginName)
-}
+fun hasPlugin(pluginName: String): HasPluginMatcher = HasPluginMatcher(pluginName)

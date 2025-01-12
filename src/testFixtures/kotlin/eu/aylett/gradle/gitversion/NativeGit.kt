@@ -25,7 +25,9 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 
-class NativeGit(private val directory: Path) {
+class NativeGit(
+  private val directory: Path,
+) {
   val home = Files.createTempDirectory("isolatedGitHome")
 
   init {
@@ -39,9 +41,7 @@ class NativeGit(private val directory: Path) {
     }
   }
 
-  private fun runGitCmd(vararg commands: String): String {
-    return runGitCmd(HashMap(), *commands)
-  }
+  private fun runGitCmd(vararg commands: String): String = runGitCmd(HashMap(), *commands)
 
   private fun runGitCmd(
     envvars: Map<String, String>,
@@ -160,8 +160,8 @@ class NativeGit(private val directory: Path) {
       "HEAD",
     )
 
-  private fun gitCommandExists(): Boolean {
-    return try {
+  private fun gitCommandExists(): Boolean =
+    try {
       // verify that "git" command exists (throws exception if it does not)
       val gitVersionProcess = ProcessBuilder("git", "version").start()
       check(gitVersionProcess.waitFor() == 0) { "error invoking git command" }
@@ -176,7 +176,6 @@ class NativeGit(private val directory: Path) {
       log.error("Native git command not found", e)
       false
     }
-  }
 
   private val log by lazy { LoggerFactory.getLogger(NativeGit::class.java) }
 

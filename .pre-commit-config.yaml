@@ -77,14 +77,14 @@ repos:
     - '/*| *| */'
 - repo: local
   hooks:
-  - id: spotless
+  - id: ktlint
     stages:
     - pre-commit
     - pre-push
-    name: Spotless
+    name: KtLint
     language: system
     pass_filenames: false
-    entry: ./gradlew :buildSrc:spotlessApply :spotlessApply
+    entry: ./gradlew :buildSrc:formatKotlin :formatKotlin
     types_or:
     - java
     - kotlin

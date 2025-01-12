@@ -18,12 +18,14 @@
 
 import org.gradle.kotlin.dsl.support.expectedKotlinDslPluginsVersion
 import java.util.Locale
+import org.jmailen.gradle.kotlinter.tasks.LintTask
+import org.jmailen.gradle.kotlinter.tasks.FormatTask
 
 plugins {
   `java-library`
   `java-gradle-plugin`
   `kotlin-dsl`
-  id("com.diffplug.spotless") version "6.25.0"
+  id("org.jmailen.kotlinter") version "5.0.1"
   idea
 }
 
@@ -45,7 +47,7 @@ dependencies {
   implementation("org.jetbrains.kotlin:kotlin-gradle-plugin-api")
   implementation("org.jetbrains.dokka:dokka-gradle-plugin:2.0.0")
   implementation("com.google.guava:guava:33.4.0-jre")
-  implementation("com.diffplug.spotless:spotless-plugin-gradle:6.25.0")
+  implementation("org.jmailen.kotlinter:org.jmailen.kotlinter.gradle.plugin:5.0.1")
   implementation("org.gradle.kotlin:gradle-kotlin-dsl-plugins:$expectedKotlinDslPluginsVersion")
   implementation("org.pitest:pitest:1.17.4")
   implementation("com.groupcdg.gradle:common:1.0.7")
@@ -54,6 +56,7 @@ dependencies {
 
   internalDeps("org.junit.jupiter:junit-jupiter:5.11.4")
   internalDeps("org.pitest:pitest-junit5-plugin:1.2.1")
+  internalDeps("com.pinterest.ktlint:ktlint-rule-engine:1.5.0")
 }
 
 val generateInternalDepsVersions by tasks.registering {
@@ -64,9 +67,11 @@ val generateInternalDepsVersions by tasks.registering {
   doLast {
     internalDeps.resolve()
     val versionsFile =
-      outputDir.get().file(
-        "eu/aylett/gradle/generated/InternalDepsVersions.kt",
-      ).asFile
+      outputDir
+        .get()
+        .file(
+          "eu/aylett/gradle/generated/InternalDepsVersions.kt",
+        ).asFile
     versionsFile.parentFile.mkdirs()
     versionsFile.writeText(
       buildString {
@@ -74,19 +79,20 @@ val generateInternalDepsVersions by tasks.registering {
         appendLine()
         appendLine("@Suppress(\"unused\")")
         appendLine("object InternalDepsVersions {")
-        internalDeps.allDependencies.filter {
-          it.name != "unspecified" &&
-            !it.name.contains(
-              ".",
+        internalDeps.allDependencies
+          .filter {
+            it.name != "unspecified" &&
+              !it.name.contains(
+                ".",
+              )
+          }.forEach {
+            appendLine(
+              "    const val ${it.name.replace(
+                "-",
+                "_",
+              ).uppercase(Locale.getDefault())}: String = \"${it.version}\"",
             )
-        }.forEach {
-          appendLine(
-            "    const val ${it.name.replace(
-              "-",
-              "_",
-            ).uppercase(Locale.getDefault())}: String = \"${it.version}\"",
-          )
-        }
+          }
         appendLine("}")
       },
     )
@@ -98,32 +104,32 @@ tasks.withType<AbstractArchiveTask>().configureEach {
   isReproducibleFileOrder = true
 }
 
-spotless {
-  kotlin {
-    ktlint()
-    target("src/main/kotlin")
-  }
-  kotlinGradle {
-    ktlint()
-  }
+val formatKotlin: TaskProvider<Task> by tasks.existing
+val lintKotlin: TaskProvider<Task> by tasks.existing
+formatKotlin.configure { mustRunAfter(tasks.named("clean"))
 }
-
-val spotlessApply: TaskProvider<Task> by tasks.existing
-val spotlessCheck: TaskProvider<Task> by tasks.existing
-tasks.named("check").configure { dependsOn(spotlessCheck) }
-spotlessApply.configure { mustRunAfter(tasks.named("clean")) }
 
 val isCI = providers.environmentVariable("CI").isPresent
 if (!isCI) {
-  spotlessCheck.configure { dependsOn(spotlessApply) }
+  lintKotlin.configure { dependsOn(formatKotlin) }
 }
 
-val spotlessKotlinApply: TaskProvider<Task> by tasks.existing
-val spotlessKotlinCheck: TaskProvider<Task> by tasks.existing
+tasks.configureEach {
+  if (name.startsWith("compile") && name.endsWith("Kotlin")) {
+    mustRunAfter(formatKotlin)
+    shouldRunAfter(lintKotlin)
+  }
+}
+tasks.withType<LintTask> {
+  this.source = this.source.minus(fileTree("build/")).asFileTree
+}
 
-tasks.withType<SourceTask>().configureEach {
-  mustRunAfter(spotlessKotlinApply)
-  shouldRunAfter(spotlessKotlinCheck)
+tasks.withType<FormatTask> {
+  this.source = this.source.minus(fileTree("build/")).asFileTree
+}
+
+kotlinter {
+  ktlintVersion = internalDeps.dependencies.find { it.group == "com.pinterest.ktlint" }!!.version!!
 }
 
 configurations.matching { it.isCanBeConsumed && !it.isCanBeResolved }.configureEach {

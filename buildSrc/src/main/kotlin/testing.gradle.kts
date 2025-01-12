@@ -58,42 +58,43 @@ val gen =
 val isCI = providers.environmentVariable("CI").isPresent
 
 val check = tasks.named("check")
-val testing = extensions.getByType<TestingExtension>().apply {
-  suites {
-    register<JvmTestSuite>("functionalTest") {
-      targets.configureEach {
-        dependencies {
-          implementation(testFixtures(project()))
-          implementation(gradleTestKit())
-        }
-        testTask.configure {
-          shouldRunAfter(tasks.named("test"))
-        }
-      }
-    }
-
-    withType<JvmTestSuite>().configureEach {
-      useJUnitJupiter(InternalDepsVersions.JUNIT_JUPITER)
-      dependencies {
-        implementation("org.hamcrest:hamcrest:3.0")
-        implementation(gradleApi())
-      }
-      targets.configureEach {
-        sources {
-          kotlin {
-            srcDir(gen)
+val testing =
+  extensions.getByType<TestingExtension>().apply {
+    suites {
+      register<JvmTestSuite>("functionalTest") {
+        targets.configureEach {
+          dependencies {
+            implementation(testFixtures(project()))
+            implementation(gradleTestKit())
+          }
+          testTask.configure {
+            shouldRunAfter(tasks.named("test"))
           }
         }
-        testTask.configure {
-          dependsOn(gen)
+      }
+
+      withType<JvmTestSuite>().configureEach {
+        useJUnitJupiter(InternalDepsVersions.JUNIT_JUPITER)
+        dependencies {
+          implementation("org.hamcrest:hamcrest:3.0")
+          implementation(gradleApi())
+        }
+        targets.configureEach {
+          sources {
+            kotlin {
+              srcDir(gen)
+            }
+          }
+          testTask.configure {
+            dependsOn(gen)
+          }
         }
       }
     }
   }
-}
 
 testing.suites.withType<JvmTestSuite>().configureEach {
   check.configure {
-    dependsOn( this@configureEach.targets.map { it.testTask })
+    dependsOn(this@configureEach.targets.map { it.testTask })
   }
 }
