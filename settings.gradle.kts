@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Andrew Aylett
+ * Copyright 2023-2025 Andrew Aylett
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,18 @@ pluginManagement {
 }
 
 plugins {
+  id("com.gradle.develocity") version "3.18"
   id("org.gradle.toolchains.foojay-resolver-convention") version "0.9.0"
 }
+
+develocity {
+  buildScan {
+    termsOfUseUrl = "https://gradle.com/help/legal-terms-of-use"
+    termsOfUseAgree = "yes"
+    uploadInBackground = false
+  }
+}
+
 
 rootProject.name = "gradle-plugins"
 
