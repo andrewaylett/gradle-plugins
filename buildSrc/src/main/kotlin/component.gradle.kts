@@ -59,9 +59,11 @@ dokka.apply {
         localDirectory.set(projectDir.resolve("src"))
         remoteUrl("https://github.com/andrewaylett/gradle-plugins/tree/main/src")
         remoteLineSuffix.set("#L")
-//        externalDocumentationLink {
-//          url.set(URI("https://docs.gradle.org/${gradle.gradleVersion}/javadoc/"))
-//        }
+        externalDocumentationLinks {
+          val gradle by creating {
+            url("https://docs.gradle.org/${gradle.gradleVersion}/javadoc/")
+          }
+        }
       }
     }
   }
@@ -73,30 +75,37 @@ kotlinter.apply {
   ktlintVersion = InternalDepsVersions.KTLINT_RULE_ENGINE
 }
 
-val formatKotlin: TaskProvider<Task> by tasks.existing
-val lintKotlin: TaskProvider<Task> by tasks.existing
-formatKotlin.configure {
-  mustRunAfter(tasks.named("clean"))
-}
-
 val isCI = providers.environmentVariable("CI").isPresent
-if (!isCI) {
-  lintKotlin.configure { dependsOn(formatKotlin) }
+
+tasks.named { it.startsWith("compile") && it.endsWith("Kotlin") }.configureEach {
+  val compileSet = name.substringAfter("compile").substringBefore("Kotlin")
+  val sourceSet = if (compileSet.isEmpty()) "Main" else compileSet
+  mustRunAfter("formatKotlin$sourceSet")
+  shouldRunAfter("lintKotlin$sourceSet")
 }
 
-tasks.configureEach {
-  if (name.startsWith("compile") && name.endsWith("Kotlin")) {
-    mustRunAfter(formatKotlin)
-    shouldRunAfter(lintKotlin)
+val formatKotlinBuildScripts by tasks.registering(FormatTask::class) {
+  source(layout.projectDirectory.files("build.gradle.kts", "settings.gradle.kts"))
+}
+tasks.named("formatKotlin").configure { dependsOn(formatKotlinBuildScripts) }
+
+val lintKotlinBuildScripts by tasks.registering(LintTask::class) {
+  source(layout.projectDirectory.files("build.gradle.kts", "settings.gradle.kts"))
+}
+tasks.named("lintKotlin").configure { dependsOn(lintKotlinBuildScripts) }
+
+tasks.withType<LintTask>().configureEach {
+  group = "verification"
+  if (!isCI) {
+    dependsOn("format${name.substringAfter("lint")}")
   }
+  exclude("gradle/", "eu/aylett/gradle/generated/", "*Plugin.kt")
 }
 
-tasks.withType<LintTask> {
-  this.source = this.source.minus(fileTree("build/")).asFileTree
-}
-
-tasks.withType<FormatTask> {
-  this.source = this.source.minus(fileTree("build/")).asFileTree
+tasks.withType<FormatTask>().configureEach {
+  group = "formatting"
+  mustRunAfter("clean")
+  exclude("gradle/", "eu/aylett/gradle/generated/", "*Plugin.kt")
 }
 
 val idea = extensions.getByType<IdeaModel>()
