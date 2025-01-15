@@ -42,14 +42,14 @@ group = "eu.aylett"
 version = aylett.versions.gitVersion()
 description = "Andrew's favourite Gradle conventions"
 
-configurations.matching { it.isCanBeConsumed && !it.isCanBeResolved }.configureEach {
-  resolutionStrategy {
-    failOnVersionConflict()
-  }
-}
-
 configurations.configureEach {
   resolutionStrategy {
+    if (isCanBeConsumed && !isCanBeResolved && !isCanBeDeclared) {
+      failOnVersionConflict()
+    }
+    if (!isCanBeConsumed && !isCanBeResolved && isCanBeDeclared) {
+      failOnVersionConflict()
+    }
     failOnNonReproducibleResolution()
   }
 }

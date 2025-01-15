@@ -17,9 +17,9 @@
 @file:Suppress("UnstableApiUsage")
 
 import org.gradle.kotlin.dsl.support.expectedKotlinDslPluginsVersion
-import java.util.Locale
-import org.jmailen.gradle.kotlinter.tasks.LintTask
 import org.jmailen.gradle.kotlinter.tasks.FormatTask
+import org.jmailen.gradle.kotlinter.tasks.LintTask
+import java.util.Locale
 
 plugins {
   `java-library`
@@ -34,12 +34,31 @@ repositories {
   gradlePluginPortal()
 }
 
+configurations.configureEach {
+  resolutionStrategy {
+    if (isCanBeConsumed && !isCanBeResolved && !isCanBeDeclared) {
+      failOnVersionConflict()
+    }
+    if (!isCanBeConsumed && !isCanBeResolved && isCanBeDeclared) {
+      failOnVersionConflict()
+    }
+    failOnNonReproducibleResolution()
+  }
+}
+
 val internalDeps: Configuration by configurations.creating {
   isCanBeDeclared = true
   isCanBeConsumed = false
+  isCanBeResolved = false
+  extendsFrom(configurations.implementation.get())
+}
+
+val internalDepClasspath: Configuration by configurations.creating {
+  isCanBeDeclared = false
+  isCanBeConsumed = false
   isCanBeResolved = true
   shouldResolveConsistentlyWith(configurations.compileClasspath.get())
-  extendsFrom(configurations.implementation.get())
+  extendsFrom(internalDeps)
 }
 
 dependencies {
@@ -57,15 +76,16 @@ dependencies {
   internalDeps("org.junit.jupiter:junit-jupiter:5.13.4")
   internalDeps("org.pitest:pitest-junit5-plugin:1.2.3")
   internalDeps("com.pinterest.ktlint:ktlint-rule-engine:1.7.1")
+  internalDeps("com.groupcdg.pitest.github:com.groupcdg.pitest.github.gradle.plugin:1.0.6")
 }
 
 val generateInternalDepsVersions by tasks.registering {
   val outputDir = layout.buildDirectory.dir("generated-sources/internal-deps")
   outputs.dir(outputDir)
-  dependsOn(internalDeps)
+  dependsOn(internalDepClasspath)
 
   doLast {
-    internalDeps.resolve()
+    internalDepClasspath.resolve()
     val versionsFile =
       outputDir
         .get()
@@ -79,7 +99,7 @@ val generateInternalDepsVersions by tasks.registering {
         appendLine()
         appendLine("@Suppress(\"unused\")")
         appendLine("object InternalDepsVersions {")
-        internalDeps.allDependencies
+        internalDepClasspath.allDependencies
           .filter {
             it.name != "unspecified" &&
               !it.name.contains(
@@ -104,44 +124,42 @@ tasks.withType<AbstractArchiveTask>().configureEach {
   isReproducibleFileOrder = true
 }
 
-val formatKotlin: TaskProvider<Task> by tasks.existing
-val lintKotlin: TaskProvider<Task> by tasks.existing
-formatKotlin.configure { mustRunAfter(tasks.named("clean"))
-}
-
 val isCI = providers.environmentVariable("CI").isPresent
-if (!isCI) {
-  lintKotlin.configure { dependsOn(formatKotlin) }
+
+tasks.named { it.startsWith("compile") && it.endsWith("Kotlin") }.configureEach {
+  val compileSet = name.substringAfter("compile").substringBefore("Kotlin")
+  val sourceSet = compileSet.ifEmpty { "Main" }
+  mustRunAfter("formatKotlin$sourceSet")
+  shouldRunAfter("lintKotlin$sourceSet")
 }
 
-tasks.configureEach {
-  if (name.startsWith("compile") && name.endsWith("Kotlin")) {
-    mustRunAfter(formatKotlin)
-    shouldRunAfter(lintKotlin)
+val formatKotlinBuildScripts by tasks.registering(FormatTask::class) {
+  source(layout.projectDirectory.files("build.gradle.kts", "settings.gradle.kts"))
+}
+tasks.named("formatKotlin").configure { dependsOn(formatKotlinBuildScripts) }
+
+val lintKotlinBuildScripts by tasks.registering(LintTask::class) {
+  source(layout.projectDirectory.files("build.gradle.kts", "settings.gradle.kts"))
+}
+tasks.named("lintKotlin").configure { dependsOn(lintKotlinBuildScripts) }
+
+tasks.withType<LintTask>().configureEach {
+  group = "verification"
+  if (!isCI) {
+    dependsOn("format${name.substringAfter("lint")}")
   }
-}
-tasks.withType<LintTask> {
-  this.source = this.source.minus(fileTree("build/")).asFileTree
+  exclude("gradle/", "eu/aylett/gradle/generated/", "*Plugin.kt")
 }
 
-tasks.withType<FormatTask> {
-  this.source = this.source.minus(fileTree("build/")).asFileTree
+tasks.withType<FormatTask>().configureEach {
+  group = "formatting"
+  mustRunAfter("clean")
+  exclude("gradle/", "eu/aylett/gradle/generated/", "*Plugin.kt")
 }
 
 kotlinter {
-  ktlintVersion = internalDeps.dependencies.find { it.group == "com.pinterest.ktlint" }!!.version!!
-}
-
-configurations.matching { it.isCanBeConsumed && !it.isCanBeResolved }.configureEach {
-  resolutionStrategy {
-    failOnVersionConflict()
-  }
-}
-
-configurations.configureEach {
-  resolutionStrategy {
-    failOnNonReproducibleResolution()
-  }
+  ktlintVersion =
+    internalDeps.dependencies.find { it.group == "com.pinterest.ktlint" }!!.version!!
 }
 
 java {
