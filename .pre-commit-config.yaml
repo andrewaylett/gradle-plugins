@@ -1,5 +1,3 @@
-# See https://pre-commit.com for more information
-# See https://pre-commit.com/hooks.html for more hooks
 default_install_hook_types:
 - pre-commit
 - pre-push
@@ -7,17 +5,18 @@ repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v5.0.0
   hooks:
-  - id: trailing-whitespace
-    exclude: \.snap$
-  - id: end-of-file-fixer
-    exclude: ^\.idea
+  - id: check-added-large-files
   - id: check-case-conflict
   - id: check-merge-conflict
-  - id: check-yaml
   - id: check-toml
-  - id: check-added-large-files
+  - id: check-xml
+  - id: check-yaml
+  - id: end-of-file-fixer
+    exclude: ^\.idea
+  - id: forbid-submodules
   - id: mixed-line-ending
-
+  - id: trailing-whitespace
+    exclude: \.snap$
 - repo: https://github.com/rhysd/actionlint
   rev: v1.7.7
   hooks:
@@ -75,6 +74,16 @@ repos:
     - .license-header
     - --comment-style
     - '/*| *| */'
+- repo: https://github.com/renovatebot/pre-commit-hooks
+  rev: 41.23.5
+  hooks:
+  - id: renovate-config-validator
+    args:
+    - --strict
+- repo: https://github.com/andrewaylett/pre-commit-hooks
+  rev: v0.5.0
+  hooks:
+  - id: init-hooks
 - repo: local
   hooks:
   - id: ktlint
