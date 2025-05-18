@@ -33,7 +33,7 @@ dependencies {
   implementation(platform("org.jetbrains.kotlin:kotlin-bom:$embeddedKotlinVersion"))
   implementation("com.google.guava:guava:33.4.8-jre")
 
-  testImplementation("com.fasterxml.jackson.core:jackson-core:2.18.3")
+  testImplementation("com.fasterxml.jackson.core:jackson-core:2.19.0")
   testImplementation("com.fasterxml.jackson.core:jackson-databind")
   testImplementation("org.jetbrains.kotlin:kotlin-gradle-plugin")
 }
