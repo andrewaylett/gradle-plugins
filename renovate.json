@@ -1,7 +1,10 @@
 {
   "extends": [
     "config:recommended",
-    "github>andrewaylett/renovate-config",
+    "github>andrewaylett/renovate-config#v1",
     ":assignAndReview(andrewaylett)"
-  ]
+  ],
+    "maven": {
+        "managerFilePatterns": ["module.md"]
+    }
 }
