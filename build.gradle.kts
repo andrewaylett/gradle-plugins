@@ -15,8 +15,11 @@
  */
 
 @file:Suppress("UnstableApiUsage")
+@file:OptIn(ExperimentalKotlinGradlePluginApi::class)
 
 import okio.ByteString.Companion.decodeBase64
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 
 plugins {
@@ -62,7 +65,18 @@ java {
   withSourcesJar()
   withJavadocJar()
   toolchain {
-    languageVersion.set(JavaLanguageVersion.of(17))
+    languageVersion.set(JavaLanguageVersion.of(21))
+  }
+}
+
+tasks.withType<JavaCompile>().configureEach {
+  options.release = 17
+}
+kotlin {
+  target {
+    compilerOptions {
+      jvmTarget.set(JvmTarget.JVM_17)
+    }
   }
 }
 

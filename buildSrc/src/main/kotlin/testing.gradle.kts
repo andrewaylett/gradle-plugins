@@ -24,7 +24,7 @@ plugins {
   java
   `jvm-test-suite`
   `java-test-fixtures`
-  id("org.jetbrains.kotlin.jvm")
+  kotlin("jvm")
 }
 
 abstract class GenerateTestProjectConstants : DefaultTask() {
@@ -55,8 +55,6 @@ val gen =
     this.projectDir.set(layout.projectDirectory.asFile.canonicalPath)
   }
 
-val isCI = providers.environmentVariable("CI").isPresent
-
 val check = tasks.named("check")
 val testing =
   extensions.getByType<TestingExtension>().apply {
@@ -79,12 +77,12 @@ val testing =
           implementation("org.hamcrest:hamcrest:3.0")
           implementation(gradleApi())
         }
-        targets.configureEach {
-          sources {
-            kotlin {
-              srcDir(gen)
-            }
+        sources {
+          kotlin {
+            srcDir(gen)
           }
+        }
+        targets.configureEach {
           testTask.configure {
             dependsOn(gen)
           }

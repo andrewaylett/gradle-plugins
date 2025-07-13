@@ -22,13 +22,14 @@ import org.jmailen.gradle.kotlinter.tasks.FormatTask
 import org.jmailen.gradle.kotlinter.tasks.LintTask
 
 plugins {
+  `java-library`
   id("testing")
   id("pitest")
-  id("org.gradle.kotlin.kotlin-dsl")
   id("org.jetbrains.dokka")
   id("org.jmailen.kotlinter")
-  `java-library`
   idea
+  kotlin("jvm")
+  id("org.gradle.kotlin.kotlin-dsl")
 }
 
 repositories {
