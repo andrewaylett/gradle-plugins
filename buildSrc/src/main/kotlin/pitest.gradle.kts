@@ -35,19 +35,6 @@ dependencies {
   pitest("com.groupcdg.pitest:pitest-kotlin-plugin:1.1.6")
 }
 
-inline fun <T, R> Iterable<T>.transform(crossinline transform: (T) -> R): Iterable<R> {
-  return object : Iterable<R> {
-    override fun iterator(): Iterator<R> {
-      val wrapped = this@transform.iterator()
-      return object : Iterator<R> {
-        override fun hasNext(): Boolean = wrapped.hasNext()
-
-        override fun next(): R = transform.invoke(wrapped.next())
-      }
-    }
-  }
-}
-
 val isCI = providers.environmentVariable("CI").isPresent
 pitest {
   targetClasses.add("eu.aylett.*")
