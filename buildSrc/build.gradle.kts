@@ -56,7 +56,7 @@ dependencies {
 
   internalDeps("org.junit.jupiter:junit-jupiter:5.13.3")
   internalDeps("org.pitest:pitest-junit5-plugin:1.2.3")
-  internalDeps("com.pinterest.ktlint:ktlint-rule-engine:1.6.0")
+  internalDeps("com.pinterest.ktlint:ktlint-rule-engine:1.7.0")
 }
 
 val generateInternalDepsVersions by tasks.registering {
