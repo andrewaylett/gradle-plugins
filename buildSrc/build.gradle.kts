@@ -54,7 +54,7 @@ dependencies {
   implementation("info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.15.0")
   implementation("com.groupcdg.pitest.github:com.groupcdg.pitest.github.gradle.plugin:1.0.7")
 
-  internalDeps("org.junit.jupiter:junit-jupiter:5.11.4")
+  internalDeps("org.junit.jupiter:junit-jupiter:5.13.3")
   internalDeps("org.pitest:pitest-junit5-plugin:1.2.3")
   internalDeps("com.pinterest.ktlint:ktlint-rule-engine:1.6.0")
 }
