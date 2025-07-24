@@ -1,7 +1,7 @@
 {
   "extends": [
     "config:recommended",
-    "github>andrewaylett/renovate-config#v1",
+    "github>andrewaylett/renovate-config#v2",
     ":assignAndReview(andrewaylett)"
   ],
     "maven": {
