@@ -23,7 +23,6 @@ import org.gradle.process.ExecSpec
 import java.nio.file.Path
 import kotlin.io.path.isDirectory
 
-@Suppress("UnstableApiUsage")
 class Git(
   private val gitDir: Path,
   private val providers: ProviderFactory,
@@ -36,7 +35,7 @@ class Git(
     }
   }
 
-  private fun exec(action: Action<in ExecSpec?>?): String {
+  private fun exec(action: Action<in ExecSpec>?): String {
     var spec: ExecSpec? = null
     val result =
       providers.exec {

@@ -48,22 +48,9 @@ repos:
   rev: v1.5.5
   hooks:
   - id: insert-license
-    # Skipped in CI because we don't want to update all files even if unchanged
     stages:
     - pre-commit
     - pre-push
-    types:
-    - kotlin
-    exclude: .*/gitversion/.*
-    args:
-    - --use-current-year
-    - --license-filepath
-    - .license-header
-    - --comment-style
-    - '/*| *| */'
-  - id: insert-license
-    # Like the above, but not updating to the latest year
-    stages:
     - pre-merge-commit
     types:
     - kotlin

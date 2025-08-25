@@ -19,7 +19,7 @@ package eu.aylett.gradle.gitversion
 import java.util.stream.Collectors
 
 internal object JsonUtils {
-  fun mapToJson(map: Map<String?, *>): String {
+  fun mapToJson(map: Map<String, *>): String {
     // Manually writing the json string here rather than using a library to avoid dependencies in this incredibly
     // widely used plugin.
     val middleJson =

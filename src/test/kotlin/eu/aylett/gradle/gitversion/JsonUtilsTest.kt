@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test
 internal class JsonUtilsTest {
   @Test
   fun converts_empty_map_to_empty_json_object() {
-    val json = mapToJson(emptyMap<String?, Any>())
+    val json = mapToJson(emptyMap<String, Any>())
     assertThat(json, equalTo("{}"))
   }
 
