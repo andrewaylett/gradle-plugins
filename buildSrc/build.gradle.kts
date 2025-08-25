@@ -51,7 +51,7 @@ dependencies {
   implementation("org.gradle.kotlin:gradle-kotlin-dsl-plugins:$expectedKotlinDslPluginsVersion")
   implementation("org.pitest:pitest:1.20.0")
   implementation("com.groupcdg.gradle:common:1.0.7")
-  implementation("info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.15.0")
+  implementation("info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.19.0-rc.1")
   implementation("com.groupcdg.pitest.github:com.groupcdg.pitest.github.gradle.plugin:1.0.7")
 
   internalDeps("org.junit.jupiter:junit-jupiter:5.13.4")
