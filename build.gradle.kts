@@ -145,60 +145,59 @@ signing {
   sign(publishing.publications)
 }
 
+@Suppress("unused")
 gradlePlugin {
   website = "https://gradle-plugins.aylett.eu/"
   vcsUrl = "https://github.com/andrewaylett/gradle-plugins"
 
   testSourceSets(sourceSets.getByName("functionalTest"))
 
-  plugins {
-    create("basePlugin") {
-      id = "eu.aylett.plugins.base"
-      displayName = "aylett.eu base plugin"
-      description = "Base plugin for registering common Gradle features"
-      tags = listOf("base", "jvm")
-      //language=jvm-class-name
-      implementationClass = "eu.aylett.gradle.plugins.BasePlugin"
-    }
-    create("versionPlugin") {
-      id = "eu.aylett.plugins.version"
-      displayName = "aylett.eu automatic version plugin"
-      description = "Sets the project version from the state of the git repository it's in."
-      tags = listOf("git", "version")
-      //language=jvm-class-name
-      implementationClass = "eu.aylett.gradle.gitversion.GitVersionPlugin"
-    }
-    create("bomAlignmentConvention") {
-      id = "eu.aylett.conventions.bom-alignment"
-      displayName = "aylett.eu BOM alignment plugin"
-      description = "Adds virtual BOM for common sets of packages that don't have a real BOM"
-      tags = listOf("bom", "jvm")
-      //language=jvm-class-name
-      implementationClass = "eu.aylett.gradle.plugins.conventions.BomAlignmentConvention"
-    }
-    create("ideSupportConvention") {
-      id = "eu.aylett.conventions.ide-support"
-      displayName = "aylett.eu IDE support conventions"
-      description = "Conventional support for JetBrains IDEs"
-      tags = listOf("ide", "idea", "conventions", "jvm")
-      //language=jvm-class-name
-      implementationClass = "eu.aylett.gradle.plugins.conventions.IDESupportConvention"
-    }
-    create("jvmConvention") {
-      id = "eu.aylett.conventions.jvm"
-      displayName = "aylett.eu JVM conventions"
-      description = "Conventional support for JVM build features, like integration tests"
-      tags = listOf("jvm", "testing", "integrationtests", "conventions")
-      //language=jvm-class-name
-      implementationClass = "eu.aylett.gradle.plugins.conventions.JvmConvention"
-    }
-    create("allConventions") {
-      id = "eu.aylett.conventions"
-      displayName = "aylett.eu conventions"
-      description = "Applies all Andrew's favourite build conventions"
-      tags = listOf("conventions", "jvm")
-      //language=jvm-class-name
-      implementationClass = "eu.aylett.gradle.plugins.conventions.Conventions"
-    }
+  val basePlugin by plugins.creating {
+    id = "eu.aylett.plugins.base"
+    displayName = "aylett.eu base plugin"
+    description = "Base plugin for registering common Gradle features"
+    tags = listOf("base", "jvm")
+    //language=jvm-class-name
+    implementationClass = "eu.aylett.gradle.plugins.BasePlugin"
+  }
+  val versionPlugin by plugins.creating {
+    id = "eu.aylett.plugins.version"
+    displayName = "aylett.eu automatic version plugin"
+    description = "Sets the project version from the state of the git repository it's in."
+    tags = listOf("git", "version")
+    //language=jvm-class-name
+    implementationClass = "eu.aylett.gradle.gitversion.GitVersionPlugin"
+  }
+  val bomAlignmentConvention by plugins.creating {
+    id = "eu.aylett.conventions.bom-alignment"
+    displayName = "aylett.eu BOM alignment plugin"
+    description = "Adds virtual BOM for common sets of packages that don't have a real BOM"
+    tags = listOf("bom", "jvm")
+    //language=jvm-class-name
+    implementationClass = "eu.aylett.gradle.plugins.conventions.BomAlignmentConvention"
+  }
+  val ideSupportConvention by plugins.creating {
+    id = "eu.aylett.conventions.ide-support"
+    displayName = "aylett.eu IDE support conventions"
+    description = "Conventional support for JetBrains IDEs"
+    tags = listOf("ide", "idea", "conventions", "jvm")
+    //language=jvm-class-name
+    implementationClass = "eu.aylett.gradle.plugins.conventions.IDESupportConvention"
+  }
+  val jvmConvention by plugins.creating {
+    id = "eu.aylett.conventions.jvm"
+    displayName = "aylett.eu JVM conventions"
+    description = "Conventional support for JVM build features, like integration tests"
+    tags = listOf("jvm", "testing", "integrationtests", "conventions")
+    //language=jvm-class-name
+    implementationClass = "eu.aylett.gradle.plugins.conventions.JvmConvention"
+  }
+  val allConventions by plugins.creating {
+    id = "eu.aylett.conventions"
+    displayName = "aylett.eu conventions"
+    description = "Applies all Andrew's favourite build conventions"
+    tags = listOf("conventions", "jvm")
+    //language=jvm-class-name
+    implementationClass = "eu.aylett.gradle.plugins.conventions.Conventions"
   }
 }
