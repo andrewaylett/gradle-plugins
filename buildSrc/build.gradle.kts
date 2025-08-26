@@ -46,23 +46,21 @@ configurations.configureEach {
   }
 }
 
-val internalDeps: Configuration by configurations.creating {
-  isCanBeDeclared = true
-  isCanBeConsumed = false
-  isCanBeResolved = false
-  extendsFrom(configurations.implementation.get())
+configurations {
+  dependencyScope("internalDeps") {
+    extendsFrom(configurations.implementation.get())
+  }
+  resolvable("internalDepsClasspath") {
+    shouldResolveConsistentlyWith(configurations.compileClasspath.get())
+    extendsFrom(configurations.named("internalDeps").get())
+  }
 }
 
-val internalDepClasspath: Configuration by configurations.creating {
-  isCanBeDeclared = false
-  isCanBeConsumed = false
-  isCanBeResolved = true
-  shouldResolveConsistentlyWith(configurations.compileClasspath.get())
-  extendsFrom(internalDeps)
-}
+val internalDeps by configurations.getting
+val internalDepsClasspath by configurations.getting
 
 dependencies {
-  implementation(platform("org.jetbrains.kotlin:kotlin-bom:$embeddedKotlinVersion"))
+  implementation(platform("org.jetbrains.kotlin:kotlin-bom:2.2.10"))
   implementation("org.jetbrains.kotlin:kotlin-gradle-plugin-api")
   implementation("org.jetbrains.dokka:dokka-gradle-plugin:2.0.0")
   implementation("com.google.guava:guava:33.4.8-jre")
@@ -76,16 +74,14 @@ dependencies {
   internalDeps("org.junit.jupiter:junit-jupiter:5.13.4")
   internalDeps("org.pitest:pitest-junit5-plugin:1.2.3")
   internalDeps("com.pinterest.ktlint:ktlint-rule-engine:1.7.1")
-  internalDeps("com.groupcdg.pitest.github:com.groupcdg.pitest.github.gradle.plugin:1.0.6")
 }
 
 val generateInternalDepsVersions by tasks.registering {
   val outputDir = layout.buildDirectory.dir("generated-sources/internal-deps")
   outputs.dir(outputDir)
-  dependsOn(internalDepClasspath)
+  dependsOn(internalDepsClasspath)
 
   doLast {
-    internalDepClasspath.resolve()
     val versionsFile =
       outputDir
         .get()
@@ -99,18 +95,15 @@ val generateInternalDepsVersions by tasks.registering {
         appendLine()
         appendLine("@Suppress(\"unused\")")
         appendLine("object InternalDepsVersions {")
-        internalDepClasspath.allDependencies
+        internalDepsClasspath.incoming.dependencies
           .filter {
-            it.name != "unspecified" &&
-              !it.name.contains(
-                ".",
-              )
+            it.name != "unspecified" && it.version != null
           }.forEach {
             appendLine(
               "    const val ${it.name.replace(
                 "-",
                 "_",
-              ).uppercase(Locale.getDefault())}: String = \"${it.version}\"",
+              ).replace(".", "_").uppercase(Locale.getDefault())}: String = \"${it.version}\"",
             )
           }
         appendLine("}")

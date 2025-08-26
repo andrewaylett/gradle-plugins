@@ -39,7 +39,7 @@ repositories {
 val implementation by configurations.existing
 
 dependencies {
-  implementation(platform("org.jetbrains.kotlin:kotlin-bom:$embeddedKotlinVersion"))
+  implementation(platform("org.jetbrains.kotlin:kotlin-bom:${InternalDepsVersions.KOTLIN_BOM}"))
 }
 
 tasks.withType<AbstractArchiveTask>().configureEach {
