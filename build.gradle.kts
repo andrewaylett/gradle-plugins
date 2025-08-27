@@ -66,6 +66,13 @@ java {
   }
 }
 
+if (gradle.taskGraph.hasTask(":generateMetadataFileForPluginMavenPublication")) {
+  // https://youtrack.jetbrains.com/issue/KT-79047/Gradle-compileKotlin-fails-with-configuration-cache
+  tasks.withType<org.jetbrains.kotlin.gradle.tasks.AbstractKotlinCompile<*>> {
+    incremental = false
+  }
+}
+
 val checkPublishVersion by tasks.registering {
   doNotTrackState("Either does nothing or fails the build")
   doFirst {
