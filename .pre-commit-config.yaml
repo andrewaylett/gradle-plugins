@@ -68,7 +68,7 @@ repos:
     args:
     - --strict
 - repo: https://github.com/andrewaylett/pre-commit-hooks
-  rev: v0.6.2
+  rev: v0.7.0
   hooks:
   - id: init-hooks
 - repo: local
