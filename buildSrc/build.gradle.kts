@@ -94,7 +94,7 @@ dependencies {
     implementation("com.jayway.jsonpath:json-path") {
       because("CVE-2023-51074")
     }
-    implementation("com.fasterxml.woodstox:woodstox-core:6.2.4") {
+    implementation("com.fasterxml.woodstox:woodstox-core:6.7.0") {
       because("CVE-2022-40152")
     }
   }
