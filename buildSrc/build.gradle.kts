@@ -74,6 +74,30 @@ dependencies {
   internalDeps("org.junit.jupiter:junit-jupiter:5.13.4")
   internalDeps("org.pitest:pitest-junit5-plugin:1.2.3")
   internalDeps("com.pinterest.ktlint:ktlint-rule-engine:1.7.1")
+
+  constraints {
+    implementation("net.minidev:json-smart:2.4.10") {
+      because("CVE-2023-1370")
+    }
+    implementation("commons-io:commons-io:2.14.0") {
+      because("CVE-2024-47554")
+    }
+    implementation("com.fasterxml.jackson.core:jackson-core:2.15.0") {
+      because("CVE-2025-52999")
+    }
+    implementation("org.apache.commons:commons-lang3:3.18.0") {
+      because("CVE-2025-48924")
+    }
+    implementation("com.squareup.okio:okio:3.4.0") {
+      because("CVE-2023-3635")
+    }
+    implementation("com.jayway.jsonpath:json-path") {
+      because("CVE-2023-51074")
+    }
+    implementation("com.fasterxml.woodstox:woodstox-core:6.2.4") {
+      because("CVE-2022-40152")
+    }
+  }
 }
 
 val generateInternalDepsVersions by tasks.registering {
