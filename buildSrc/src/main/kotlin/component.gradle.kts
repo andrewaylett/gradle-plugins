@@ -87,12 +87,14 @@ tasks.named { it.startsWith("compile") && it.endsWith("Kotlin") }.configureEach 
 val formatKotlinBuildScripts by tasks.registering(FormatTask::class) {
   source(layout.projectDirectory.files("build.gradle.kts", "settings.gradle.kts"))
 }
-tasks.named("formatKotlin").configure { dependsOn(formatKotlinBuildScripts) }
-
 val lintKotlinBuildScripts by tasks.registering(LintTask::class) {
   source(layout.projectDirectory.files("build.gradle.kts", "settings.gradle.kts"))
 }
-tasks.named("lintKotlin").configure { dependsOn(lintKotlinBuildScripts) }
+
+afterEvaluate {
+  tasks.named("formatKotlin").configure { dependsOn(formatKotlinBuildScripts) }
+  tasks.named("lintKotlin").configure { dependsOn(lintKotlinBuildScripts) }
+}
 
 tasks.withType<LintTask>().configureEach {
   group = "verification"

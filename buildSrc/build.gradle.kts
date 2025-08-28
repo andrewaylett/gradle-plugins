@@ -25,7 +25,7 @@ plugins {
   `java-library`
   `java-gradle-plugin`
   `kotlin-dsl`
-  id("org.jmailen.kotlinter") version "5.1.1"
+  id("org.jmailen.kotlinter") version "5.2.0"
   idea
 }
 
@@ -66,7 +66,7 @@ dependencies {
   implementation("org.jetbrains.kotlin:kotlin-gradle-plugin-api")
   implementation("org.jetbrains.dokka:dokka-gradle-plugin:2.0.0")
   implementation("com.google.guava:guava:33.4.8-jre")
-  implementation("org.jmailen.kotlinter:org.jmailen.kotlinter.gradle.plugin:5.1.1")
+  implementation("org.jmailen.kotlinter:org.jmailen.kotlinter.gradle.plugin:5.2.0")
   implementation("org.gradle.kotlin:gradle-kotlin-dsl-plugins:$expectedKotlinDslPluginsVersion")
   implementation("org.pitest:pitest:1.20.2")
   implementation("com.groupcdg.gradle:common:1.0.7")
@@ -136,12 +136,15 @@ tasks.named { it.startsWith("compile") && it.endsWith("Kotlin") }.configureEach 
 val formatKotlinBuildScripts by tasks.registering(FormatTask::class) {
   source(layout.projectDirectory.files("build.gradle.kts", "settings.gradle.kts"))
 }
-tasks.named("formatKotlin").configure { dependsOn(formatKotlinBuildScripts) }
 
 val lintKotlinBuildScripts by tasks.registering(LintTask::class) {
   source(layout.projectDirectory.files("build.gradle.kts", "settings.gradle.kts"))
 }
-tasks.named("lintKotlin").configure { dependsOn(lintKotlinBuildScripts) }
+
+afterEvaluate {
+  tasks.named("formatKotlin").configure { dependsOn(formatKotlinBuildScripts) }
+  tasks.named("lintKotlin").configure { dependsOn(lintKotlinBuildScripts) }
+}
 
 tasks.withType<LintTask>().configureEach {
   group = "verification"
