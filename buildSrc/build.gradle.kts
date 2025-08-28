@@ -82,7 +82,7 @@ dependencies {
     implementation("commons-io:commons-io:2.14.0") {
       because("CVE-2024-47554")
     }
-    implementation("com.fasterxml.jackson.core:jackson-core:2.15.0") {
+    implementation("com.fasterxml.jackson.core:jackson-core:2.19.2") {
       because("CVE-2025-52999")
     }
     implementation("org.apache.commons:commons-lang3:3.18.0") {
