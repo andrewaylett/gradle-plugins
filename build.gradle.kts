@@ -33,8 +33,8 @@ plugins {
 }
 
 dependencies {
-  implementation(platform("org.jetbrains.kotlin:kotlin-bom:$embeddedKotlinVersion"))
   implementation("com.google.guava:guava:33.4.8-jre")
+  implementation(gradleApi())
 
   testImplementation("com.fasterxml.jackson.core:jackson-core:2.20.0")
   testImplementation("com.fasterxml.jackson.core:jackson-databind")
@@ -213,5 +213,13 @@ gradlePlugin {
     tags = listOf("conventions", "jvm")
     //language=jvm-class-name
     implementationClass = "eu.aylett.gradle.plugins.conventions.Conventions"
+  }
+  plugins.create("lock-dependencies") {
+    id = "eu.aylett.lock-dependencies"
+    displayName = "aylett.eu dependency locking plugin"
+    description = "Tools for managing dependency lock files"
+    tags = listOf("dependencies", "jvm", "locking")
+    //language=jvm-class-name
+    implementationClass = "eu.aylett.gradle.plugins.dependencies.DependencyLockPlugin"
   }
 }

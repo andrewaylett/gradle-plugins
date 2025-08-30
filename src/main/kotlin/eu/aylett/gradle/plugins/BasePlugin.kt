@@ -20,7 +20,17 @@ import eu.aylett.gradle.extensions.BaseExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
+/**
+ * Base plugin that registers the root [eu.aylett.gradle.extensions.BaseExtension] under the `aylett` name.
+ *
+ * This is applied automatically by higher-level plugins in this module; you typically don't need to
+ * apply it directly.
+ */
 class BasePlugin : Plugin<Project> {
+  /**
+   * Creates the `aylett` extension on the target project, which is used by other convention plugins
+   * to expose configuration options.
+   */
   override fun apply(target: Project) {
     target.extensions.create("aylett", BaseExtension::class.java)
   }

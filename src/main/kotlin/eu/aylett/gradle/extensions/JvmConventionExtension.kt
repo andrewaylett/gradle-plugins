@@ -18,6 +18,13 @@ package eu.aylett.gradle.extensions
 
 import org.gradle.api.provider.Property
 
+/**
+ * Configuration options for the [eu.aylett.gradle.plugins.conventions.JvmConvention] plugin.
+ */
 interface JvmConventionExtension {
+  /**
+   * The target Java toolchain version to use for compilation and testing.
+   * Defaults to 21 unless overridden.
+   */
   val jvmVersion: Property<Int>
 }
