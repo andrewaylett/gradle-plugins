@@ -22,8 +22,16 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 
+/**
+ * Plugin that exposes git-derived version information to builds.
+ *
+ * Adds a `versions` extension providing `gitVersion {}` and `versionDetails {}` Groovy-closure APIs,
+ * sets Gradle extra properties `gitVersion` and `versionDetails` for easy access, and registers a
+ * `printVersion` task for convenience.
+ */
 @Suppress("unused")
 class GitVersionPlugin : Plugin<Project> {
+  /** Applies the plugin and wires up the versioning extension, properties, and tasks. */
   override fun apply(project: Project) {
     project.pluginManager.apply(BasePlugin::class)
     val versionCacheService =

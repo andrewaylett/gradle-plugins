@@ -1,10 +1,22 @@
 {
-  "extends": [
-    "config:recommended",
-    "github>andrewaylett/renovate-config#v2",
-    ":assignAndReview(andrewaylett)"
-  ],
-    "maven": {
-        "managerFilePatterns": ["module.md"]
-    }
+    "extends": [
+        "config:recommended",
+        "github>andrewaylett/renovate-config#v2",
+        ":assignAndReview(andrewaylett)"
+    ],
+    "customManagers": [
+        {
+            "customType": "regex",
+            "managerFilePatterns": [
+                "manager.md",
+                "README.md"
+            ],
+            "matchStrings": [
+                "id '(?<depName>[^']+)' version '(?<currentValue>[^']+)'",
+                "id\\(\"(?<depName>[^\"]+)\"\\) version \"(?<currentValue>[^\"]+)\""
+            ],
+            "packageNameTemplate": "eu.aylett:gradle-plugins",
+            "datasourceTemplate": "maven"
+        }
+    ]
 }

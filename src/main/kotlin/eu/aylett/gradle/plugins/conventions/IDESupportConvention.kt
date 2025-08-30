@@ -43,6 +43,7 @@ import org.gradle.plugins.ide.idea.model.IdeaModel
  * ```
  */
 class IDESupportConvention : Plugin<Project> {
+  /** Applies IDEA configuration to download sources and Javadoc for dependencies. */
   override fun apply(target: Project) {
     target.pluginManager.apply("idea")
     target.extensions.getByType(IdeaModel::class).module {

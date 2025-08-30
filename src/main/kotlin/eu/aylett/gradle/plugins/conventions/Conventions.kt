@@ -19,7 +19,14 @@ package eu.aylett.gradle.plugins.conventions
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
+/**
+ * Aggregates and applies all aylett.eu build conventions to a project.
+ *
+ * This plugin applies [BomAlignmentConvention], [IDESupportConvention], and [JvmConvention]
+ * to provide a sensible baseline for typical JVM builds.
+ */
 class Conventions : Plugin<Project> {
+  /** Applies the convention plugins to the target project. */
   override fun apply(target: Project) {
     target.pluginManager.run {
       apply(BomAlignmentConvention::class.java)

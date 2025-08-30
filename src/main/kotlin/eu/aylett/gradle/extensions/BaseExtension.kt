@@ -18,4 +18,9 @@ package eu.aylett.gradle.extensions
 
 import org.gradle.api.plugins.ExtensionAware
 
+/**
+ * Root extension added by [eu.aylett.gradle.plugins.BasePlugin] under the `aylett` name.
+ *
+ * Other convention plugins attach their own nested extensions to this for user configuration.
+ */
 abstract class BaseExtension : ExtensionAware

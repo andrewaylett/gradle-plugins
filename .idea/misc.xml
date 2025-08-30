@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="EntryPointsManager">
-    <list size="1">
-      <item index="0" class="java.lang.String" itemvalue="org.junit.jupiter.api.BeforeAll" />
+    <list size="2">
+      <item index="0" class="java.lang.String" itemvalue="org.gradle.api.tasks.TaskAction" />
+      <item index="1" class="java.lang.String" itemvalue="org.junit.jupiter.api.BeforeAll" />
     </list>
+    <pattern value="org.gradle.api.Project" hierarchically="true" />
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />
   <component name="FrameworkDetectionExcludesConfiguration">
