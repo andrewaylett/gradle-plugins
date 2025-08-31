@@ -88,7 +88,7 @@ dependencies {
     implementation("org.apache.commons:commons-lang3:3.18.0") {
       because("CVE-2025-48924")
     }
-    implementation("com.squareup.okio:okio:3.4.0") {
+    implementation("com.squareup.okio:okio:3.16.0") {
       because("CVE-2023-3635")
     }
     implementation("com.jayway.jsonpath:json-path") {
