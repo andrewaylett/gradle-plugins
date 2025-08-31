@@ -21,7 +21,7 @@ import okio.ByteString.Companion.decodeBase64
 
 plugins {
   id("component")
-  id("eu.aylett.plugins.version") version "0.5.2"
+  id("eu.aylett.plugins.version") version "0.6.1"
   `java-gradle-plugin`
   id("com.gradle.plugin-publish") version "1.3.1"
   `maven-publish`
