@@ -79,7 +79,7 @@ dependencies {
     implementation("net.minidev:json-smart:2.6.0") {
       because("CVE-2023-1370")
     }
-    implementation("commons-io:commons-io:2.14.0") {
+    implementation("commons-io:commons-io:2.20.0") {
       because("CVE-2024-47554")
     }
     implementation("com.fasterxml.jackson.core:jackson-core:2.20.0") {
