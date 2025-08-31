@@ -76,7 +76,7 @@ dependencies {
   internalDeps("com.pinterest.ktlint:ktlint-rule-engine:1.7.1")
 
   constraints {
-    implementation("net.minidev:json-smart:2.4.10") {
+    implementation("net.minidev:json-smart:2.6.0") {
       because("CVE-2023-1370")
     }
     implementation("commons-io:commons-io:2.14.0") {
