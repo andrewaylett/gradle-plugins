@@ -24,7 +24,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
   id("component")
-  id("eu.aylett.plugins.version") version "0.6.1"
+  id("eu.aylett.plugins.version") version "0.7.0"
   `java-gradle-plugin`
   id("com.gradle.plugin-publish") version "1.3.1"
   `maven-publish`
