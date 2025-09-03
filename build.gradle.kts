@@ -82,6 +82,9 @@ kotlin {
 
 val checkPublishVersion by tasks.registering {
   doNotTrackState("Either does nothing or fails the build")
+  notCompatibleWithConfigurationCache(
+    "Uses a closure to do its work, only runs with configuration cache disabled anyway",
+  )
   doFirst {
     val versionDetails = aylett.versions.versionDetails()
     if (!versionDetails.isCleanTag) {

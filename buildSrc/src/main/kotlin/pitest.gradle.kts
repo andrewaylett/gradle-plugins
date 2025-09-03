@@ -23,16 +23,16 @@ plugins {
   `jvm-test-suite`
   id("testing")
   id("info.solidsoft.pitest")
-  id("com.groupcdg.pitest.github")
+  id("com.arcmutate.github")
 }
 
 dependencies {
   pitest("org.slf4j:slf4j-api:2.0.17")
   pitest("ch.qos.logback:logback-classic:1.5.18")
-  pitest("com.groupcdg.arcmutate:base:1.2.2")
-  pitest("com.groupcdg.pitest:pitest-accelerator-junit5:1.0.6")
-  pitest("com.groupcdg:pitest-git-plugin:1.1.4")
-  pitest("com.groupcdg.pitest:pitest-kotlin-plugin:1.1.6")
+  pitest("com.arcmutate:base:1.5.3")
+  pitest("com.arcmutate:pitest-accelerator-junit5:1.2.2")
+  pitest("com.arcmutate:pitest-git-plugin:2.2.4")
+  pitest("com.arcmutate:pitest-kotlin-plugin:1.4.3")
 }
 
 val isCI = providers.environmentVariable("CI").isPresent
