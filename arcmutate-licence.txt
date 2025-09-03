@@ -1,0 +1,7 @@
+#Licence file for arcmutate mutation testing https://www.arcmutate.com
+#Wed Sep 03 09:42:50 BST 2025
+expires=03/09/2027
+keyVersion=1
+packages=eu.aylett.*
+signature=C39XWJ1ndyy+aRnBkw7TlDPZX29N3ldqMJRtgd5qzrxYCOLYjxVhDpWcGZJBgZsKTAv50FEcQuTxDyuqeGSt9calXnoX4akGd/b50howtb94ohBS033Hwk5pZPr9k3jT2cSWAY0+/NgClH+BTnP7EdXe2AaMrtA0FN+gAhFSHHA\=
+type=OSSS
