@@ -66,7 +66,7 @@ dependencies {
   implementation("com.google.guava:guava:33.4.8-jre")
   implementation("org.jmailen.kotlinter:org.jmailen.kotlinter.gradle.plugin:5.2.0")
   implementation("org.gradle.kotlin:gradle-kotlin-dsl-plugins:$expectedKotlinDslPluginsVersion")
-  implementation("org.pitest:pitest:1.20.2")
+  implementation("org.pitest:pitest:1.20.3")
   implementation("com.groupcdg.gradle:common:1.0.7")
   implementation("info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.19.0-rc.1")
   implementation("com.groupcdg.pitest.github:com.groupcdg.pitest.github.gradle.plugin:1.0.7")
