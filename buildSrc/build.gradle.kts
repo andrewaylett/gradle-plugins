@@ -63,7 +63,7 @@ dependencies {
   implementation(platform("org.jetbrains.kotlin:kotlin-bom:2.2.20"))
   implementation("org.jetbrains.kotlin:kotlin-gradle-plugin-api")
   implementation("org.jetbrains.dokka:dokka-gradle-plugin:2.0.0")
-  implementation("com.google.guava:guava:33.4.8-jre")
+  implementation("com.google.guava:guava:33.5.0-jre")
   implementation("org.jmailen.kotlinter:org.jmailen.kotlinter.gradle.plugin:5.2.0")
   implementation("org.gradle.kotlin:gradle-kotlin-dsl-plugins:$expectedKotlinDslPluginsVersion")
   implementation("org.pitest:pitest:1.20.3")

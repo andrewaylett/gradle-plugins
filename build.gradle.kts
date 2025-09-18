@@ -33,7 +33,7 @@ plugins {
 }
 
 dependencies {
-  implementation("com.google.guava:guava:33.4.8-jre")
+  implementation("com.google.guava:guava:33.5.0-jre")
   implementation(gradleApi())
 
   testImplementation("com.fasterxml.jackson.core:jackson-core:2.20.0")
