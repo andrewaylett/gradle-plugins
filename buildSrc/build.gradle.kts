@@ -85,7 +85,7 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-core:2.20.0") {
       because("CVE-2025-52999")
     }
-    implementation("org.apache.commons:commons-lang3:3.18.0") {
+    implementation("org.apache.commons:commons-lang3:3.19.0") {
       because("CVE-2025-48924")
     }
     implementation("com.squareup.okio:okio:3.16.0") {
