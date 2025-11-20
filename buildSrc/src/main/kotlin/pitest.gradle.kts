@@ -31,7 +31,7 @@ dependencies {
   pitest("ch.qos.logback:logback-classic:1.5.21")
   pitest("com.arcmutate:base:1.6.0")
   pitest("com.arcmutate:pitest-accelerator-junit5:1.2.2")
-  pitest("com.arcmutate:pitest-git-plugin:2.2.4")
+  pitest("com.arcmutate:pitest-git-plugin:2.2.5")
   pitest("com.arcmutate:pitest-kotlin-plugin:1.5.0")
 }
 
