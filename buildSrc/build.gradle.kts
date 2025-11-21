@@ -60,7 +60,7 @@ val internalDeps by configurations.getting
 val internalDepsClasspath by configurations.getting
 
 dependencies {
-  implementation(platform("org.jetbrains.kotlin:kotlin-bom:2.2.20"))
+  implementation(platform("org.jetbrains.kotlin:kotlin-bom:2.2.21"))
   implementation("org.jetbrains.kotlin:kotlin-gradle-plugin-api")
   implementation("org.jetbrains.dokka:dokka-gradle-plugin:2.1.0")
   implementation("com.google.guava:guava:33.5.0-jre")
