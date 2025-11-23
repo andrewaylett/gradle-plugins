@@ -78,6 +78,6 @@ jobs:
     steps:
     - name: Check out
       uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-    - uses: andrewaylett/pre-commit-action@659d7531b80ebb5da915ce4fedffa4494e86e55a # v4
+    - uses: andrewaylett/pre-commit-action@bebd7a7cc372b78642e585abf320ccc52794cb76 # v4
       with:
         extra_args: '--all-files --hook-stage pre-merge-commit'
