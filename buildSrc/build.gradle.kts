@@ -73,7 +73,7 @@ dependencies {
 
   internalDeps("org.junit.jupiter:junit-jupiter:5.14.2")
   internalDeps("org.pitest:pitest-junit5-plugin:1.2.3")
-  internalDeps("com.pinterest.ktlint:ktlint-rule-engine:1.7.1")
+  internalDeps("com.pinterest.ktlint:ktlint-rule-engine:1.8.0")
 
   constraints {
     implementation("net.minidev:json-smart:2.6.0") {
