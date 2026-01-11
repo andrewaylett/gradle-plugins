@@ -29,7 +29,6 @@ import org.gradle.api.tasks.TaskAction
 import java.util.stream.Collectors
 import javax.inject.Inject
 
-@CacheableTask
 /**
  * Task that writes a dependency versions lock file for the current build.
  *
@@ -37,6 +36,7 @@ import javax.inject.Inject
  * writes a `versions.lock` file with one line per external module in the form
  * `group:artifact:version (…resolution reasons…)`.
  */
+@CacheableTask
 abstract class WriteVersionsLocksTask : DefaultTask() {
   /** The destination file for the generated lock. Typically `<root>/versions.lock`. */
   @get:OutputFile
