@@ -71,7 +71,7 @@ dependencies {
   implementation("info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.19.0-rc.3")
   implementation("com.arcmutate.github:com.arcmutate.github.gradle.plugin:2.3.2")
 
-  internalDeps("org.junit.jupiter:junit-jupiter:5.14.3")
+  internalDeps("org.junit.jupiter:junit-jupiter:6.0.3")
   internalDeps("org.pitest:pitest-junit5-plugin:1.2.3")
   internalDeps("com.pinterest.ktlint:ktlint-rule-engine:1.8.0")
 
