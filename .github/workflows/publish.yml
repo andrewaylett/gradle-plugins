@@ -23,7 +23,7 @@ jobs:
         java-version: 21
 
     - name: Setup Gradle Build Scan
-      uses: gradle/actions/setup-gradle@748248ddd2a24f49513d8f472f81c3a07d4d50e1 # v4
+      uses: gradle/actions/setup-gradle@f29f5a9d7b09a7c6b29859002d29d24e1674c884 # v5
       with:
         dependency-graph: 'generate-and-submit'
         build-scan-publish: 'true'
