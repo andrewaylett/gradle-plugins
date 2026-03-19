@@ -26,7 +26,7 @@ plugins {
   id("component")
   id("eu.aylett.plugins.version") version "0.7.0"
   `java-gradle-plugin`
-  id("com.gradle.plugin-publish") version "2.1.0"
+  id("com.gradle.plugin-publish") version "2.1.1"
   `maven-publish`
   signing
   id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
