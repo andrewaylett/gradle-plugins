@@ -68,7 +68,7 @@ dependencies {
   implementation("org.gradle.kotlin:gradle-kotlin-dsl-plugins:$expectedKotlinDslPluginsVersion")
   implementation("org.pitest:pitest:1.23.0")
   implementation("com.groupcdg.gradle:common:1.0.7")
-  implementation("info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.19.0-rc.3")
+  implementation("info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.19.0")
   implementation("com.arcmutate.github:com.arcmutate.github.gradle.plugin:2.3.2")
 
   internalDeps("org.junit.jupiter:junit-jupiter:6.0.3")
