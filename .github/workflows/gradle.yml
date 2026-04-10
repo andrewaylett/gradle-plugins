@@ -53,13 +53,13 @@ jobs:
         report_paths: '**/build/test-results/*/TEST-*.xml'
 
     - name: Upload JAR
-      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
       with:
         name: JAR
         path: build/libs/*.jar
 
     - name: Upload Build Output
-      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
       if: failure() # we don't care so much about working builds
       with:
         name: Built-Output
