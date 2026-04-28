@@ -36,7 +36,7 @@ dependencies {
   implementation("com.google.guava:guava:33.6.0-jre")
   implementation(gradleApi())
 
-  testImplementation("com.fasterxml.jackson.core:jackson-core:2.21.2")
+  testImplementation("com.fasterxml.jackson.core:jackson-core:2.21.3")
   testImplementation("com.fasterxml.jackson.core:jackson-databind")
   testImplementation("org.jetbrains.kotlin:kotlin-gradle-plugin")
 }
