@@ -25,7 +25,7 @@ plugins {
   `java-library`
   `java-gradle-plugin`
   `kotlin-dsl`
-  id("org.jmailen.kotlinter") version "5.4.2"
+  id("org.jmailen.kotlinter") version "5.5.0"
   idea
 }
 
