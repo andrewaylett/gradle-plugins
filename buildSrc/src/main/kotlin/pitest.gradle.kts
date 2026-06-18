@@ -32,7 +32,7 @@ dependencies {
   pitest("com.arcmutate:base:1.7.1")
   pitest("com.arcmutate:pitest-accelerator-junit5:1.2.2")
   pitest("com.arcmutate:pitest-git-plugin:2.3.3")
-  pitest("com.arcmutate:pitest-kotlin-plugin:1.5.0")
+  pitest("com.arcmutate:pitest-kotlin-plugin:1.5.1")
 }
 
 val isCI = providers.environmentVariable("CI").isPresent
