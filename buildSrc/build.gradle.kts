@@ -56,8 +56,8 @@ configurations {
   }
 }
 
-val internalDeps by configurations.getting
-val internalDepsClasspath by configurations.getting
+val internalDeps = configurations.named("internalDeps")
+val internalDepsClasspath = configurations.named("internalDepsClasspath")
 
 dependencies {
   implementation(platform("org.jetbrains.kotlin:kotlin-bom:2.3.21"))
@@ -100,41 +100,44 @@ dependencies {
   }
 }
 
-val generateInternalDepsVersions by tasks.registering {
-  val outputDir = layout.buildDirectory.dir("generated-sources/internal-deps")
-  outputs.dir(outputDir)
-  dependsOn(internalDepsClasspath)
+val generateInternalDepsVersions =
+  tasks.register("generateInternalDepsVersions") {
+    val outputDir = layout.buildDirectory.dir("generated-sources/internal-deps")
+    outputs.dir(outputDir)
+    dependsOn(internalDepsClasspath)
 
-  doLast {
-    val versionsFile =
-      outputDir
-        .get()
-        .file(
-          "eu/aylett/gradle/generated/InternalDepsVersions.kt",
-        ).asFile
-    versionsFile.parentFile.mkdirs()
-    versionsFile.writeText(
-      buildString {
-        appendLine("package eu.aylett.gradle.generated")
-        appendLine()
-        appendLine("@Suppress(\"unused\")")
-        appendLine("object InternalDepsVersions {")
-        internalDepsClasspath.incoming.dependencies
-          .filter {
-            it.name != "unspecified" && it.version != null
-          }.forEach {
-            appendLine(
-              "    const val ${it.name.replace(
-                "-",
-                "_",
-              ).replace(".", "_").uppercase(Locale.getDefault())}: String = \"${it.version}\"",
-            )
-          }
-        appendLine("}")
-      },
-    )
+    doLast {
+      val versionsFile =
+        outputDir
+          .get()
+          .file(
+            "eu/aylett/gradle/generated/InternalDepsVersions.kt",
+          ).asFile
+      versionsFile.parentFile.mkdirs()
+      versionsFile.writeText(
+        buildString {
+          appendLine("package eu.aylett.gradle.generated")
+          appendLine()
+          appendLine("@Suppress(\"unused\")")
+          appendLine("object InternalDepsVersions {")
+          configurations
+            .get("internalDepsClasspath")
+            .incoming.dependencies
+            .filter {
+              it.name != "unspecified" && it.version != null
+            }.forEach {
+              appendLine(
+                "    const val ${it.name.replace(
+                  "-",
+                  "_",
+                ).replace(".", "_").uppercase(Locale.getDefault())}: String = \"${it.version}\"",
+              )
+            }
+          appendLine("}")
+        },
+      )
+    }
   }
-}
 
 tasks.withType<AbstractArchiveTask>().configureEach {
   isPreserveFileTimestamps = false
@@ -150,13 +153,15 @@ tasks.named { it.startsWith("compile") && it.endsWith("Kotlin") }.configureEach 
   shouldRunAfter("lintKotlin$sourceSet")
 }
 
-val formatKotlinBuildScripts by tasks.registering(FormatTask::class) {
-  source(layout.projectDirectory.files("build.gradle.kts", "settings.gradle.kts"))
-}
+val formatKotlinBuildScripts =
+  tasks.register<FormatTask>("formatKotlinBuildScripts") {
+    source(layout.projectDirectory.files("build.gradle.kts", "settings.gradle.kts"))
+  }
 
-val lintKotlinBuildScripts by tasks.registering(LintTask::class) {
-  source(layout.projectDirectory.files("build.gradle.kts", "settings.gradle.kts"))
-}
+val lintKotlinBuildScripts =
+  tasks.register<LintTask>("lintKotlinBuildScripts") {
+    source(layout.projectDirectory.files("build.gradle.kts", "settings.gradle.kts"))
+  }
 
 afterEvaluate {
   tasks.named("formatKotlin").configure { dependsOn(formatKotlinBuildScripts) }
@@ -179,7 +184,11 @@ tasks.withType<FormatTask>().configureEach {
 
 kotlinter {
   ktlintVersion =
-    internalDeps.dependencies.find { it.group == "com.pinterest.ktlint" }!!.version!!
+    internalDeps
+      .get()
+      .dependencies
+      .find { it.group == "com.pinterest.ktlint" }!!
+      .version!!
 }
 
 java {
