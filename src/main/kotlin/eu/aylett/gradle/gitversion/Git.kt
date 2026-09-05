@@ -18,8 +18,9 @@ package eu.aylett.gradle.gitversion
 import org.gradle.api.Action
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.kotlin.dsl.provideDelegate
-import org.gradle.problems.internal.impl.logger
 import org.gradle.process.ExecSpec
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.nio.file.Path
 import kotlin.io.path.isDirectory
 
@@ -125,5 +126,9 @@ class Git(
     exec {
       commandLine("git", "show-ref", "-q", "--verify", "--", "HEAD")
     }
+  }
+
+  companion object {
+    private val logger: Logger = LoggerFactory.getLogger(Git::class.java)
   }
 }
