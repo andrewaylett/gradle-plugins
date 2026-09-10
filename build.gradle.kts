@@ -15,16 +15,14 @@
  */
 
 @file:Suppress("UnstableApiUsage")
-@file:OptIn(ExperimentalKotlinGradlePluginApi::class)
 
 import okio.ByteString.Companion.decodeBase64
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 
 plugins {
   id("component")
-  id("eu.aylett.plugins.version") version "0.7.0"
+  id("eu.aylett.plugins.version") version "0.7.1"
   `java-gradle-plugin`
   id("com.gradle.plugin-publish") version "2.1.1"
   `maven-publish`
@@ -80,21 +78,25 @@ kotlin {
   }
 }
 
-val checkPublishVersion by tasks.registering {
-  doNotTrackState("Either does nothing or fails the build")
-  notCompatibleWithConfigurationCache(
-    "Uses a closure to do its work, only runs with configuration cache disabled anyway",
-  )
-  doFirst {
-    val versionDetails = aylett.versions.versionDetails()
-    if (!versionDetails.isCleanTag) {
-      logger.error("Version details is {}", versionDetails)
-      throw IllegalStateException(
-        "Can't publish a plugin with a version (${versionDetails.version}) that's not a clean tag",
-      )
+val checkPublishVersion =
+  tasks.register("checkPublishVersion") {
+    description = "Checks that the version is a clean tag"
+    group = "publishing"
+
+    doNotTrackState("Either does nothing or fails the build")
+    notCompatibleWithConfigurationCache(
+      "Uses a closure to do its work, only runs with configuration cache disabled anyway",
+    )
+    doFirst {
+      val versionDetails = aylett.versions.versionDetails()
+      if (!versionDetails.isCleanTag) {
+        logger.error("Version details is {}", versionDetails)
+        throw IllegalStateException(
+          "Can't publish a plugin with a version (${versionDetails.version}) that's not a clean tag",
+        )
+      }
     }
   }
-}
 tasks.named("publishPlugins").configure {
   dependsOn(checkPublishVersion)
 }
@@ -133,7 +135,7 @@ publishing.publications.withType<MavenPublication>().configureEach {
     licenses {
       license {
         name.set("Apache-2.0")
-        url.set("http://www.apache.org/licenses/LICENSE-2.0")
+        url.set("https://www.apache.org/licenses/LICENSE-2.0")
       }
     }
     developers {
@@ -169,60 +171,62 @@ gradlePlugin {
 
   testSourceSets(sourceSets.getByName("functionalTest"))
 
-  val basePlugin by plugins.creating {
-    id = "eu.aylett.plugins.base"
-    displayName = "aylett.eu base plugin"
-    description = "Base plugin for registering common Gradle features"
-    tags = listOf("base", "jvm")
-    //language=jvm-class-name
-    implementationClass = "eu.aylett.gradle.plugins.BasePlugin"
-  }
-  val versionPlugin by plugins.creating {
-    id = "eu.aylett.plugins.version"
-    displayName = "aylett.eu automatic version plugin"
-    description = "Sets the project version from the state of the git repository it's in."
-    tags = listOf("git", "version")
-    //language=jvm-class-name
-    implementationClass = "eu.aylett.gradle.gitversion.GitVersionPlugin"
-  }
-  val bomAlignmentConvention by plugins.creating {
-    id = "eu.aylett.conventions.bom-alignment"
-    displayName = "aylett.eu BOM alignment plugin"
-    description = "Adds virtual BOM for common sets of packages that don't have a real BOM"
-    tags = listOf("bom", "jvm")
-    //language=jvm-class-name
-    implementationClass = "eu.aylett.gradle.plugins.conventions.BomAlignmentConvention"
-  }
-  val ideSupportConvention by plugins.creating {
-    id = "eu.aylett.conventions.ide-support"
-    displayName = "aylett.eu IDE support conventions"
-    description = "Conventional support for JetBrains IDEs"
-    tags = listOf("ide", "idea", "conventions", "jvm")
-    //language=jvm-class-name
-    implementationClass = "eu.aylett.gradle.plugins.conventions.IDESupportConvention"
-  }
-  val jvmConvention by plugins.creating {
-    id = "eu.aylett.conventions.jvm"
-    displayName = "aylett.eu JVM conventions"
-    description = "Conventional support for JVM build features, like integration tests"
-    tags = listOf("jvm", "testing", "integrationtests", "conventions")
-    //language=jvm-class-name
-    implementationClass = "eu.aylett.gradle.plugins.conventions.JvmConvention"
-  }
-  val allConventions by plugins.creating {
-    id = "eu.aylett.conventions"
-    displayName = "aylett.eu conventions"
-    description = "Applies all Andrew's favourite build conventions"
-    tags = listOf("conventions", "jvm")
-    //language=jvm-class-name
-    implementationClass = "eu.aylett.gradle.plugins.conventions.Conventions"
-  }
-  plugins.create("lock-dependencies") {
-    id = "eu.aylett.lock-dependencies"
-    displayName = "aylett.eu dependency locking plugin"
-    description = "Tools for managing dependency lock files"
-    tags = listOf("dependencies", "jvm", "locking")
-    //language=jvm-class-name
-    implementationClass = "eu.aylett.gradle.plugins.dependencies.DependencyLockPlugin"
+  plugins.apply {
+    create("basePlugin") {
+      id = "eu.aylett.plugins.base"
+      displayName = "aylett.eu base plugin"
+      description = "Base plugin for registering common Gradle features"
+      tags = listOf("base", "jvm")
+      //language=jvm-class-name
+      implementationClass = "eu.aylett.gradle.plugins.BasePlugin"
+    }
+    create("versionPlugin") {
+      id = "eu.aylett.plugins.version"
+      displayName = "aylett.eu automatic version plugin"
+      description = "Sets the project version from the state of the git repository it's in."
+      tags = listOf("git", "version")
+      //language=jvm-class-name
+      implementationClass = "eu.aylett.gradle.gitversion.GitVersionPlugin"
+    }
+    create("bomAlignmentConvention") {
+      id = "eu.aylett.conventions.bom-alignment"
+      displayName = "aylett.eu BOM alignment plugin"
+      description = "Adds virtual BOM for common sets of packages that don't have a real BOM"
+      tags = listOf("bom", "jvm")
+      //language=jvm-class-name
+      implementationClass = "eu.aylett.gradle.plugins.conventions.BomAlignmentConvention"
+    }
+    create("ideSupportConvention") {
+      id = "eu.aylett.conventions.ide-support"
+      displayName = "aylett.eu IDE support conventions"
+      description = "Conventional support for JetBrains IDEs"
+      tags = listOf("ide", "idea", "conventions", "jvm")
+      //language=jvm-class-name
+      implementationClass = "eu.aylett.gradle.plugins.conventions.IDESupportConvention"
+    }
+    create("jvmConvention") {
+      id = "eu.aylett.conventions.jvm"
+      displayName = "aylett.eu JVM conventions"
+      description = "Conventional support for JVM build features, like integration tests"
+      tags = listOf("jvm", "testing", "integrationtests", "conventions")
+      //language=jvm-class-name
+      implementationClass = "eu.aylett.gradle.plugins.conventions.JvmConvention"
+    }
+    create("allConventions") {
+      id = "eu.aylett.conventions"
+      displayName = "aylett.eu conventions"
+      description = "Applies all Andrew's favourite build conventions"
+      tags = listOf("conventions", "jvm")
+      //language=jvm-class-name
+      implementationClass = "eu.aylett.gradle.plugins.conventions.Conventions"
+    }
+    create("lock-dependencies") {
+      id = "eu.aylett.lock-dependencies"
+      displayName = "aylett.eu dependency locking plugin"
+      description = "Tools for managing dependency lock files"
+      tags = listOf("dependencies", "jvm", "locking")
+      //language=jvm-class-name
+      implementationClass = "eu.aylett.gradle.plugins.dependencies.DependencyLockPlugin"
+    }
   }
 }

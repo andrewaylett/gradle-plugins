@@ -85,12 +85,14 @@ tasks.named { it.startsWith("compile") && it.endsWith("Kotlin") }.configureEach 
   shouldRunAfter("lintKotlin$sourceSet")
 }
 
-val formatKotlinBuildScripts by tasks.registering(FormatTask::class) {
-  source(layout.projectDirectory.files("build.gradle.kts", "settings.gradle.kts"))
-}
-val lintKotlinBuildScripts by tasks.registering(LintTask::class) {
-  source(layout.projectDirectory.files("build.gradle.kts", "settings.gradle.kts"))
-}
+val formatKotlinBuildScripts =
+  tasks.register<FormatTask>("formatKotlinBuildScripts") {
+    source(layout.projectDirectory.files("build.gradle.kts", "settings.gradle.kts"))
+  }
+val lintKotlinBuildScripts =
+  tasks.register<LintTask>("lintKotlinBuildScripts") {
+    source(layout.projectDirectory.files("build.gradle.kts", "settings.gradle.kts"))
+  }
 
 afterEvaluate {
   tasks.named("formatKotlin").configure { dependsOn(formatKotlinBuildScripts) }
