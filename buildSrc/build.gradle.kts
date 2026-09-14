@@ -64,7 +64,7 @@ dependencies {
   implementation("org.jetbrains.kotlin:kotlin-gradle-plugin-api")
   implementation("org.jetbrains.dokka:dokka-gradle-plugin:2.2.0")
   implementation("com.google.guava:guava:33.7.1-jre")
-  implementation("org.jmailen.kotlinter:org.jmailen.kotlinter.gradle.plugin:5.5.0")
+  implementation("org.jmailen.kotlinter:org.jmailen.kotlinter.gradle.plugin:5.7.0")
   implementation("org.gradle.kotlin:gradle-kotlin-dsl-plugins:$expectedKotlinDslPluginsVersion")
   implementation("org.pitest:pitest:1.25.5")
   implementation("com.groupcdg.gradle:common:1.0.7")
